@@ -1,34 +1,19 @@
 import os
-import io
-import json
 import time
-import pandas as pd
-from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, File, Body, HTTPException
-from fastapi.responses import HTMLResponse, StreamingResponse
+import logging
+import base64
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from google import genai
 from google.genai import types
-from google.genai.errors import APIError
+from google.genai import errors
 from supabase import create_client, Client
 
-load_dotenv()
+logging.basicConfig(level=logging.INFO)
 
-# Initialisation des clients
-ai_client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY"),
-    http_options=types.HttpOptions(api_version='v1beta')
-)
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ValueError("⚠️ SUPABASE_URL et SUPABASE_KEY doivent être définies dans .env")
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-app = FastAPI(title="SaaS Chiffrage BTP - Algérie (DA)")
+app = FastAPI(title="API Devis BTP avec Mercuriale Supabase (DA)", version="1.4.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,60 +23,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-PROMPT_EXTRACTION_VIERGE = """
-Tu es un métreur expert en BTP en Algérie.
-Analyse ce devis, bordereau de prix ou CPT/DQE.
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-Pour chaque article, identifie la partie de l'édifice (lot/chapitre) dans laquelle il se trouve (ex: Fondations, Superstructure, Maçonnerie, Étanchéité).
-Rassemble le contexte complet pour que la désignation soit explicite (ex: si l'article dit juste "Béton armé" dans la section "Semelles", la désignation finale doit être "Béton armé dosé à 350 kg/m3 pour semelles de fondation").
+gemini_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
-Extrais une liste JSON stricte contenant :
-- "lot": La partie de l'édifice / chapitre (ex: Fondations & Infrastructure)
-- "designation": La description complète et contextualisée de l'article
-- "quantite": La quantité demandée (nombre, 0 si absente)
-- "unite": L'unité de mesure (m2, m3, ml, kg, ens, u, etc.)
+supabase_client: Client = None
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-Renvoie UNIQUEMENT un tableau JSON valide.
-"""
 
-def trouver_prix_unitaire_supabase(designation_extraite: str, lot_extrait: str = "") -> float:
-    """Recherche le prix unitaire en tenant compte du contexte de l'édifice."""
+class DevisRequest(BaseModel):
+    description: str
+
+
+def get_catalogue_prix_supabase() -> str:
+    if not supabase_client:
+        return "Aucune base de prix externe disponible."
     try:
-        res = supabase.table("articles_prix").select("prix_unitaire_ht, designation, categorie").execute()
-        catalogue = res.data
-        
-        if not catalogue or not designation_extraite:
-            return 0.0
-
-        texte_complet = f"{lot_extrait} {designation_extraite}".lower()
-        
-        mots_inutiles = {
-            "pour", "avec", "dans", "sans", "sous", "sur", "les", "des", "une", 
-            "d'un", "d'une", "pose", "fourniture", "et", "de", "du", "la", "le", 
-            "en", "au", "aux", "y", "compris", "toutes", "servitudes", "exécution"
-        }
-        
-        mots_clef = [m for m in texte_complet.replace("'", " ").replace(",", " ").split() if len(m) > 2 and m not in mots_inutiles]
-
-        if not mots_clef:
-            return 0.0
-
-        meilleur_prix = 0.0
-        max_score = 0
-
-        for article in catalogue:
-            desig_art = f"{article.get('categorie', '')} {article['designation']}".lower()
-            
-            score = sum(1 for m in mots_clef if m in desig_art)
-
-            if score > max_score:
-                max_score = score
-                meilleur_prix = float(article["prix_unitaire_ht"])
-
-        return meilleur_prix if max_score >= 1 else 0.0
+        response = supabase_client.table("prix_unitaires").select(
+            "code_article, categorie, designation, unite, prix_unitaire_ht"
+        ).execute()
+        articles = response.data
+        if not articles:
+            return "La table des prix unitaires est vide."
+        catalogue_text = "CATALOGUE DES PRIX UNITAIRES DE RÉFÉRENCE EN DINARS ALGÉRIENS (SUPABASE) :\n"
+        for art in articles:
+            catalogue_text += (
+                f"- [{art.get('code_article', 'N/A')}] {art.get('designation')} "
+                f"({art.get('categorie', 'Général')}) : {art.get('prix_unitaire_ht')} DA HT / {art.get('unite')}\n"
+            )
+        return catalogue_text
     except Exception as e:
-        print(f"❌ Erreur Supabase : {e}")
-        return 0.0
+        logging.error(f"Erreur Supabase : {str(e)}")
+        return "Impossible de charger la base de prix officielle pour le moment."
+
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
@@ -112,7 +79,6 @@ def read_root():
             .btn-whatsapp:hover { background-color: #128C7E; }
             .btn-secondary { background-color: #6c757d; font-size: 13px; padding: 6px 12px; margin-top: 5px; }
             
-            /* Zone d'aperçu du document WhatsApp */
             #preview-container { margin-top: 15px; display: none; text-align: center; background: #eaeff2; padding: 15px; border: 2px dashed #25D366; border-radius: 8px; }
             #preview-img { max-width: 100%; max-height: 550px; border-radius: 5px; border: 1px solid #ccc; transition: transform 0.3s ease; }
             #preview-pdf { width: 100%; height: 500px; border: none; }
@@ -130,13 +96,11 @@ def read_root():
         <div class="no-print">
             <h2>📱 Logiciel de chiffrage devis BTP (Dinars Algériens)</h2>
             
-            <!-- SECTION IMPORT DOCUMENT WHATSAPP -->
             <div class="box">
                 <h3>1. Importer un document client (Photo / Document WhatsApp)</h3>
-                <p style="font-size: 13px; color: #666;">Sélectionnez directement la photo ou le fichier PDF reçu sur WhatsApp :</p>
+                <p style="font-size: 13px; color: #666;">Sélectionnez la photo ou le fichier PDF reçu sur WhatsApp :</p>
                 <input type="file" id="fileInput" accept="image/*,application/pdf,.webp" onchange="afficherApercu(event)"><br>
                 
-                <!-- Zone d'aperçu automatique pour WhatsApp -->
                 <div id="preview-container">
                     <p style="margin-top:0; font-weight:bold; color: #075e54;">📄 Document / Photo WhatsApp chargé :</p>
                     <img id="preview-img" style="display:none;" />
@@ -150,7 +114,6 @@ def read_root():
                 <button class="btn-whatsapp" onclick="lancerChiffrageAutomatique()">🚀 Lancer le chiffrage automatique</button>
             </div>
 
-            <!-- SECTION DESCRIPTION MANUELLE -->
             <div class="box">
                 <h3>2. Ou saisissez/complétez la description des travaux :</h3>
                 <textarea id="description" placeholder="Ex: Réalisation de 50 m² de faux plafond BA13 et 120 m² de peinture vinylique..."></textarea><br>
@@ -230,116 +193,127 @@ def read_root():
                 }
             }
 
-            function lancerChiffrageAutomatique() {
+            async function lancerChiffrageAutomatique() {
                 const fileInput = document.getElementById('fileInput');
-                if (!fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const resDiv = document.getElementById('resultat');
+                const btnPrint = document.getElementById('btnPrint');
+
+                if (!file) {
                     alert('Veuillez d\'abord sélectionner un fichier ou une photo WhatsApp.');
                     return;
                 }
-                alert('Traitement du document WhatsApp par analyse visuelle Gemini en cours d\'intégration...');
+
+                resDiv.innerText = "Analyse visuelle du document par l'IA Gemini et calcul des prix...";
+                btnPrint.style.display = "none";
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const response = await fetch('/generate-devis-file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        resDiv.innerText = data.devis;
+                        btnPrint.style.display = "inline-block";
+                    } else {
+                        resDiv.innerText = "Erreur : " + (data.detail || "Échec de l'analyse du document");
+                    }
+                } catch (err) {
+                    resDiv.innerText = "Erreur lors de l'envoi du fichier au serveur.";
+                }
             }
         </script>
     </body>
     </html>
     """
 
-@app.post("/chiffrer-devis-vierge")
-async def chiffrer_devis_vierge(file: UploadFile = File(...)):
+
+@app.post("/generate-devis")
+async def generate_devis(request: DevisRequest):
+    catalogue_prix = get_catalogue_prix_supabase()
+    prompt = f"""
+Tu es un métré et économiste de la construction BTP expert sur le marché algérien.
+Ta mission est de générer un devis estimatif précis et structuré en DINARS ALGÉRIENS (DA).
+
+---
+{catalogue_prix}
+---
+
+CONSIGNES STRICTES :
+1. TOUS LES PRIX DOIVENT ÊTRE EXPRIMÉS EN DINARS ALGÉRIENS (DA).
+2. Pour chaque prestation requise, vérifie si l'article existe dans le CATALOGUE DES PRIX ci-dessus.
+3. Si l'article figure dans le catalogue, réutilise son prix unitaire HT en DA et son unité.
+4. Si un article est absent, estime son prix unitaire en DA selon les tarifs actuels du marché BTP en Algérie avec la mention "(Prix estimé du marché DA)".
+5. Présente le résultat sous forme de tableau (Désignation, Quantité, Unité, PU HT DA, Total HT DA).
+6. Calcule ensuite : Total Général HT (DA), TVA (19%) (DA), Total TTC (DA).
+
+DESCRIPTION DU BESOIN CLIENT :
+{request.description}
+"""
     try:
-        content = await file.read()
-        
-        max_retries = 3
-        retry_delay = 2
-        response = None
-
-        for attempt in range(max_retries):
-            try:
-                response = ai_client.models.generate_content(
-                    model="gemini-3.6-flash",
-                    contents=[
-                        types.Part.from_bytes(data=content, mime_type=file.content_type),
-                        PROMPT_EXTRACTION_VIERGE
-                    ]
-                )
-                break
-            except APIError as e:
-                if e.code == 503 and attempt < max_retries - 1:
-                    print(f"⚠️ Serveur Gemini saturé (503). Tentative {attempt + 1}/{max_retries} dans {retry_delay}s...")
-                    time.sleep(retry_delay)
-                    retry_delay *= 2
-                else:
-                    raise e
-
-        if not response or not response.text:
-            return {"succes": False, "erreur": "L'IA n'a renvoyé aucune réponse."}
-
-        raw_text = response.text.replace("```json", "").replace("```", "").strip()
-        lignes_vierges = json.loads(raw_text)
-        
-        lignes_chiffrees = []
-        for ligne in lignes_vierges:
-            pu_bdd = trouver_prix_unitaire_supabase(
-                ligne.get("designation", ""), 
-                ligne.get("lot", "")
-            )
-            qte = float(ligne.get("quantite", 0))
-            
-            lignes_chiffrees.append({
-                "lot": ligne.get("lot", "Général"),
-                "designation": ligne.get("designation", ""),
-                "quantite": qte,
-                "unite": ligne.get("unite", ""),
-                "prix_unitaire_ht": pu_bdd,
-                "montant_ht": round(qte * pu_bdd, 2)
-            })
-        
-        return {"succes": True, "donnees": lignes_chiffrees}
-
-    except APIError as e:
-        if e.code == 503:
-            return {
-                "succes": False, 
-                "erreur": "Le service de Google Gemini est momentanément très sollicité. Veuillez réessayer dans quelques secondes."
-            }
-        return {"succes": False, "erreur": f"Erreur API Gemini : {e.message}"}
-    except Exception as e:
-        return {"succes": False, "erreur": f"Erreur serveur : {str(e)}"}
-
-@app.post("/exporter-excel")
-async def exporter_excel(postes: list = Body(...)):
-    try:
-        if not postes:
-            return {"succes": False, "erreur": "Aucune donnée reçue."}
-
-        df = pd.DataFrame(postes)
-        
-        colonnes_map = {
-            "lot": "Partie de l'Édifice / Lot",
-            "designation": "Désignation des travaux",
-            "quantite": "Quantité",
-            "unite": "Unité",
-            "prix_unitaire_ht": "Prix Unitaire HT (DA)",
-            "montant_ht": "Montant Total HT (DA)"
-        }
-        df = df.rename(columns=colonnes_map)
-
-        total_ht = float(df["Montant Total HT (DA)"].sum()) if "Montant Total HT (DA)" in df.columns else 0.0
-        
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='Devis Quantitatif DA')
-            sheet = writer.sheets['Devis Quantitatif DA']
-            sheet.append([])
-            sheet.append(["TOTAL GÉNÉRAL HT (DA)", "", "", "", "", total_ht])
-
-        output.seek(0)
-        
-        return StreamingResponse(
-            output,
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={
-                "Content-Disposition": "attachment; filename=Devis_Chiffre_BTP_DA.xlsx"
-            }
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
         )
+        devis_genere = response.text
+        if supabase_client:
+            supabase_client.table("devis").insert({
+                "description_initiale": request.description,
+                "devis_genere": devis_genere
+            }).execute()
+        return {"status": "success", "devis": devis_genere}
     except Exception as e:
-        return {"succes": False, "erreur": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/generate-devis-file")
+async def generate_devis_file(file: UploadFile = File(...)):
+    if not gemini_client:
+        raise HTTPException(status_code=500, detail="Client Gemini non disponible.")
+
+    catalogue_prix = get_catalogue_prix_supabase()
+    file_bytes = await file.read()
+
+    mime_type = file.content_type or "image/jpeg"
+    if file.filename.endswith(".webp"):
+        mime_type = "image/webp"
+
+    prompt = f"""
+Tu es un métré et économiste de la construction BTP expert sur le marché algérien.
+Analyse visuellement le document/image ci-joint (qui peut être un devis manuscrit, un plan, ou une capture d'écran WhatsApp).
+Extrais toutes les prestations BTP demandées et génère un devis estimatif complet et structuré en DINARS ALGÉRIENS (DA).
+
+---
+{catalogue_prix}
+---
+
+CONSIGNES STRICTES :
+1. TOUS LES PRIX DOIVENT ÊTRE EXPRIMÉS EN DINARS ALGÉRIENS (DA).
+2. Si un article est dans le CATALOGUE, utilise son tarif. Sinon, estime selon le marché algérien.
+3. Présente un tableau clair avec Désignation, Quantité, Unité, PU HT (DA), Total HT (DA).
+4. Calcule le Total HT, la TVA (19%) et le Total TTC en Dinars Algériens.
+"""
+
+    try:
+        image_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[image_part, prompt]
+        )
+        devis_genere = response.text
+
+        if supabase_client:
+            supabase_client.table("devis").insert({
+                "description_initiale": f"Fichier analysé : {file.filename}",
+                "devis_genere": devis_genere
+            }).execute()
+
+        return {"status": "success", "devis": devis_genere}
+    except Exception as e:
+        logging.error(f"Erreur traitement fichier : {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur d'analyse visuelle par l'IA : {str(e)}")
