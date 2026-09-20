@@ -260,7 +260,7 @@ DESCRIPTION DU BESOIN CLIENT :
 """
     try:
         response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=prompt
         )
         devis_genere = response.text
@@ -305,7 +305,7 @@ CONSIGNES STRICTES :
     try:
         image_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
         response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=[image_part, prompt]
         )
         devis_genere = response.text
