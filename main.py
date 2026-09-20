@@ -1,16 +1,18 @@
 import os
 import logging
+import time
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from google import genai
 from google.genai import types
+from google.genai.errors import APIError
 from supabase import create_client, Client
 
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(title="API Devis BTP", version="1.5.0")
+app = FastAPI(title="API Devis BTP", version="1.7.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,6 +35,42 @@ if SUPABASE_URL and SUPABASE_KEY:
 
 class DevisRequest(BaseModel):
     description: str
+
+
+def call_gemini_with_fallback(contents):
+    """
+    Appelle Gemini avec réessais en cas d'erreur 503 et bascule de modèle si nécessaire.
+    """
+    if not gemini_client:
+        raise HTTPException(status_code=500, detail="Client Gemini non disponible.")
+
+    models_to_try = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.5-pro"]
+    
+    for model_name in models_to_try:
+        for attempt in range(2):
+            try:
+                logging.info(f"Tentative de génération avec {model_name} (essai {attempt + 1})...")
+                response = gemini_client.models.generate_content(
+                    model=model_name,
+                    contents=contents
+                )
+                return response.text
+            except APIError as e:
+                if e.code in [503, 429]:
+                    logging.warning(f"Surcharge détectée sur {model_name} (Code {e.code}). Pause de 2s...")
+                    time.sleep(2)
+                    continue
+                else:
+                    logging.error(f"Erreur API avec {model_name}: {str(e)}")
+                    break
+            except Exception as e:
+                logging.error(f"Erreur inattendue avec {model_name}: {str(e)}")
+                break
+
+    raise HTTPException(
+        status_code=503, 
+        detail="Les serveurs d'IA sont actuellement très sollicités. Veuillez réespayer dans quelques instants."
+    )
 
 
 def get_catalogue_prix_supabase() -> str:
@@ -208,7 +246,7 @@ def read_root():
                 return;
             }
 
-            resDiv.innerText = "Analyse visuelle du document par l'IA Gemini et calcul des prix...";
+            resDiv.innerText = "Analyse de la forme et du contenu du document par l'IA...";
             btnPrint.style.display = "none";
 
             const formData = new FormData();
@@ -259,26 +297,21 @@ DESCRIPTION DU BESOIN CLIENT :
 {request.description}
 """
     try:
-        response = gemini_client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=prompt
-        )
-        devis_genere = response.text
+        devis_genere = call_gemini_with_fallback(prompt)
         if supabase_client:
             supabase_client.table("devis").insert({
                 "description_initiale": request.description,
                 "devis_genere": devis_genere
             }).execute()
         return {"status": "success", "devis": devis_genere}
+    except HTTPException as http_ex:
+        raise http_ex
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/generate-devis-file")
 async def generate_devis_file(file: UploadFile = File(...)):
-    if not gemini_client:
-        raise HTTPException(status_code=500, detail="Client Gemini non disponible.")
-
     catalogue_prix = get_catalogue_prix_supabase()
     file_bytes = await file.read()
 
@@ -287,28 +320,28 @@ async def generate_devis_file(file: UploadFile = File(...)):
         mime_type = "image/webp"
 
     prompt = f"""
-Tu es un métré et économiste de la construction BTP expert sur le marché algérien.
-Analyse visuellement le document/image ci-joint (qui peut être un devis manuscrit, un plan, ou une capture d'écran WhatsApp).
-Extrais toutes les prestations BTP demandées et génère un devis estimatif complet et structuré en DINARS ALGÉRIENS (DA).
+Tu es un expert métré et métreur-vérificateur BTP en Algérie.
+Analyse visuellement le document fourni (photo manuscrite, document scanné, ou capture WhatsApp).
 
 ---
+RÈGLE D'OR DE RESTITUTION VISUELLE ET STRUCTURELLE :
+- RESPECTE STRICTEMENT LA FORME DU DOCUMENT REÇU.
+- Si le document d'origine est un TABLEAU : restitué sous forme de TABLEAU complet en conservant toutes ses colonnes initiales et en complétant/ajoutant les colonnes de chiffrage en Dinars Algériens (DA) : Désignation, Quantité, Unité, Prix Unitaire HT (DA), Total HT (DA).
+- Si le document d me parvient sous forme de LISTE / TEXTE / PARAGRAPHE : conserve la structure en liste/sections telle qu'elle apparaît, tout en ajoutant les détails du chiffrage.
+---
+
 {catalogue_prix}
----
 
-CONSIGNES STRICTES :
+CONSIGNES DE CHIFFRAGE BTP (ALGERIE) :
 1. TOUS LES PRIX DOIVENT ÊTRE EXPRIMÉS EN DINARS ALGÉRIENS (DA).
-2. Si un article est dans le CATALOGUE, utilise son tarif. Sinon, estime selon le marché algérien.
-3. Présente un tableau clair avec Désignation, Quantité, Unité, PU HT (DA), Total HT (DA).
-4. Calcule le Total HT, la TVA (19%) et le Total TTC en Dinars Algériens.
+2. Si un article est présent dans le CATALOGUE SUPABASE, utilise son prix unitaire exact.
+3. Si un article est absent du catalogue, calcule une estimation au prix du marché BTP algérien actuel et indique "(Prix estimé DA)".
+4. Calcule systématiquement en fin de document : Total Général HT (DA), TVA 19% (DA), et Total TTC (DA).
 """
 
     try:
         image_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
-        response = gemini_client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=[image_part, prompt]
-        )
-        devis_genere = response.text
+        devis_genere = call_gemini_with_fallback([image_part, prompt])
 
         if supabase_client:
             supabase_client.table("devis").insert({
@@ -317,6 +350,8 @@ CONSIGNES STRICTES :
             }).execute()
 
         return {"status": "success", "devis": devis_genere}
+    except HTTPException as http_ex:
+        raise http_ex
     except Exception as e:
         logging.error(f"Erreur traitement fichier : {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erreur d'analyse visuelle par l'IA : {str(e)}")
