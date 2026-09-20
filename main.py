@@ -101,149 +101,142 @@ def read_root():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SaaS Chiffrage Devis BTP (DA)</title>
+        <title>Logiciel de Devis BTP (Dinars Algériens)</title>
         <style>
-            body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
-            .container { max-width: 1100px; margin: 0 auto; }
-            .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
-            .btn { background: #0284c7; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-            .btn-excel { background: #16a34a; display: none; margin-top: 15px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
-            th { background: #f1f5f9; }
-            input { width: 95%; padding: 4px; }
-            #status { margin-top: 10px; font-weight: bold; color: #d97706; }
-            .total-box { margin-top: 15px; font-size: 1.2em; font-weight: bold; color: #0284c7; text-align: right; }
+            body { font-family: Arial, sans-serif; margin: 15px; max-width: 900px; color: #333; background-color: #f4f6f9; }
+            .box { border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; background: #fff; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            textarea { width: 100%; height: 100px; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+            button { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; font-weight: bold; }
+            button:hover { background-color: #0056b3; }
+            .btn-whatsapp { background-color: #25D366; color: white; }
+            .btn-whatsapp:hover { background-color: #128C7E; }
+            .btn-secondary { background-color: #6c757d; font-size: 13px; padding: 6px 12px; margin-top: 5px; }
+            
+            /* Zone d'aperçu du document WhatsApp */
+            #preview-container { margin-top: 15px; display: none; text-align: center; background: #eaeff2; padding: 15px; border: 2px dashed #25D366; border-radius: 8px; }
+            #preview-img { max-width: 100%; max-height: 550px; border-radius: 5px; border: 1px solid #ccc; transition: transform 0.3s ease; }
+            #preview-pdf { width: 100%; height: 500px; border: none; }
+
+            #resultat { margin-top: 20px; white-space: pre-wrap; background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace; font-size: 14px; }
+            
+            @media print {
+                .no-print { display: none !important; }
+                body { margin: 0; padding: 0; background: #fff; }
+                #resultat { border: none; padding: 0; font-family: Arial, sans-serif; }
+            }
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="card">
-                <h2>🏗️ Logiciel de Chiffrage Devis BTP (Dinars Algériens - DA)</h2>
-                <p>Importez votre devis vierge (PDF / Image) pour chiffrer automatiquement :</p>
-                <input type="file" id="devisFile" accept="image/*,application/pdf">
-                <button class="btn" onclick="analyserEtChiffrer()">Lancer le Chiffrage</button>
-                <div id="status"></div>
+        <div class="no-print">
+            <h2>📱 Logiciel de chiffrage devis BTP (Dinars Algériens)</h2>
+            
+            <!-- SECTION IMPORT DOCUMENT WHATSAPP -->
+            <div class="box">
+                <h3>1. Importer un document client (Photo / Document WhatsApp)</h3>
+                <p style="font-size: 13px; color: #666;">Sélectionnez directement la photo ou le fichier PDF reçu sur WhatsApp :</p>
+                <input type="file" id="fileInput" accept="image/*,application/pdf,.webp" onchange="afficherApercu(event)"><br>
+                
+                <!-- Zone d'aperçu automatique pour WhatsApp -->
+                <div id="preview-container">
+                    <p style="margin-top:0; font-weight:bold; color: #075e54;">📄 Document / Photo WhatsApp chargé :</p>
+                    <img id="preview-img" style="display:none;" />
+                    <iframe id="preview-pdf" style="display:none;"></iframe>
+                    
+                    <div id="image-controls" style="display:none; margin-top: 10px;">
+                        <button class="btn-secondary" onclick="tournerImage()">🔄 Tourner l'image (90°)</button>
+                    </div>
+                </div>
+
+                <button class="btn-whatsapp" onclick="lancerChiffrageAutomatique()">🚀 Lancer le chiffrage automatique</button>
             </div>
 
-            <div class="card">
-                <h3>📋 Bordereau des Prix Unités (DA)</h3>
-                <div id="containerTable">Aucun document importé.</div>
-                <div id="totalGeneral" class="total-box"></div>
-                <button id="btnExcel" class="btn btn-excel" onclick="exporterExcel()">📥 Exporter en Excel (.xlsx)</button>
+            <!-- SECTION DESCRIPTION MANUELLE -->
+            <div class="box">
+                <h3>2. Ou saisissez/complétez la description des travaux :</h3>
+                <textarea id="description" placeholder="Ex: Réalisation de 50 m² de faux plafond BA13 et 120 m² de peinture vinylique..."></textarea><br>
+                <button onclick="genererDevisTexte()">Chiffrer via le texte</button>
             </div>
+
+            <button id="btnPrint" style="display:none; background-color: #17a2b8;" onclick="window.print()">📄 Imprimer / Sauvegarder en PDF</button>
         </div>
 
-        <script>
-            let currentPostes = [];
+        <div id="resultat">En attente d'un document ou d'une description...</div>
 
-            async function analyserEtChiffrer() {
-                const fileInput = document.getElementById('devisFile');
-                const statusDiv = document.getElementById('status');
-                
-                if (!fileInput.files[0]) {
-                    alert("Veuillez sélectionner un fichier PDF ou Image.");
+        <script>
+            let rotationAngle = 0;
+
+            function afficherApercu(event) {
+                const file = event.target.files[0];
+                const container = document.getElementById('preview-container');
+                const img = document.getElementById('preview-img');
+                const pdf = document.getElementById('preview-pdf');
+                const controls = document.getElementById('image-controls');
+
+                if (!file) {
+                    container.style.display = 'none';
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
+                container.style.display = 'block';
+                rotationAngle = 0;
+                img.style.transform = 'rotate(0deg)';
+                const fileURL = URL.createObjectURL(file);
 
-                statusDiv.innerText = "⏳ Extraction Gemini par partie d'édifice & application des tarifs BTP (DA)...";
-
-                try {
-                    const response = await fetch('/chiffrer-devis-vierge', { method: 'POST', body: formData });
-                    const data = await response.json();
-                    statusDiv.innerText = "";
-
-                    if (data.succes) {
-                        currentPostes = data.donnees;
-                        afficherTableau(currentPostes);
-                    } else {
-                        alert("Erreur : " + data.erreur);
-                    }
-                } catch (err) {
-                    statusDiv.innerText = "";
-                    alert("Erreur serveur : " + err);
+                if (file.type.startsWith('image/') || file.name.endsWith('.webp')) {
+                    pdf.style.display = 'none';
+                    img.src = fileURL;
+                    img.style.display = 'inline-block';
+                    controls.style.display = 'block';
+                } else if (file.type === 'application/pdf') {
+                    img.style.display = 'none';
+                    controls.style.display = 'none';
+                    pdf.src = fileURL;
+                    pdf.style.display = 'block';
                 }
             }
 
-            function afficherTableau(postes) {
-                let html = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 20%;">Partie Édifice / Lot</th>
-                                <th style="width: 35%;">Désignation des Travaux</th>
-                                <th style="width: 8%;">Qté</th>
-                                <th style="width: 7%;">Unité</th>
-                                <th style="width: 13%;">P.U HT (DA)</th>
-                                <th style="width: 17%;">Montant HT (DA)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                let totalGeneral = 0;
-
-                postes.forEach((p, index) => {
-                    const totalLigne = (p.quantite || 0) * (p.prix_unitaire_ht || 0);
-                    totalGeneral += totalLigne;
-
-                    html += `
-                        <tr>
-                            <td><input type="text" value="${p.lot || ''}" onchange="updatePoste(${index}, 'lot', this.value)"></td>
-                            <td><input type="text" value="${p.designation}" onchange="updatePoste(${index}, 'designation', this.value)"></td>
-                            <td><input type="number" value="${p.quantite}" onchange="updatePoste(${index}, 'quantite', this.value)"></td>
-                            <td><input type="text" value="${p.unite}" onchange="updatePoste(${index}, 'unite', this.value)"></td>
-                            <td><input type="number" step="0.01" value="${p.prix_unitaire_ht}" onchange="updatePoste(${index}, 'prix_unitaire_ht', this.value)"></td>
-                            <td><strong>${totalLigne.toLocaleString('fr-FR', {minimumFractionDigits: 2})} DA</strong></td>
-                        </tr>
-                    `;
-                });
-
-                html += `</tbody></table>`;
-                document.getElementById('containerTable').innerHTML = html;
-                document.getElementById('totalGeneral').innerText = "TOTAL GÉNÉRAL HT : " + totalGeneral.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + " DA";
-                document.getElementById('btnExcel').style.display = 'block';
+            function tournerImage() {
+                const img = document.getElementById('preview-img');
+                rotationAngle = (rotationAngle + 90) % 360;
+                img.style.transform = `rotate(${rotationAngle}deg)`;
             }
 
-            function updatePoste(index, field, value) {
-                if (field === 'quantite' || field === 'prix_unitaire_ht') {
-                    currentPostes[index][field] = parseFloat(value) || 0;
-                    currentPostes[index]['montant_ht'] = currentPostes[index]['quantite'] * currentPostes[index]['prix_unitaire_ht'];
-                } else {
-                    currentPostes[index][field] = value;
-                }
-                afficherTableau(currentPostes);
-            }
+            async function genererDevisTexte() {
+                const desc = document.getElementById('description').value;
+                const resDiv = document.getElementById('resultat');
+                const btnPrint = document.getElementById('btnPrint');
+                
+                if (!desc) { alert('Veuillez entrer une description des travaux.'); return; }
 
-            async function exporterExcel() {
-                if (!currentPostes || currentPostes.length === 0) return;
+                resDiv.innerText = "Génération du devis en cours via Gemini et Supabase...";
+                btnPrint.style.display = "none";
 
                 try {
-                    const response = await fetch('/exporter-excel', {
+                    const response = await fetch('/generate-devis', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(currentPostes)
+                        body: JSON.stringify({ description: desc })
                     });
+                    const data = await response.json();
 
-                    if (!response.ok) {
-                        alert("Erreur lors de l'exportation.");
-                        return;
+                    if (data.status === 'success') {
+                        resDiv.innerText = data.devis;
+                        btnPrint.style.display = "inline-block";
+                    } else {
+                        resDiv.innerText = "Erreur : " + (data.detail || "Échec de la génération");
                     }
-
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = "Devis_Chiffre_BTP_DA.xlsx";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
                 } catch (err) {
-                    alert("Erreur technique : " + err);
+                    resDiv.innerText = "Erreur de connexion avec le serveur.";
                 }
+            }
+
+            function lancerChiffrageAutomatique() {
+                const fileInput = document.getElementById('fileInput');
+                if (!fileInput.files[0]) {
+                    alert('Veuillez d\'abord sélectionner un fichier ou une photo WhatsApp.');
+                    return;
+                }
+                alert('Traitement du document WhatsApp par analyse visuelle Gemini en cours d\'intégration...');
             }
         </script>
     </body>
