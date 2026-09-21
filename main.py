@@ -12,7 +12,7 @@ from supabase import create_client, Client
 
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(title="API Devis BTP", version="2.0.0")
+app = FastAPI(title="API Devis BTP", version="2.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,14 +39,14 @@ class DevisRequest(BaseModel):
 
 def call_gemini_with_fallback(contents):
     """
-    Appelle l'API Gemini avec les modèles 2.5/3.1 valides, gère les réessais en cas d'erreur 503
-    et bascule de modèle si nécessaire.
+    Appelle l'API Gemini avec les modèles Flash optimisés pour le quota gratuit,
+    et gère la temporisation automatique en cas de quota ou de surcharge (429/503).
     """
     if not gemini_client:
         raise HTTPException(status_code=500, detail="Client Gemini non disponible. Veuillez vérifier GEMINI_API_KEY.")
 
-    # Modèles actifs et supportés par l'API Google GenAI
-    models_to_try = ["gemini-2.5-flash", "gemini-3.1-pro-preview"]
+    # Modèles légers disposant d'un quota Free Tier élevé
+    models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash"]
     
     last_error_msg = None
 
@@ -65,12 +65,14 @@ def call_gemini_with_fallback(contents):
                 error_code = getattr(e, "code", None)
                 logging.warning(f"Erreur API Gemini sur {model_name} (Code {error_code}): {e}")
                 
-                # Si surcharge temporaire (503) ou limitation de fréquence (429)
-                if error_code in [503, 429]:
-                    time.sleep((attempt + 1) * 2)  # Pause progressive : 2s, 4s, 6s
+                # Si quota/fréquence dépassé (429) ou serveur saturé (503)
+                if error_code in [429, 503]:
+                    wait_time = (attempt + 1) * 4  # Pause progressive : 4s, 8s, 12s
+                    logging.info(f"Quota ou surcharge sur {model_name}. Attente de {wait_time}s...")
+                    time.sleep(wait_time)
                     continue
                 else:
-                    # Pour toute autre erreur API (ex: 404), passer immédiatement au modèle suivant
+                    # Pour toute autre erreur API, passer au modèle suivant
                     break
             except Exception as e:
                 last_error_msg = str(e)
@@ -79,8 +81,8 @@ def call_gemini_with_fallback(contents):
 
     logging.error(f"Échec global de l'appel Gemini. Dernier message : {last_error_msg}")
     raise HTTPException(
-        status_code=503, 
-        detail=f"Erreur lors de l'analyse IA : {last_error_msg}"
+        status_code=53, 
+        detail="Quota temporairement dépassé ou serveurs occupés. Veuillez re-tester dans quelques secondes."
     )
 
 
