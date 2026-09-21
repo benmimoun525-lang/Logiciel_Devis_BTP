@@ -12,7 +12,7 @@ from supabase import create_client, Client
 
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(title="API Devis BTP", version="1.8.0")
+app = FastAPI(title="API Devis BTP", version="1.9.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,14 +39,14 @@ class DevisRequest(BaseModel):
 
 def call_gemini_with_fallback(contents):
     """
-    Appelle l'API Gemini avec les modèles 3.6, gère les réessais en cas d'erreur 503
+    Appelle l'API Gemini avec les modèles stables supportés, gère les réessais en cas d'erreur 503
     et bascule de modèle si nécessaire.
     """
     if not gemini_client:
         raise HTTPException(status_code=500, detail="Client Gemini non disponible. Veuillez vérifier GEMINI_API_KEY.")
 
-    # Modèles Gemini 3.6 récents et stables
-    models_to_try = ["gemini-3.6-flash", "gemini-3.6-pro"]
+    # Modèles officiels supportés par l'API Google GenAI
+    models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
     
     last_error_msg = None
 
@@ -67,10 +67,10 @@ def call_gemini_with_fallback(contents):
                 
                 # Si surcharge temporaire (503) ou limitation de fréquence (429)
                 if error_code in [503, 429]:
-                    time.sleep((attempt + 1) * 2)  # Pause de 2s, 4s, 6s
+                    time.sleep((attempt + 1) * 2)  # Pause progressive : 2s, 4s, 6s
                     continue
                 else:
-                    # Pour toute autre erreur non liée à la surcharge, passer au modèle suivant
+                    # Pour toute autre erreur API, passer au modèle suivant
                     break
             except Exception as e:
                 last_error_msg = str(e)
@@ -80,7 +80,7 @@ def call_gemini_with_fallback(contents):
     logging.error(f"Échec global de l'appel Gemini. Dernier message : {last_error_msg}")
     raise HTTPException(
         status_code=503, 
-        detail="Les serveurs d'IA sont actuellement très sollicités ou le fichier envoyé est incompatible. Veuillez réessayer dans quelques instants."
+        detail=f"Erreur lors de l'analyse IA : {last_error_msg}"
     )
 
 
@@ -224,7 +224,7 @@ def read_root():
             
             if (!desc) { alert('Veuillez entrer une description des travaux.'); return; }
 
-            resDiv.innerText = "Génération du devis en cours via Gemini 3.6 et Supabase...";
+            resDiv.innerText = "Génération du devis en cours via Gemini et Supabase...";
             btnPrint.style.display = "none";
 
             try {
@@ -257,7 +257,7 @@ def read_root():
                 return;
             }
 
-            resDiv.innerText = "Analyse de la forme et du contenu du document par l'IA Gemini 3.6...";
+            resDiv.innerText = "Analyse de la forme et du contenu du document par l'IA...";
             btnPrint.style.display = "none";
 
             const formData = new FormData();
@@ -326,7 +326,7 @@ async def generate_devis_file(file: UploadFile = File(...)):
     catalogue_prix = get_catalogue_prix_supabase()
     file_bytes = await file.read()
 
-    # Détermination précise du type MIME du fichier
+    # Détermination du type MIME exact du fichier
     mime_type = file.content_type or "image/jpeg"
     filename_lower = file.filename.lower()
     if filename_lower.endswith(".webp"):
@@ -359,7 +359,7 @@ CONSIGNES DE CHIFFRAGE BTP (ALGÉRIE) :
 """
 
     try:
-        # Encapuler correctement les octets du fichier avec le type MIME exact
+        # Encapuler les octets bruts du fichier avec son type MIME
         document_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
         devis_genere = call_gemini_with_fallback([document_part, prompt])
 
