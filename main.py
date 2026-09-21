@@ -12,7 +12,7 @@ from supabase import create_client, Client
 
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(title="API Devis BTP", version="1.9.0")
+app = FastAPI(title="API Devis BTP", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,14 +39,14 @@ class DevisRequest(BaseModel):
 
 def call_gemini_with_fallback(contents):
     """
-    Appelle l'API Gemini avec les modèles stables supportés, gère les réessais en cas d'erreur 503
+    Appelle l'API Gemini avec les modèles 2.5/3.1 valides, gère les réessais en cas d'erreur 503
     et bascule de modèle si nécessaire.
     """
     if not gemini_client:
         raise HTTPException(status_code=500, detail="Client Gemini non disponible. Veuillez vérifier GEMINI_API_KEY.")
 
-    # Modèles officiels supportés par l'API Google GenAI
-    models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro"]
+    # Modèles actifs et supportés par l'API Google GenAI
+    models_to_try = ["gemini-2.5-flash", "gemini-3.1-pro-preview"]
     
     last_error_msg = None
 
@@ -70,7 +70,7 @@ def call_gemini_with_fallback(contents):
                     time.sleep((attempt + 1) * 2)  # Pause progressive : 2s, 4s, 6s
                     continue
                 else:
-                    # Pour toute autre erreur API, passer au modèle suivant
+                    # Pour toute autre erreur API (ex: 404), passer immédiatement au modèle suivant
                     break
             except Exception as e:
                 last_error_msg = str(e)
@@ -359,7 +359,7 @@ CONSIGNES DE CHIFFRAGE BTP (ALGÉRIE) :
 """
 
     try:
-        # Encapuler les octets bruts du fichier avec son type MIME
+        # Encapsuler les octets bruts du fichier avec son type MIME
         document_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
         devis_genere = call_gemini_with_fallback([document_part, prompt])
 
