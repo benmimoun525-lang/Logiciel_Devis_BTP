@@ -12,7 +12,7 @@ from supabase import create_client, Client
 
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(title="API Devis BTP", version="1.7.0")
+app = FastAPI(title="API Devis BTP", version="1.8.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,37 +39,48 @@ class DevisRequest(BaseModel):
 
 def call_gemini_with_fallback(contents):
     """
-    Appelle Gemini avec réessais en cas d'erreur 503 et bascule de modèle si nécessaire.
+    Appelle l'API Gemini avec les modèles 3.6, gère les réessais en cas d'erreur 503
+    et bascule de modèle si nécessaire.
     """
     if not gemini_client:
-        raise HTTPException(status_code=500, detail="Client Gemini non disponible.")
+        raise HTTPException(status_code=500, detail="Client Gemini non disponible. Veuillez vérifier GEMINI_API_KEY.")
 
-    models_to_try = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.5-pro"]
+    # Modèles Gemini 3.6 récents et stables
+    models_to_try = ["gemini-3.6-flash", "gemini-3.6-pro"]
     
+    last_error_msg = None
+
     for model_name in models_to_try:
-        for attempt in range(2):
+        for attempt in range(3):
             try:
-                logging.info(f"Tentative de génération avec {model_name} (essai {attempt + 1})...")
+                logging.info(f"Tentative d'appel avec {model_name} (essai {attempt + 1})...")
                 response = gemini_client.models.generate_content(
                     model=model_name,
                     contents=contents
                 )
-                return response.text
+                if response and response.text:
+                    return response.text
             except APIError as e:
-                if e.code in [503, 429]:
-                    logging.warning(f"Surcharge détectée sur {model_name} (Code {e.code}). Pause de 2s...")
-                    time.sleep(2)
+                last_error_msg = str(e)
+                error_code = getattr(e, "code", None)
+                logging.warning(f"Erreur API Gemini sur {model_name} (Code {error_code}): {e}")
+                
+                # Si surcharge temporaire (503) ou limitation de fréquence (429)
+                if error_code in [503, 429]:
+                    time.sleep((attempt + 1) * 2)  # Pause de 2s, 4s, 6s
                     continue
                 else:
-                    logging.error(f"Erreur API avec {model_name}: {str(e)}")
+                    # Pour toute autre erreur non liée à la surcharge, passer au modèle suivant
                     break
             except Exception as e:
-                logging.error(f"Erreur inattendue avec {model_name}: {str(e)}")
+                last_error_msg = str(e)
+                logging.error(f"Erreur inattendue avec {model_name}: {e}")
                 break
 
+    logging.error(f"Échec global de l'appel Gemini. Dernier message : {last_error_msg}")
     raise HTTPException(
         status_code=503, 
-        detail="Les serveurs d'IA sont actuellement très sollicités. Veuillez réespayer dans quelques instants."
+        detail="Les serveurs d'IA sont actuellement très sollicités ou le fichier envoyé est incompatible. Veuillez réessayer dans quelques instants."
     )
 
 
@@ -213,7 +224,7 @@ def read_root():
             
             if (!desc) { alert('Veuillez entrer une description des travaux.'); return; }
 
-            resDiv.innerText = "Génération du devis en cours via Gemini et Supabase...";
+            resDiv.innerText = "Génération du devis en cours via Gemini 3.6 et Supabase...";
             btnPrint.style.display = "none";
 
             try {
@@ -246,7 +257,7 @@ def read_root():
                 return;
             }
 
-            resDiv.innerText = "Analyse de la forme et du contenu du document par l'IA...";
+            resDiv.innerText = "Analyse de la forme et du contenu du document par l'IA Gemini 3.6...";
             btnPrint.style.display = "none";
 
             const formData = new FormData();
@@ -315,24 +326,32 @@ async def generate_devis_file(file: UploadFile = File(...)):
     catalogue_prix = get_catalogue_prix_supabase()
     file_bytes = await file.read()
 
+    # Détermination précise du type MIME du fichier
     mime_type = file.content_type or "image/jpeg"
-    if file.filename.endswith(".webp"):
+    filename_lower = file.filename.lower()
+    if filename_lower.endswith(".webp"):
         mime_type = "image/webp"
+    elif filename_lower.endswith(".png"):
+        mime_type = "image/png"
+    elif filename_lower.endswith(".pdf"):
+        mime_type = "application/pdf"
+    elif filename_lower.endswith(".jpg") or filename_lower.endswith(".jpeg"):
+        mime_type = "image/jpeg"
 
     prompt = f"""
-Tu es un expert métré et métreur-vérificateur BTP en Algérie.
-Analyse visuellement le document fourni (photo manuscrite, document scanné, ou capture WhatsApp).
+Tu es un expert métreur-vérificateur BTP en Algérie.
+Analyse visuellement le document fourni (photo manuscrite, document scanné ou capture WhatsApp).
 
 ---
 RÈGLE D'OR DE RESTITUTION VISUELLE ET STRUCTURELLE :
 - RESPECTE STRICTEMENT LA FORME DU DOCUMENT REÇU.
-- Si le document d'origine est un TABLEAU : restitué sous forme de TABLEAU complet en conservant toutes ses colonnes initiales et en complétant/ajoutant les colonnes de chiffrage en Dinars Algériens (DA) : Désignation, Quantité, Unité, Prix Unitaire HT (DA), Total HT (DA).
-- Si le document d me parvient sous forme de LISTE / TEXTE / PARAGRAPHE : conserve la structure en liste/sections telle qu'elle apparaît, tout en ajoutant les détails du chiffrage.
+- Si le document d'origine est un TABLEAU : restitue le résultat sous forme de TABLEAU complet en conservant toutes ses colonnes initiales et en complétant/ajoutant les colonnes de chiffrage en Dinars Algériens (DA) : Désignation, Quantité, Unité, Prix Unitaire HT (DA), Total HT (DA).
+- Si le document parvient sous forme de LISTE / TEXTE / PARAGRAPHE : conserve la structure en liste/sections telle qu'elle apparaît, tout en ajoutant les détails du chiffrage.
 ---
 
 {catalogue_prix}
 
-CONSIGNES DE CHIFFRAGE BTP (ALGERIE) :
+CONSIGNES DE CHIFFRAGE BTP (ALGÉRIE) :
 1. TOUS LES PRIX DOIVENT ÊTRE EXPRIMÉS EN DINARS ALGÉRIENS (DA).
 2. Si un article est présent dans le CATALOGUE SUPABASE, utilise son prix unitaire exact.
 3. Si un article est absent du catalogue, calcule une estimation au prix du marché BTP algérien actuel et indique "(Prix estimé DA)".
@@ -340,8 +359,9 @@ CONSIGNES DE CHIFFRAGE BTP (ALGERIE) :
 """
 
     try:
-        image_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
-        devis_genere = call_gemini_with_fallback([image_part, prompt])
+        # Encapuler correctement les octets du fichier avec le type MIME exact
+        document_part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
+        devis_genere = call_gemini_with_fallback([document_part, prompt])
 
         if supabase_client:
             supabase_client.table("devis").insert({
@@ -353,5 +373,5 @@ CONSIGNES DE CHIFFRAGE BTP (ALGERIE) :
     except HTTPException as http_ex:
         raise http_ex
     except Exception as e:
-        logging.error(f"Erreur traitement fichier : {str(e)}")
+        logging.error(f"Erreur lors du traitement du fichier : {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erreur d'analyse visuelle par l'IA : {str(e)}")
