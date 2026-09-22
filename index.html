@@ -3,77 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Chiffrage Devis BTP</title>
+    <title>Chiffrage Express BTP (DZD)</title>
+
+    <!-- Configuration PWA (Mobile) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f4f6f9; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        button { background: #2563eb; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; }
-        button:disabled { background: #94a3b8; }
-        #resultat { margin-top: 20px; padding: 15px; background: #1e293b; color: #38bdf8; font-family: monospace; white-space: pre-wrap; border-radius: 5px; min-height: 150px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .upload-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            background-color: #f1f5f9;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        #resultat {
+            background-color: #0f172a;
+            color: #38bdf8;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 250px;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #1e293b;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Générateur de Devis BTP (DZD)</h2>
-    <p>Sélectionnez un devis vierge ou un métré (PDF, Image, Texte) :</p>
-    
-    <input type="file" id="fichierDevis" /><br><br>
-    <button id="btnLancer" onclick="envoyerFichier()">Lancer le chiffrage</button>
+    <div class="card">
+        <h1><span class="status-dot"></span>Chiffrage Devis BTP (DZD)</h1>
+        <p class="subtitle">Sélectionnez un devis ou un métré (PDF / Image) pour générer l'estimation en temps réel.</p>
 
-    <h3>Résultat en direct :</h3>
-    <div id="resultat">En attente de votre fichier...</div>
-</div>
+        <div class="upload-zone">
+            <input type="file" id="fichierDevis" accept=".pdf,image/*">
+            <button id="btnLancer" onclick="envoyerFichier()">Lancer le chiffrage</button>
+        </div>
+    </div>
 
-<script>
-    // ⚠️ REMPLACER PAR VOTRE VRAIE URL RENDER ⚠️
-    const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
+    <div class="card">
+        <h3>Résultat du chiffrage :</h3>
+        <pre id="resultat">En attente d'un document...</pre>
+    </div>
 
-    async function envoyerFichier() {
-        const input = document.getElementById('fichierDevis');
-        const resultat = document.getElementById('resultat');
-        const btn = document.getElementById('btnLancer');
-
-        if (!input.files[0]) {
-            alert("Veuillez d'abord choisir un fichier !");
-            return;
+    <script>
+        // 1. Enregistrement du Service Worker pour la PWA Mobile
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("PWA Service Worker : Prêt"))
+                .catch((err) => console.error("Erreur Service Worker :", err));
         }
 
-        const formData = new FormData();
-        formData.append('file', input.files[0]);
+        // 2. URL de votre serveur Render FastAPI
+        const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
 
-        btn.disabled = true;
-        resultat.textContent = "Connexion au serveur Render...\n";
+        // 3. Fonction principale d'envoi et de streaming
+        async function envoyerFichier() {
+            const input = document.getElementById('fichierDevis');
+            const resultat = document.getElementById('resultat');
+            const btn = document.getElementById('btnLancer');
 
-        try {
-            const response = await fetch(RENDER_URL, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) throw new Error("Erreur HTTP " + response.status);
-
-            resultat.textContent = ""; // On vide la zone de texte
-            
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder("utf-8");
-
-            // Lecture du flux en direct
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                
-                const chunk = decoder.decode(value, { stream: true });
-                resultat.textContent += chunk; // Affiche le texte au fur et à mesure
+            if (!input.files || !input.files[0]) {
+                alert("Veuillez d'abord sélectionner un fichier (PDF ou Image) !");
+                return;
             }
 
-        } catch (err) {
-            resultat.textContent += "\nErreur : " + err.message;
-        } finally {
-            btn.disabled = false;
-        }
-    }
-</script>
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
 
+            btn.disabled = true;
+            resultat.textContent = "⏳ Connexion au serveur Render et analyse du document...\n\n";
+
+            try {
+                const response = await fetch(RENDER_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const textErreur = await response.text();
+                    throw new Error(`Code ${response.status} : ${textErreur || response.statusText}`);
+                }
+
+                resultat.textContent = ""; // Réinitialisation de la zone de résultat
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+
+                // Lecture en continu du flux (Streaming)
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    resultat.textContent += chunk;
+
+                    // Défilement automatique vers le bas lors de l'arrivée du texte
+                    resultat.scrollTop = resultat.scrollHeight;
+                }
+
+            } catch (err) {
+                console.error("Erreur d'envoi :", err);
+                resultat.textContent = "❌ ÉCHEC DE L'OPÉRATION :\n" + err.message;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
