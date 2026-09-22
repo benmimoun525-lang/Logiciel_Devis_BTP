@@ -3,193 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chiffrage Express BTP (DZD)</title>
-
-    <!-- Configuration PWA (Mobile) -->
+    <title>Logiciel de Chiffrage Devis BTP (DZD)</title>
+    
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e293b">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        :root {
+            --primary: #1e3a8a;
+            --accent: #d97706;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
             padding: 20px;
-            max-width: 800px;
+        }
+
+        .container {
+            max-width: 900px;
             margin: 0 auto;
         }
 
-        .card {
-            background: #ffffff;
+        .header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 25px;
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            color: #1e293b;
-            margin-bottom: 8px;
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
         }
 
-        p.subtitle {
-            color: #64748b;
-            font-size: 0.95rem;
+        .header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
 
-        .upload-zone {
+        .upload-section {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         input[type="file"] {
-            padding: 10px;
+            flex: 1;
+            padding: 12px;
             border: 2px dashed #cbd5e1;
             border-radius: 8px;
-            background-color: #f1f5f9;
-            cursor: pointer;
-            width: 100%;
+            background: #f1f5f9;
         }
 
-        button {
-            background-color: #2563eb;
+        .btn-submit {
+            background-color: var(--accent);
             color: white;
             border: none;
-            padding: 14px 20px;
+            padding: 14px 28px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            width: 100%;
+            transition: all 0.2s;
         }
 
-        button:hover {
-            background-color: #1d4ed8;
+        .btn-submit:hover {
+            background-color: #b45309;
         }
 
-        button:disabled {
+        .btn-submit:disabled {
             background-color: #94a3b8;
             cursor: not-allowed;
         }
 
-        #resultat {
-            background-color: #0f172a;
-            color: #38bdf8;
-            padding: 20px;
+        .output-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            font-family: "Courier New", Courier, monospace;
-            font-size: 0.95rem;
+            padding: 20px;
+            min-height: 300px;
+            font-size: 1rem;
+            line-height: 1.6;
             white-space: pre-wrap;
-            word-wrap: break-word;
-            min-height: 250px;
-            max-height: 600px;
             overflow-y: auto;
-            border: 1px solid #1e293b;
         }
 
-        .status-dot {
+        .status-badge {
             display: inline-block;
-            width: 10px;
-            height: 10px;
-            background-color: #22c55e;
-            border-radius: 50%;
-            margin-right: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
+
+        .status-waiting { background-color: #e2e8f0; color: #475569; }
+        .status-running { background-color: #fef3c7; color: #92400e; }
+        .status-success { background-color: #dcfce7; color: #166534; }
+        .status-error { background-color: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1><span class="status-dot"></span>Chiffrage Devis BTP (DZD)</h1>
-        <p class="subtitle">Sélectionnez un devis ou un métré (PDF / Image) pour générer l'estimation en temps réel.</p>
+<div class="container">
+    <div class="header">
+        <h1>Estimation & Chiffrage Devis BTP (DZD)</h1>
+        <p>Analyse automatique de métrés et devis avec calcul instantané des prix en Dinars Algériens.</p>
+    </div>
 
-        <div class="upload-zone">
+    <div class="card">
+        <h3>1. Importer un document BTP</h3>
+        <div class="upload-section">
             <input type="file" id="fichierDevis" accept=".pdf,image/*">
-            <button id="btnLancer" onclick="envoyerFichier()">Lancer le chiffrage</button>
+            <button id="btnLancer" class="btn-submit" onclick="envoyerChiffrage()">Générer le Chiffrage</button>
         </div>
     </div>
 
     <div class="card">
-        <h3>Résultat du chiffrage :</h3>
-        <pre id="resultat">En attente d'un document...</pre>
+        <div id="statusBadge" class="status-badge status-waiting">En attente de document</div>
+        <h3>2. Résultat de l'analyse et Chiffrage détaillé :</h3>
+        <div id="resultatOutput" class="output-box">Sélectionnez un fichier ci-dessus pour lancer l'analyse...</div>
     </div>
+</div>
 
-    <script>
-        // 1. Enregistrement du Service Worker pour la PWA Mobile
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log("PWA Service Worker : Prêt"))
-                .catch((err) => console.error("Erreur Service Worker :", err));
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+
+    const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
+
+    async function envoyerChiffrage() {
+        const input = document.getElementById('fichierDevis');
+        const output = document.getElementById('resultatOutput');
+        const btn = document.getElementById('btnLancer');
+        const badge = document.getElementById('statusBadge');
+
+        if (!input.files || !input.files[0]) {
+            alert("Veuillez sélectionner un document BTP (Image ou PDF).");
+            return;
         }
 
-        // 2. URL de votre serveur Render FastAPI
-        const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
+        const formData = new FormData();
+        formData.append('file', input.files[0]);
 
-        // 3. Fonction principale d'envoi et de streaming
-        async function envoyerFichier() {
-            const input = document.getElementById('fichierDevis');
-            const resultat = document.getElementById('resultat');
-            const btn = document.getElementById('btnLancer');
+        btn.disabled = true;
+        badge.className = "status-badge status-running";
+        badge.textContent = "Analyse en cours...";
+        output.textContent = "Connexion au serveur et début du chiffrage en direct...\n\n";
 
-            if (!input.files || !input.files[0]) {
-                alert("Veuillez d'abord sélectionner un fichier (PDF ou Image) !");
-                return;
+        try {
+            const response = await fetch(RENDER_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(errText);
             }
 
-            const formData = new FormData();
-            formData.append('file', input.files[0]);
+            output.textContent = "";
+            badge.className = "status-badge status-running";
+            badge.textContent = "Réception du chiffrage...";
 
-            btn.disabled = true;
-            resultat.textContent = "⏳ Connexion au serveur Render et analyse du document...\n\n";
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
 
-            try {
-                const response = await fetch(RENDER_URL, {
-                    method: 'POST',
-                    body: formData
-                });
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
 
-                if (!response.ok) {
-                    const textErreur = await response.text();
-                    throw new Error(`Code ${response.status} : ${textErreur || response.statusText}`);
-                }
-
-                resultat.textContent = ""; // Réinitialisation de la zone de résultat
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder("utf-8");
-
-                // Lecture en continu du flux (Streaming)
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    resultat.textContent += chunk;
-
-                    // Défilement automatique vers le bas lors de l'arrivée du texte
-                    resultat.scrollTop = resultat.scrollHeight;
-                }
-
-            } catch (err) {
-                console.error("Erreur d'envoi :", err);
-                resultat.textContent = "❌ ÉCHEC DE L'OPÉRATION :\n" + err.message;
-            } finally {
-                btn.disabled = false;
+                const chunk = decoder.decode(value, { stream: true });
+                output.textContent += chunk;
             }
+
+            badge.className = "status-badge status-success";
+            badge.textContent = "Chiffrage Terminé";
+
+        } catch (err) {
+            console.error(err);
+            badge.className = "status-badge status-error";
+            badge.textContent = "Erreur d'analyse";
+            output.textContent = "❌ " + err.message;
+        } finally {
+            btn.disabled = false;
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>

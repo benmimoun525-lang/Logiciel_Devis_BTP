@@ -42,7 +42,7 @@ Présente le résultat sous forme d'un tableau Markdown clair, lisible et profes
 
 async def generer_chiffrage_stream(fichier_bytes: bytes, mime_type: str):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
         contents = [
             {"mime_type": mime_type, "data": fichier_bytes},
