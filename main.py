@@ -1,18 +1,18 @@
 import os
 import google.generativeai as genai
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-# Configuration de la clé API Gemini
+# Vérification de la clé API
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
     raise RuntimeError("GEMINI_API_KEY introuvable dans les variables d'environnement")
 
 genai.configure(api_key=api_key)
 
-# Modèle Gemini 2.0 Flash
-model = genai.GenerativeModel('gemini-2.0-flash')
+# Modèle recommandé stable Gemini 2.0 Flash
+MODEL_NAME = 'gemini-2.0-flash'
 
 app = FastAPI()
 
@@ -28,36 +28,41 @@ app.add_middleware(
 def read_root():
     return {"status": "ok", "message": "Serveur BTP Chiffrage opérationnel"}
 
-@app.get("/models")
-def list_models():
-    try:
-        models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-        return {"available_models": models}
-    except Exception as e:
-        return {"error": str(e)}
-
 @app.post("/chiffrer-devis")
-async def chiffrer_devis(file: UploadFile = File(...)):
+async def chiffrer_devis(
+    file: UploadFile = File(None),
+    texte_descriptif: str = Form(None)
+):
     try:
-        contents = await file.read()
+        model = genai.GenerativeModel(MODEL_NAME)
         
-        content_type = file.content_type if file.content_type else "image/jpeg"
-        
-        image_part = {
-            "mime_type": content_type,
-            "data": contents
-        }
-        
-        prompt = (
+        prompt_base = (
             "Tu es un expert métreur et chiffreur en bâtiment (BTP) en Algérie. "
-            "Examine attentivement ce document (devis/métré/plan). "
-            "1. Extrais et liste le texte et les désignations des travaux détectés. "
-            "2. Génère un tableau de chiffrage détaillé avec : Désignation, Unité, Quantité, Prix Unitaire (DZD), et Prix Total (DZD). "
+            "Examine les éléments fournis (document/image ou texte descriptif). "
+            "1. Extrais et liste clairement l'ensemble du texte, métrés et désignations de travaux détectés. "
+            "2. Génère un tableau de chiffrage détaillé : Désignation, Unité, Quantité, Prix Unitaire (DZD), et Prix Total (DZD). "
             "3. Indique le Montant Total Hors Taxe (HT), la TVA (19%), et le Montant TTC en Dinars Algériens (DZD). "
-            "Sois très précis et structure la réponse de manière professionnelle."
+            "Sois très précis et professionnel."
         )
 
-        response = model.generate_content([prompt, image_part], stream=True)
+        contents_list = [prompt_base]
+
+        if texte_descriptif and texte_descriptif.strip():
+            contents_list.append(f"\n--- DESCRIPTIF / TEXTE DU CLIENT ---\n{texte_descriptif.strip()}")
+
+        if file:
+            file_bytes = await file.read()
+            if file_bytes:
+                content_type = file.content_type or "image/jpeg"
+                contents_list.append({
+                    "mime_type": content_type,
+                    "data": file_bytes
+                })
+
+        if len(contents_list) == 1:
+            raise HTTPException(status_code=400, detail="Veuillez fournir un fichier ou saisir du texte.")
+
+        response = model.generate_content(contents_list, stream=True)
 
         def generate_stream():
             for chunk in response:
