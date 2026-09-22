@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logiciel de Chiffrage Devis BTP (DZD)</title>
+    <title>Logiciel de Chiffrage BTP (DZD)</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e293b">
+    <meta name="theme-color" content="#1e3a8a">
 
     <style>
         :root {
@@ -42,11 +42,6 @@
         .header h1 {
             margin: 0 0 10px 0;
             font-size: 1.8rem;
-        }
-
-        .header p {
-            margin: 0;
-            opacity: 0.9;
         }
 
         .card {
@@ -95,13 +90,14 @@
 
         .output-box {
             background-color: #ffffff;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
             padding: 20px;
-            min-height: 300px;
-            font-size: 1rem;
+            min-height: 350px;
+            font-size: 0.95rem;
             line-height: 1.6;
             white-space: pre-wrap;
+            word-wrap: break-word;
             overflow-y: auto;
         }
 
@@ -111,7 +107,7 @@
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .status-waiting { background-color: #e2e8f0; color: #475569; }
@@ -124,28 +120,28 @@
 
 <div class="container">
     <div class="header">
-        <h1>Estimation & Chiffrage Devis BTP (DZD)</h1>
-        <p>Analyse automatique de métrés et devis avec calcul instantané des prix en Dinars Algériens.</p>
+        <h1>Scannage & Chiffrage Express BTP (DZD)</h1>
+        <p>Analyse de documents BTP, extraction de texte et génération du devis estimatif en Dinars Algériens.</p>
     </div>
 
     <div class="card">
-        <h3>1. Importer un document BTP</h3>
+        <h3>1. Importer un devis ou plan (PDF / Image)</h3>
         <div class="upload-section">
             <input type="file" id="fichierDevis" accept=".pdf,image/*">
-            <button id="btnLancer" class="btn-submit" onclick="envoyerChiffrage()">Générer le Chiffrage</button>
+            <button id="btnLancer" class="btn-submit" onclick="envoyerChiffrage()">Lancer le Chiffrage</button>
         </div>
     </div>
 
     <div class="card">
         <div id="statusBadge" class="status-badge status-waiting">En attente de document</div>
-        <h3>2. Résultat de l'analyse et Chiffrage détaillé :</h3>
-        <div id="resultatOutput" class="output-box">Sélectionnez un fichier ci-dessus pour lancer l'analyse...</div>
+        <h3>2. Scannage et Chiffrage en direct :</h3>
+        <div id="resultatOutput" class="output-box">Sélectionnez un fichier et cliquez sur "Lancer le Chiffrage"...</div>
     </div>
 </div>
 
 <script>
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
+        navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
     }
 
     const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
@@ -157,7 +153,7 @@
         const badge = document.getElementById('statusBadge');
 
         if (!input.files || !input.files[0]) {
-            alert("Veuillez sélectionner un document BTP (Image ou PDF).");
+            alert("Veuillez sélectionner un fichier (Image ou PDF).");
             return;
         }
 
@@ -166,8 +162,8 @@
 
         btn.disabled = true;
         badge.className = "status-badge status-running";
-        badge.textContent = "Analyse en cours...";
-        output.textContent = "Connexion au serveur et début du chiffrage en direct...\n\n";
+        badge.textContent = "Scannage du document en cours...";
+        output.textContent = "Analyse de l'image/document et lancement du chiffrage DZD...\n\n";
 
         try {
             const response = await fetch(RENDER_URL, {
@@ -177,12 +173,12 @@
 
             if (!response.ok) {
                 const errText = await response.text();
-                throw new Error(errText);
+                throw new Error(`Erreur ${response.status} : ${errText}`);
             }
 
             output.textContent = "";
             badge.className = "status-badge status-running";
-            badge.textContent = "Réception du chiffrage...";
+            badge.textContent = "Génération du chiffrage...";
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
@@ -193,10 +189,11 @@
 
                 const chunk = decoder.decode(value, { stream: true });
                 output.textContent += chunk;
+                output.scrollTop = output.scrollHeight;
             }
 
             badge.className = "status-badge status-success";
-            badge.textContent = "Chiffrage Terminé";
+            badge.textContent = "Chiffrage Terminé avec Succès";
 
         } catch (err) {
             console.error(err);
