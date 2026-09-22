@@ -11,8 +11,8 @@ if not api_key:
 
 genai.configure(api_key=api_key)
 
-# Modèle recommandé stable Gemini 2.0 Flash
-MODEL_NAME = 'gemini-2.0-flash'
+# Modèle exact exigé par l'API Google
+MODEL_NAME = 'gemini-3.6-flash'
 
 app = FastAPI()
 
@@ -53,7 +53,7 @@ async def chiffrer_devis(
         if file:
             file_bytes = await file.read()
             if file_bytes:
-                content_type = file.content_type or "image/jpeg"
+                content_type = file.content_type or "application/pdf"
                 contents_list.append({
                     "mime_type": content_type,
                     "data": file_bytes
