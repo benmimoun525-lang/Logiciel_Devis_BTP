@@ -1,10 +1,10 @@
 import os
+import time
 import google.generativeai as genai
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-# Clé API Google Gemini
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
     raise RuntimeError("GEMINI_API_KEY introuvable dans les variables d'environnement")
@@ -21,9 +21,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Utilisation directe du modèle officiel recommandé
-PRIMARY_MODEL = 'gemini-3.6-flash'
-FALLBACK_MODEL = 'gemini-1.5-flash'
+MODELS_PRIORITY = [
+    'gemini-3.6-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro'
+]
 
 @app.get("/")
 def read_root():
@@ -61,23 +63,32 @@ async def chiffrer_devis(
         if len(contents_list) == 1:
             raise HTTPException(status_code=400, detail="Veuillez fournir un fichier ou saisir du texte.")
 
-        # Tenter d'abord avec gemini-3.6-flash, puis avec gemini-1.5-flash en cas de problème de quota
-        for model_name in [PRIMARY_MODEL, FALLBACK_MODEL]:
-            try:
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(contents_list, stream=True)
+        # Essai avec répétition automatique en cas de quota dépassé
+        for model_name in MODELS_PRIORITY:
+            for attempt in range(2): # Tente 2 fois par modèle avec une pause
+                try:
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content(contents_list, stream=True)
 
-                def generate_stream():
-                    for chunk in response:
-                        if hasattr(chunk, 'text') and chunk.text:
-                            yield chunk.text
+                    def generate_stream():
+                        for chunk in response:
+                            if hasattr(chunk, 'text') and chunk.text:
+                                yield chunk.text
 
-                return StreamingResponse(generate_stream(), media_type="text/plain; charset=utf-8")
-            except Exception as inner_e:
-                print(f"Erreur avec {model_name}: {inner_e}")
-                continue
+                    return StreamingResponse(generate_stream(), media_type="text/plain; charset=utf-8")
 
-        raise HTTPException(status_code=429, detail="Les quotas de requêtes sont dépassés. Veuillez réessayer dans un instant.")
+                except Exception as inner_e:
+                    err_msg = str(inner_e).lower()
+                    if "429" in err_msg or "quota" in err_msg:
+                        time.sleep(3) # Attente de 3 secondes avant réessai
+                        continue
+                    else:
+                        break # Si c'est un autre problème, passer au modèle suivant
+
+        raise HTTPException(
+            status_code=429, 
+            detail="Quota temporairement atteint. Veuillez réimporter le document dans 30 secondes."
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
