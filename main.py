@@ -4,7 +4,6 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-# Clé API Google
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
     raise RuntimeError("GEMINI_API_KEY introuvable dans les variables d'environnement")
@@ -21,11 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Liste des modèles de secours en cas de dépassement de limite/quota
+# gemini-3.6-flash est désormais le modèle principal recommandé
 MODELS_PRIORITY = [
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
     'gemini-3.6-flash',
+    'gemini-1.5-flash',
     'gemini-1.5-pro'
 ]
 
@@ -65,7 +63,7 @@ async def chiffrer_devis(
         if len(contents_list) == 1:
             raise HTTPException(status_code=400, detail="Veuillez fournir un fichier ou saisir du texte.")
 
-        # Essai automatique de chaque modèle si le quota de l'un d'eux est dépassé (Erreur 429)
+        # Essai des modèles par ordre de priorité avec capture globale des erreurs
         for model_name in MODELS_PRIORITY:
             try:
                 model = genai.GenerativeModel(model_name)
@@ -79,15 +77,13 @@ async def chiffrer_devis(
                 return StreamingResponse(generate_stream(), media_type="text/plain; charset=utf-8")
 
             except Exception as e:
-                error_str = str(e)
-                if "429" in error_str or "quota" in error_str.lower() or "not found" in error_str.lower():
-                    continue  # Si ce modèle est bloqué ou indisponible, on passe au suivant
-                else:
-                    raise e
+                # Si le modèle renvoie 404, 429 ou toute autre indisponibilité, on essaye le suivant
+                print(f"Échec avec le modèle {model_name}: {e}")
+                continue
 
         raise HTTPException(
-            status_code=429, 
-            detail="Les quotas gratuits ont été temporairement atteints. Veuillez réessayer dans quelques minutes."
+            status_code=500, 
+            detail="Impossible de contacter le service AI. Veuillez re-tester dans un moment."
         )
 
     except Exception as e:
