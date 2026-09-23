@@ -164,7 +164,6 @@
             overflow-y: auto;
         }
 
-        /* Style spécifique pour l'en-tête du devis imprimable */
         .devis-header-print {
             display: flex;
             justify-content: space-between;
@@ -215,7 +214,7 @@
         <p>Génération automatique de devis estimatifs avec en-tête personnalisable et export PDF.</p>
     </div>
 
-    <!-- NOUVELLE SECTION : Informations Entreprise -->
+    <!-- Informations Entreprise -->
     <div class="card">
         <h3>🏢 Informations Entreprise (En-tête Devis)</h3>
         <div class="grid-company">
@@ -266,7 +265,7 @@
     <div class="card">
         <div id="statusBadge" class="status-badge status-waiting">En attente des données</div>
         
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <h3>Résultat du Devis Estimatif (DZD) :</h3>
             <button id="btnExportPDF" class="btn-pdf" onclick="exporterPDF()">📄 Télécharger en PDF</button>
         </div>
@@ -298,6 +297,40 @@
     }
 
     const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
+
+    // ⚡ COMPRESSION D'IMAGE AUTOMATIQUE (Réduit la taille et accélère le traitement)
+    async function compresserImage(file) {
+        if (!file.type.startsWith('image/')) return file;
+        
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1500;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                    }, 'image/jpeg', 0.80);
+                };
+            };
+        });
+    }
 
     function mettreAJourEnTete() {
         const nom = document.getElementById('nomEntreprise').value || "ENTREPRISE BTP";
@@ -358,11 +391,22 @@
         const badge = document.getElementById('statusBadge');
         const btnPDF = document.getElementById('btnExportPDF');
 
-        const file = input.files ? input.files[0] : null;
+        let file = input.files ? input.files[0] : null;
 
         if (!file && !texteInput.trim()) {
             alert("Veuillez importer un fichier OU saisir un texte descriptif.");
             return;
+        }
+
+        btn.disabled = true;
+        btnPDF.style.display = "none";
+        badge.className = "status-badge status-running";
+        badge.textContent = "Traitement et compression en cours...";
+        output.textContent = "Analyse et lancement du chiffrage DZD...\n\n";
+
+        // Compression si c'est une photo
+        if (file && file.type.startsWith('image/')) {
+            file = await compresserImage(file);
         }
 
         mettreAJourEnTete();
@@ -370,12 +414,6 @@
         const formData = new FormData();
         if (file) formData.append('file', file);
         if (texteInput.trim()) formData.append('texte_descriptif', texteInput);
-
-        btn.disabled = true;
-        btnPDF.style.display = "none";
-        badge.className = "status-badge status-running";
-        badge.textContent = "Chiffrage en cours...";
-        output.textContent = "Traitement en direct...\n\n";
 
         try {
             const response = await fetch(RENDER_URL, {
@@ -390,7 +428,7 @@
 
             output.textContent = "";
             badge.className = "status-badge status-running";
-            badge.textContent = "Réception du chiffrage DZD...";
+            badge.textContent = "Réception du chiffrage DZD en direct...";
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
