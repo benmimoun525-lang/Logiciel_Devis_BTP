@@ -4,6 +4,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
+# Clé API Google Gemini
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
     raise RuntimeError("GEMINI_API_KEY introuvable dans les variables d'environnement")
@@ -20,12 +21,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# gemini-3.6-flash est désormais le modèle principal recommandé
-MODELS_PRIORITY = [
-    'gemini-3.6-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro'
-]
+# Utilisation directe du modèle officiel recommandé
+PRIMARY_MODEL = 'gemini-3.6-flash'
+FALLBACK_MODEL = 'gemini-1.5-flash'
 
 @app.get("/")
 def read_root():
@@ -63,8 +61,8 @@ async def chiffrer_devis(
         if len(contents_list) == 1:
             raise HTTPException(status_code=400, detail="Veuillez fournir un fichier ou saisir du texte.")
 
-        # Essai des modèles par ordre de priorité avec capture globale des erreurs
-        for model_name in MODELS_PRIORITY:
+        # Tenter d'abord avec gemini-3.6-flash, puis avec gemini-1.5-flash en cas de problème de quota
+        for model_name in [PRIMARY_MODEL, FALLBACK_MODEL]:
             try:
                 model = genai.GenerativeModel(model_name)
                 response = model.generate_content(contents_list, stream=True)
@@ -75,16 +73,11 @@ async def chiffrer_devis(
                             yield chunk.text
 
                 return StreamingResponse(generate_stream(), media_type="text/plain; charset=utf-8")
-
-            except Exception as e:
-                # Si le modèle renvoie 404, 429 ou toute autre indisponibilité, on essaye le suivant
-                print(f"Échec avec le modèle {model_name}: {e}")
+            except Exception as inner_e:
+                print(f"Erreur avec {model_name}: {inner_e}")
                 continue
 
-        raise HTTPException(
-            status_code=500, 
-            detail="Impossible de contacter le service AI. Veuillez re-tester dans un moment."
-        )
+        raise HTTPException(status_code=429, detail="Les quotas de requêtes sont dépassés. Veuillez réessayer dans un instant.")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
