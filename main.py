@@ -38,12 +38,24 @@ async def chiffrer_devis(
 ):
     try:
         prompt_base = (
-            "Tu es un expert métreur et chiffreur en bâtiment (BTP) en Algérie. "
-            "Examine les éléments fournis (document/image ou texte descriptif). "
-            "1. Extrais et liste clairement l'ensemble du texte, métrés et désignations de travaux détectés. "
-            "2. Génère un tableau de chiffrage détaillé : Désignation, Unité, Quantité, Prix Unitaire (DZD), et Prix Total (DZD). "
-            "3. Indique le Montant Total Hors Taxe (HT), la TVA (19%), et le Montant TTC en Dinars Algériens (DZD). "
-            "Sois très précis et synthétique."
+            "Tu es un expert métreur et chiffreur BTP en Algérie.\n"
+            "Analyse le document/texte fourni et génère un **Devis Quantitatif et Estimatif (DQE)**.\n\n"
+            "Format STRICT de réponse attendu (HTML) :\n"
+            "1. Une courte introduction résumant les travaux détectés.\n"
+            "2. Un tableau HTML complet structuré comme suit :\n"
+            "<table class='devis-table'>\n"
+            "  <thead>\n"
+            "    <tr><th>N°</th><th>Désignation des Travaux</th><th>Unité</th><th>Qté</th><th>P.U (DZD)</th><th>Montant HT (DZD)</th></tr>\n"
+            "  </thead>\n"
+            "  <tbody>\n"
+            "    <!-- Lignes de travaux -->\n"
+            "  </tbody>\n"
+            "</table>\n\n"
+            "3. Le récapitulatif financier sous forme de tableau ou bloc structuré :\n"
+            "- Total Général HT (DZD)\n"
+            "- TVA (19%) (DZD)\n"
+            "- Total Général TTC (DZD)\n\n"
+            "Sois précis, professionnel et utilise des prix réalistes du marché BTP algérien en DZD."
         )
 
         contents_list = [prompt_base]
@@ -63,9 +75,8 @@ async def chiffrer_devis(
         if len(contents_list) == 1:
             raise HTTPException(status_code=400, detail="Veuillez fournir un fichier ou saisir du texte.")
 
-        # Essai avec répétition automatique en cas de quota dépassé
         for model_name in MODELS_PRIORITY:
-            for attempt in range(2): # Tente 2 fois par modèle avec une pause
+            for attempt in range(2):
                 try:
                     model = genai.GenerativeModel(model_name)
                     response = model.generate_content(contents_list, stream=True)
@@ -75,15 +86,15 @@ async def chiffrer_devis(
                             if hasattr(chunk, 'text') and chunk.text:
                                 yield chunk.text
 
-                    return StreamingResponse(generate_stream(), media_type="text/plain; charset=utf-8")
+                    return StreamingResponse(generate_stream(), media_type="text/html; charset=utf-8")
 
                 except Exception as inner_e:
                     err_msg = str(inner_e).lower()
                     if "429" in err_msg or "quota" in err_msg:
-                        time.sleep(3) # Attente de 3 secondes avant réessai
+                        time.sleep(3)
                         continue
                     else:
-                        break # Si c'est un autre problème, passer au modèle suivant
+                        break
 
         raise HTTPException(
             status_code=429, 
