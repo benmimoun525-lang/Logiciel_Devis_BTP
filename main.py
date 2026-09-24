@@ -52,23 +52,22 @@ async def chiffrer_devis(
 
         prompt_base = (
             "Tu es un expert métreur et chiffreur BTP en Algérie.\n"
-            "Analyse le document/texte fourni et génère un **Devis Quantitatif et Estimatif (DQE) COMPLET sans jamais t'arrêter en cours de route**.\n\n"
-            "Format STRICT de réponse attendu (HTML) :\n"
-            "1. Une courte introduction d'une ligne.\n"
-            "2. Un tableau HTML complet structuré comme suit :\n"
+            "Ta mission : Extraire et chiffrer l'INTÉGRALITÉ des articles du document sans AUCUNE omission, synthèse ou regroupement.\n"
+            "Si le document contient 83 articles ou plus, tu dois TOUS les lister du N°1 au dernier N°.\n\n"
+            "Format STRICT de réponse attendu (HTML compact) :\n"
+            "1. Une ligne d'intro : <p>Devis DQE détaillé complet.</p>\n"
+            "2. Le tableau HTML :\n"
             "<table class='devis-table'>\n"
-            "  <thead>\n"
-            "    <tr><th>N°</th><th>Désignation des Travaux</th><th>Unité</th><th>Qté</th><th>P.U (DZD)</th><th>Montant HT (DZD)</th></tr>\n"
-            "  </thead>\n"
-            "  <tbody>\n"
-            "    <!-- Lignes de travaux - Sois concis dans la désignation pour aller jusqu'au dernier article -->\n"
-            "  </tbody>\n"
+            "<thead><tr><th>N°</th><th>Désignation</th><th>Unité</th><th>Qté</th><th>P.U (DZD)</th><th>Montant HT</th></tr></thead>\n"
+            "<tbody>\n"
+            "<!-- Lignes de 1 jusqu'à la fin. Garde les désignations précises mais sans blabla superflu pour tenir sur la totalité. -->\n"
+            "</tbody>\n"
             "</table>\n\n"
-            "3. Le récapitulatif financier final :\n"
-            "- Total Général HT (DZD)\n"
-            "- TVA (19%) (DZD)\n"
-            "- Total Général TTC (DZD)\n\n"
-            "IMPORTANT : Ne coupe JAMAIS la réponse. Va obligatoirement jusqu'au dernier article et affiche le Total TTC."
+            "3. Bloc financier final en bas du tableau :\n"
+            "<p><strong>Total Général HT :</strong> [Montant] DZD<br>\n"
+            "<strong>TVA (19%) :</strong> [Montant] DZD<br>\n"
+            "<strong>Total Général TTC :</strong> [Montant] DZD</p>\n\n"
+            "RÈGLE D'OR : Traite l'intégralité des 83+ articles et termine IMPÉRATIVEMENT par le Total TTC."
         )
 
         contents_list = [prompt_base]
@@ -88,10 +87,10 @@ async def chiffrer_devis(
         if len(contents_list) == 1:
             raise HTTPException(status_code=400, detail="Veuillez fournir un fichier ou saisir du texte.")
 
-        # Configuration pour autoriser la taille maximale de réponse (8192 tokens)
+        # Configuration maximale pour très grands métrés
         generation_config = genai.GenerationConfig(
             max_output_tokens=8192,
-            temperature=0.2
+            temperature=0.0
         )
 
         last_exception = None
