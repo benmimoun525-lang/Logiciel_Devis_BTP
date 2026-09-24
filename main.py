@@ -52,22 +52,23 @@ async def chiffrer_devis(
 
         prompt_base = (
             "Tu es un expert métreur et chiffreur BTP en Algérie.\n"
-            "Ta mission : Extraire et chiffrer l'INTÉGRALITÉ des articles du document sans AUCUNE omission, synthèse ou regroupement.\n"
-            "Si le document contient 83 articles ou plus, tu dois TOUS les lister du N°1 au dernier N°.\n\n"
-            "Format STRICT de réponse attendu (HTML compact) :\n"
-            "1. Une ligne d'intro : <p>Devis DQE détaillé complet.</p>\n"
-            "2. Le tableau HTML :\n"
+            "INSTRUCTION CRITIQUE ET SANS EXCEPTION :\n"
+            "Analyse le document/texte et extrait ABSOLUMENT TOUS les articles détectés sans exception, un par un.\n"
+            "Si le document comporte 83 articles, tu dois obligatoirement générer les 83 lignes dans le tableau, du N°1 jusqu'au N°83.\n"
+            "Interdiction absolue de résumer, de regrouper ou de sauter des articles.\n\n"
+            "Format de réponse (HTML pure) :\n"
+            "<p><strong>Devis Quantitatif et Estimatif (DQE) Détaillé</strong></p>\n"
             "<table class='devis-table'>\n"
-            "<thead><tr><th>N°</th><th>Désignation</th><th>Unité</th><th>Qté</th><th>P.U (DZD)</th><th>Montant HT</th></tr></thead>\n"
+            "<thead><tr><th>N°</th><th>Désignation des Travaux</th><th>Unité</th><th>Qté</th><th>P.U (DZD)</th><th>Montant HT (DZD)</th></tr></thead>\n"
             "<tbody>\n"
-            "<!-- Lignes de 1 jusqu'à la fin. Garde les désignations précises mais sans blabla superflu pour tenir sur la totalité. -->\n"
+            "<!-- Génère chaque ligne une par une sans t'arrêter -->\n"
             "</tbody>\n"
-            "</table>\n\n"
-            "3. Bloc financier final en bas du tableau :\n"
-            "<p><strong>Total Général HT :</strong> [Montant] DZD<br>\n"
-            "<strong>TVA (19%) :</strong> [Montant] DZD<br>\n"
-            "<strong>Total Général TTC :</strong> [Montant] DZD</p>\n\n"
-            "RÈGLE D'OR : Traite l'intégralité des 83+ articles et termine IMPÉRATIVEMENT par le Total TTC."
+            "</table>\n"
+            "<div style='margin-top:20px; font-size:1.1em;'>\n"
+            "<p><strong>Total Général HT :</strong> [Montant] DZD</p>\n"
+            "<p><strong>TVA (19%) :</strong> [Montant] DZD</p>\n"
+            "<p><strong>Total Général TTC :</strong> [Montant] DZD</p>\n"
+            "</div>"
         )
 
         contents_list = [prompt_base]
@@ -87,13 +88,10 @@ async def chiffrer_devis(
         if len(contents_list) == 1:
             raise HTTPException(status_code=400, detail="Veuillez fournir un fichier ou saisir du texte.")
 
-        # Configuration maximale pour très grands métrés
         generation_config = genai.GenerationConfig(
             max_output_tokens=8192,
             temperature=0.0
         )
-
-        last_exception = None
 
         for api_key in keys_pool:
             genai.configure(api_key=api_key)
@@ -109,15 +107,15 @@ async def chiffrer_devis(
                     def generate_stream():
                         for chunk in response:
                             if hasattr(chunk, 'text') and chunk.text:
-                                yield chunk.text
+                                text = chunk.text
+                                text = text.replace("```html", "").replace("```", "")
+                                yield text
 
                     return StreamingResponse(generate_stream(), media_type="text/html; charset=utf-8")
 
                 except Exception as inner_e:
-                    last_exception = inner_e
                     err_msg = str(inner_e).lower()
                     print(f"Échec Modèle {model_name} : {err_msg}")
-                    
                     if "429" in err_msg or "quota" in err_msg:
                         continue
                     else:
