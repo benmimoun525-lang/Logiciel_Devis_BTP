@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logiciel Pro Chiffrage BTP (DZD)</title>
+    <title>Demande de Devis BTP (DZD)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
 
-    <!-- Bibliothèque pour l'exportation PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -42,10 +41,7 @@
             margin-bottom: 20px;
         }
 
-        .header-app h1 {
-            margin: 0 0 10px 0;
-            font-size: 1.8rem;
-        }
+        .header-app h1 { margin: 0 0 10px 0; font-size: 1.8rem; }
 
         .card {
             background: var(--card-bg);
@@ -55,13 +51,7 @@
             margin-bottom: 20px;
         }
 
-        .grid-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .grid-company {
+        .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
@@ -69,7 +59,14 @@
         }
 
         @media (max-width: 768px) {
-            .grid-inputs, .grid-company { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 5px;
         }
 
         input[type="text"], textarea {
@@ -81,10 +78,7 @@
             box-sizing: border-box;
         }
 
-        textarea {
-            height: 110px;
-            resize: vertical;
-        }
+        textarea { height: 110px; resize: vertical; }
 
         input[type="file"] {
             width: 100%;
@@ -93,35 +87,6 @@
             border-radius: 8px;
             background: #f1f5f9;
             box-sizing: border-box;
-        }
-
-        .preview-area {
-            margin-top: 10px;
-            display: none;
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            background: #fafafa;
-        }
-
-        .preview-area img {
-            max-width: 100%;
-            max-height: 180px;
-            border-radius: 6px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .btn-action {
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.85rem;
-            display: inline-block;
         }
 
         .btn-submit {
@@ -146,50 +111,33 @@
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 15px;
             display: none;
         }
 
-        .btn-submit:disabled, .btn-pdf:disabled { background-color: #94a3b8; }
+        .btn-submit:disabled { background-color: #94a3b8; }
 
         .output-box {
             background-color: #ffffff;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
-            padding: 25px;
-            min-height: 300px;
+            padding: 20px;
+            min-height: 250px;
             font-size: 0.95rem;
             line-height: 1.6;
             white-space: pre-wrap;
-            overflow-y: auto;
         }
 
+        /* Styles de l'en-tête du devis d'export */
         .devis-header-print {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             border-bottom: 2px solid #1e3a8a;
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
 
-        .devis-company-info h2 {
-            margin: 0 0 5px 0;
-            color: #1e3a8a;
-            font-size: 1.4rem;
-        }
-
-        .devis-company-info p {
-            margin: 2px 0;
-            font-size: 0.85rem;
-            color: #475569;
-        }
-
-        .logo-preview-devis {
-            max-height: 70px;
-            max-width: 150px;
-            object-fit: contain;
-        }
+        .box-info h3 { margin: 0 0 5px 0; color: #1e3a8a; font-size: 1.1rem; }
+        .box-info p { margin: 3px 0; font-size: 0.85rem; color: #334155; }
 
         .status-badge {
             display: inline-block;
@@ -199,7 +147,6 @@
             font-weight: bold;
             margin-bottom: 12px;
         }
-
         .status-waiting { background-color: #e2e8f0; color: #475569; }
         .status-running { background-color: #fef3c7; color: #92400e; }
         .status-success { background-color: #dcfce7; color: #166534; }
@@ -210,83 +157,79 @@
 
 <div class="container">
     <div class="header-app">
-        <h1>Plateforme Pro : Chiffrage BTP (DZD)</h1>
-        <p>Génération automatique de devis estimatifs avec en-tête personnalisable et export PDF.</p>
+        <h1>Demande de Chiffrage BTP (DZD)</h1>
+        <p>Remplissez vos coordonnées et fournissez votre métré ou scan pour obtenir votre devis estimatif.</p>
     </div>
 
-    <!-- Informations Entreprise -->
+    <!-- FORMULAIRE CLIENT / MAÎTRE D'OUVRAGE -->
     <div class="card">
-        <h3>🏢 Informations Entreprise (En-tête Devis)</h3>
-        <div class="grid-company">
+        <h3>👤 Coordonnées du Client / Maître d'Ouvrage</h3>
+        <div class="grid-2">
             <div>
-                <label>Nom de l'entreprise / Entrepreneur :</label>
-                <input type="text" id="nomEntreprise" placeholder="Ex: ETB KHALDI & Frères" oninput="mettreAJourEnTete()">
+                <label>Nom complet / Raison Sociale * :</label>
+                <input type="text" id="nomClient" placeholder="Ex: M. Benali Ahmed" oninput="mettreAJourPrint()">
             </div>
             <div>
-                <label>Téléphone & Email :</label>
-                <input type="text" id="contactEntreprise" placeholder="Ex: 0550 00 00 00 | contact@etb.dz" oninput="mettreAJourEnTete()">
+                <label>Téléphone / WhatsApp * :</label>
+                <input type="text" id="telClient" placeholder="Ex: 0661 00 00 00" oninput="mettreAJourPrint()">
             </div>
         </div>
-        <div class="grid-company">
+        <div class="grid-2">
             <div>
-                <label>Adresse :</label>
-                <input type="text" id="adresseEntreprise" placeholder="Ex: Cité 500 logements, Tlemcen" oninput="mettreAJourEnTete()">
+                <label>Wilaya / Ville * :</label>
+                <input type="text" id="villeClient" placeholder="Ex: Tlemcen" oninput="mettreAJourPrint()">
             </div>
             <div>
-                <label>Logo de l'entreprise (Optionnel) :</label>
-                <input type="file" id="logoInput" accept="image/*" onchange="chargerLogo(event)">
+                <label>Adresse du Chantier :</label>
+                <input type="text" id="adresseChantier" placeholder="Ex: Cité Safsafa, Lot N°12" oninput="mettreAJourPrint()">
             </div>
         </div>
     </div>
 
+    <!-- DESCRIPTION DES TRAVAUX / PIÈCE JOINTE -->
     <div class="card">
-        <div class="grid-inputs">
-            <!-- Document / Scan -->
+        <h3>📋 Description du Projet / Travaux</h3>
+        <div class="grid-2">
             <div>
-                <h3>1. Document / Scan (PDF/Image)</h3>
-                <input type="file" id="fichierDevis" accept=".pdf,image/*" onchange="gererApercuFichier()">
-                
-                <div id="previewArea" class="preview-area">
-                    <div id="previewContent"></div>
-                    <a id="btnTelecharger" class="btn-action" download>💾 Consulter le document</a>
-                </div>
+                <label>1. Importer un Plan / Scan / Métré (PDF/Image) :</label>
+                <input type="file" id="fichierDevis" accept=".pdf,image/*">
             </div>
-
-            <!-- Saisie Texte -->
             <div>
-                <h3>2. Saisie Texte / Métré Manuel</h3>
-                <textarea id="texteDescriptif" placeholder="Ex: Realisation de semelles isolees 1.2x1.2m (8 pcs), Betonnage voile (40 m3)..."></textarea>
+                <label>2. Ou Décrire les travaux manuellement :</label>
+                <textarea id="texteDescriptif" placeholder="Ex: Béton armé pour poteaux (12 m3), Maçonnerie brique 15cm (150 m2)..."></textarea>
             </div>
         </div>
 
-        <button id="btnLancer" class="btn-submit" onclick="envoyerChiffrage()">Lancer le Chiffrage Express</button>
+        <button id="btnLancer" class="btn-submit" onclick="envoyerChiffrage()">Générer l'Estimation du Devis</button>
     </div>
 
+    <!-- RÉSULTAT DU DEVIS -->
     <div class="card">
-        <div id="statusBadge" class="status-badge status-waiting">En attente des données</div>
+        <div id="statusBadge" class="status-badge status-waiting">En attente de vos informations</div>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <h3>Résultat du Devis Estimatif (DZD) :</h3>
-            <button id="btnExportPDF" class="btn-pdf" onclick="exporterPDF()">📄 Télécharger en PDF</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3>Devis Estimatif Généré (DZD) :</h3>
+            <button id="btnExportPDF" class="btn-pdf" onclick="exporterPDF()">📄 Télécharger le Devis en PDF</button>
         </div>
 
-        <!-- ZONE IMPRIMABLE PDF -->
-        <div id="zoneDevisPDF" style="background: white; padding: 10px;">
+        <!-- ZONE DU DEVIS IMPRIMABLE -->
+        <div id="zoneDevisPDF" style="background: white; padding: 15px;">
             
-            <!-- EN-TÊTE DYNAMIQUE DU DEVIS -->
-            <div class="devis-header-print" id="headerPrintDevis" style="display: none;">
-                <div class="devis-company-info">
-                    <h2 id="printNomEntreprise">ENTREPRISE BTP</h2>
-                    <p id="printContactEntreprise">Téléphone / Email</p>
-                    <p id="printAdresseEntreprise">Adresse</p>
+            <div class="devis-header-print" id="headerPrintDevis">
+                <div class="box-info">
+                    <h3>ENTREPRISE BTP & SERVICE</h3>
+                    <p>Chiffrage & Estimation de Travaux</p>
+                    <p>Email: contact@btp-algerie.dz</p>
                 </div>
-                <div>
-                    <img id="printLogo" class="logo-preview-devis" src="" alt="" style="display: none;">
+                <div class="box-info" style="text-align: right;">
+                    <h3>CLIENT / DEMANDEUR</h3>
+                    <p id="printNomClient">Nom: -</p>
+                    <p id="printTelClient">Tél: -</p>
+                    <p id="printChantier">Chantier: -</p>
                 </div>
             </div>
 
-            <!-- CORPS DU DEVIS GENERÉ PAR L'IA -->
-            <div id="resultatOutput" class="output-box">Importez un fichier ou saisissez du texte ci-dessus...</div>
+            <div id="resultatOutput" class="output-box">Le devis détaillé apparaîtra ici après validation du formulaire...</div>
         </div>
     </div>
 </div>
@@ -298,92 +241,45 @@
 
     const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
 
-    // ⚡ COMPRESSION D'IMAGE AUTOMATIQUE (Réduit la taille et accélère le traitement)
     async function compresserImage(file) {
         if (!file.type.startsWith('image/')) return file;
-        
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = (event) => {
+            reader.onload = (e) => {
                 const img = new Image();
-                img.src = event.target.result;
+                img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const MAX_WIDTH = 1500;
-                    let width = img.width;
-                    let height = img.height;
-
+                    let width = img.width, height = img.height;
                     if (width > MAX_WIDTH) {
                         height *= MAX_WIDTH / width;
                         width = MAX_WIDTH;
                     }
-
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
-                    canvas.toBlob((blob) => {
-                        resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-                    }, 'image/jpeg', 0.80);
+                    canvas.toBlob((b) => resolve(new File([b], file.name, { type: 'image/jpeg' })), 'image/jpeg', 0.80);
                 };
             };
         });
     }
 
-    function mettreAJourEnTete() {
-        const nom = document.getElementById('nomEntreprise').value || "ENTREPRISE BTP";
-        const contact = document.getElementById('contactEntreprise').value || "";
-        const adresse = document.getElementById('adresseEntreprise').value || "";
-        const headerPrint = document.getElementById('headerPrintDevis');
+    function mettreAJourPrint() {
+        const nom = document.getElementById('nomClient').value || "-";
+        const tel = document.getElementById('telClient').value || "-";
+        const ville = document.getElementById('villeClient').value || "";
+        const adresse = document.getElementById('adresseChantier').value || "";
 
-        document.getElementById('printNomEntreprise').textContent = nom;
-        document.getElementById('printContactEntreprise').textContent = contact;
-        document.getElementById('printAdresseEntreprise').textContent = adresse;
-
-        headerPrint.style.display = "flex";
-    }
-
-    function chargerLogo(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById('printLogo');
-                img.src = e.target.result;
-                img.style.display = "block";
-                document.getElementById('headerPrintDevis').style.display = "flex";
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function gererApercuFichier() {
-        const input = document.getElementById('fichierDevis');
-        const previewArea = document.getElementById('previewArea');
-        const previewContent = document.getElementById('previewContent');
-        const btnTelecharger = document.getElementById('btnTelecharger');
-
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const url = URL.createObjectURL(file);
-
-            previewArea.style.display = "block";
-            btnTelecharger.href = url;
-            btnTelecharger.download = file.name;
-
-            if (file.type.startsWith('image/')) {
-                previewContent.innerHTML = `<img src="${url}" alt="Aperçu image">`;
-            } else {
-                previewContent.innerHTML = `<p>📄 <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} Ko)</p>`;
-            }
-        } else {
-            previewArea.style.display = "none";
-        }
+        document.getElementById('printNomClient').textContent = "Nom: " + nom;
+        document.getElementById('printTelClient').textContent = "Tél: " + tel;
+        document.getElementById('printChantier').textContent = "Chantier: " + ville + (adresse ? " (" + adresse + ")" : "");
     }
 
     async function envoyerChiffrage() {
+        const nomClient = document.getElementById('nomClient').value.trim();
         const input = document.getElementById('fichierDevis');
         const texteInput = document.getElementById('texteDescriptif').value;
         const output = document.getElementById('resultatOutput');
@@ -391,25 +287,29 @@
         const badge = document.getElementById('statusBadge');
         const btnPDF = document.getElementById('btnExportPDF');
 
+        if (!nomClient) {
+            alert("Veuillez saisir votre Nom / Raison Sociale.");
+            return;
+        }
+
         let file = input.files ? input.files[0] : null;
 
         if (!file && !texteInput.trim()) {
-            alert("Veuillez importer un fichier OU saisir un texte descriptif.");
+            alert("Veuillez joindre un fichier (plan/scan) OU saisir une description des travaux.");
             return;
         }
 
         btn.disabled = true;
         btnPDF.style.display = "none";
         badge.className = "status-badge status-running";
-        badge.textContent = "Traitement et compression en cours...";
-        output.textContent = "Analyse et lancement du chiffrage DZD...\n\n";
+        badge.textContent = "Traitement du devis en cours...";
+        output.textContent = "Analyse et calcul du chiffrage DZD...\n\n";
 
-        // Compression si c'est une photo
         if (file && file.type.startsWith('image/')) {
             file = await compresserImage(file);
         }
 
-        mettreAJourEnTete();
+        mettreAJourPrint();
 
         const formData = new FormData();
         if (file) formData.append('file', file);
@@ -428,7 +328,7 @@
 
             output.textContent = "";
             badge.className = "status-badge status-running";
-            badge.textContent = "Réception du chiffrage DZD en direct...";
+            badge.textContent = "Génération du devis...";
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
@@ -436,14 +336,12 @@
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                output.textContent += chunk;
+                output.textContent += decoder.decode(value, { stream: true });
                 output.scrollTop = output.scrollHeight;
             }
 
             badge.className = "status-badge status-success";
-            badge.textContent = "Chiffrage Terminé avec Succès";
+            badge.textContent = "Devis prêt avec succès";
             btnPDF.style.display = "inline-block";
 
         } catch (err) {
@@ -458,11 +356,11 @@
 
     function exporterPDF() {
         const element = document.getElementById('zoneDevisPDF');
-        const nomEntreprise = document.getElementById('nomEntreprise').value || "Devis_BTP";
+        const nomClient = document.getElementById('nomClient').value || "Client";
         
         const options = {
             margin:       10,
-            filename:     `Devis_Estimatif_${nomEntreprise.replace(/\s+/g, '_')}.pdf`,
+            filename:     `Devis_Estimatif_${nomClient.replace(/\s+/g, '_')}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2 },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
