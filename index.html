@@ -89,6 +89,32 @@
             box-sizing: border-box;
         }
 
+        /* ⚡ ZONE DE PRÉVISUALISATION INSTANTANÉE */
+        .preview-container {
+            margin-top: 15px;
+            display: none;
+            padding: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #ffffff;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .preview-container iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 6px;
+        }
+
         .btn-submit {
             background-color: var(--accent);
             color: white;
@@ -127,7 +153,6 @@
             white-space: pre-wrap;
         }
 
-        /* Styles de l'en-tête du devis d'export */
         .devis-header-print {
             display: flex;
             justify-content: space-between;
@@ -192,12 +217,19 @@
         <div class="grid-2">
             <div>
                 <label>1. Importer un Plan / Scan / Métré (PDF/Image) :</label>
-                <input type="file" id="fichierDevis" accept=".pdf,image/*">
+                <!-- Event onchange pour l'affichage instantané -->
+                <input type="file" id="fichierDevis" accept=".pdf,image/*" onchange="afficherDocumentInstantane()">
             </div>
             <div>
                 <label>2. Ou Décrire les travaux manuellement :</label>
                 <textarea id="texteDescriptif" placeholder="Ex: Béton armé pour poteaux (12 m3), Maçonnerie brique 15cm (150 m2)..."></textarea>
             </div>
+        </div>
+
+        <!-- ⚡ BLOC D'AFFICHAGE INSTANTANÉ DU DOCUMENT CLIENT -->
+        <div id="previewBox" class="preview-container">
+            <h4 style="margin-top: 0; color: #1e3a8a;">📄 Aperçu du document sélectionné :</h4>
+            <div id="previewContent"></div>
         </div>
 
         <button id="btnLancer" class="btn-submit" onclick="envoyerChiffrage()">Générer l'Estimation du Devis</button>
@@ -240,6 +272,33 @@
     }
 
     const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
+
+    // ⚡ FONCTION D'AFFICHAGE INSTANTANÉ EN LOCAL (0ms)
+    function afficherDocumentInstantane() {
+        const input = document.getElementById('fichierDevis');
+        const previewBox = document.getElementById('previewBox');
+        const previewContent = document.getElementById('previewContent');
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const fileUrl = URL.createObjectURL(file);
+
+            previewBox.style.display = "block";
+
+            if (file.type.startsWith('image/')) {
+                // Affichage direct de l'image / photo / scan
+                previewContent.innerHTML = `<img src="${fileUrl}" alt="Aperçu document client">`;
+            } else if (file.type === 'application/pdf') {
+                // Affichage de la visionneuse PDF intégrée
+                previewContent.innerHTML = `<iframe src="${fileUrl}"></iframe>`;
+            } else {
+                previewContent.innerHTML = `<p>📄 Document chargé : <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} Ko)</p>`;
+            }
+        } else {
+            previewBox.style.display = "none";
+            previewContent.innerHTML = "";
+        }
+    }
 
     async function compresserImage(file) {
         if (!file.type.startsWith('image/')) return file;
