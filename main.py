@@ -24,7 +24,6 @@ def get_api_keys_pool():
     return keys
 
 MODELS_PRIORITY = [
-    'gemini-3.6-flash',
     'gemini-1.5-flash',
     'gemini-1.5-pro'
 ]
@@ -52,23 +51,18 @@ async def chiffrer_devis(
 
         prompt_base = (
             "Tu es un expert métreur et chiffreur BTP en Algérie.\n"
-            "INSTRUCTION CRITIQUE ET SANS EXCEPTION :\n"
-            "Analyse le document/texte et extrait ABSOLUMENT TOUS les articles détectés sans exception, un par un.\n"
-            "Si le document comporte 83 articles, tu dois obligatoirement générer les 83 lignes dans le tableau, du N°1 jusqu'au N°83.\n"
-            "Interdiction absolue de résumer, de regrouper ou de sauter des articles.\n\n"
-            "Format de réponse (HTML pure) :\n"
-            "<p><strong>Devis Quantitatif et Estimatif (DQE) Détaillé</strong></p>\n"
-            "<table class='devis-table'>\n"
-            "<thead><tr><th>N°</th><th>Désignation des Travaux</th><th>Unité</th><th>Qté</th><th>P.U (DZD)</th><th>Montant HT (DZD)</th></tr></thead>\n"
-            "<tbody>\n"
-            "<!-- Génère chaque ligne une par une sans t'arrêter -->\n"
-            "</tbody>\n"
-            "</table>\n"
-            "<div style='margin-top:20px; font-size:1.1em;'>\n"
-            "<p><strong>Total Général HT :</strong> [Montant] DZD</p>\n"
-            "<p><strong>TVA (19%) :</strong> [Montant] DZD</p>\n"
-            "<p><strong>Total Général TTC :</strong> [Montant] DZD</p>\n"
-            "</div>"
+            "Analyse le document fourni et extrait l'INTÉGRALITÉ des articles (du 1er au tout dernier, ex: 83 articles) sans exception.\n\n"
+            "FORMAT DE RÉPONSE STRICT (JSON UNIQUEMENT, SANS BALISES HTML NI BLOCKS MARKDOWN) :\n"
+            "Renvoie un tableau JSON contenant chaque article sous cette structure exacte :\n"
+            "[\n"
+            "  {\"n\": 1, \"d\": \"Désignation concise du poste\", \"u\": \"m3\", \"q\": 12.5, \"pu\": 15000},\n"
+            "  {\"n\": 2, \"d\": \"Désignation poste 2\", \"u\": \"m2\", \"q\": 120, \"pu\": 1800}\n"
+            "]\n\n"
+            "CONSIGNES :\n"
+            "- Traite TOUS les articles du document sans omission.\n"
+            "- Sois concis et précis dans la désignation 'd'.\n"
+            "- Estime un Prix Unitaire 'pu' réaliste en DZD pour le marché algérien si non spécifié.\n"
+            "- Ne renvoie AUCUN autre texte ou explication, uniquement le tableau JSON."
         )
 
         contents_list = [prompt_base]
@@ -108,10 +102,9 @@ async def chiffrer_devis(
                         for chunk in response:
                             if hasattr(chunk, 'text') and chunk.text:
                                 text = chunk.text
-                                text = text.replace("```html", "").replace("```", "")
                                 yield text
 
-                    return StreamingResponse(generate_stream(), media_type="text/html; charset=utf-8")
+                    return StreamingResponse(generate_stream(), media_type="application/json; charset=utf-8")
 
                 except Exception as inner_e:
                     err_msg = str(inner_e).lower()

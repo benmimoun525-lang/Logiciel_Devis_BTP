@@ -92,7 +92,6 @@
             box-sizing: border-box;
         }
 
-        /* Cadre d'aperçu du document importé */
         .preview-container {
             margin-top: 15px;
             display: none;
@@ -108,14 +107,12 @@
             border-radius: 6px;
             display: block;
             margin: 0 auto;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .preview-container iframe {
             width: 100%;
             height: 400px;
             border: none;
-            border-radius: 6px;
         }
 
         .btn-submit {
@@ -156,12 +153,11 @@
             overflow-x: auto;
         }
 
-        /* Style des tableaux DQE */
         .devis-table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
         }
 
         .devis-table th {
@@ -181,7 +177,24 @@
             background-color: #f8fafc;
         }
 
-        /* Style d'en-tête pour le document d'export PDF */
+        .devis-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            border-left: 4px solid #1e3a8a;
+        }
+
+        .devis-summary table {
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+        }
+
+        .devis-summary td {
+            padding: 5px 10px;
+        }
+
         .devis-header-print {
             display: flex;
             justify-content: space-between;
@@ -254,7 +267,6 @@
             </div>
         </div>
 
-        <!-- Zone d'aperçu instantané -->
         <div id="previewBox" class="preview-container">
             <h4 style="margin-top: 0; color: #1e3a8a;">📄 Aperçu du document sélectionné :</h4>
             <div id="previewContent"></div>
@@ -272,9 +284,7 @@
             <button id="btnExportPDF" class="btn-pdf" onclick="exporterPDF()">📄 Télécharger le Devis en PDF</button>
         </div>
 
-        <!-- ZONE DU DEVIS IMPRIMABLE ET EXPORTABLE EN PDF -->
         <div id="zoneDevisPDF" style="background: white; padding: 15px;">
-            
             <div class="devis-header-print" id="headerPrintDevis">
                 <div class="box-info">
                     <h3>ENTREPRISE BTP & SERVICE</h3>
@@ -301,7 +311,6 @@
 
     const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
 
-    // Affichage instantané du document client en local (0 ms)
     function afficherDocumentInstantane() {
         const input = document.getElementById('fichierDevis');
         const previewBox = document.getElementById('previewBox');
@@ -326,7 +335,6 @@
         }
     }
 
-    // Compression d'image avant upload pour un transfert très rapide
     async function compresserImage(file) {
         if (!file.type.startsWith('image/')) return file;
         return new Promise((resolve) => {
@@ -353,7 +361,6 @@
         });
     }
 
-    // Mise à jour synchrone de l'en-tête d'impression
     function mettreAJourPrint() {
         const nom = document.getElementById('nomClient').value || "-";
         const tel = document.getElementById('telClient').value || "-";
@@ -365,7 +372,10 @@
         document.getElementById('printChantier').textContent = "Chantier: " + ville + (adresse ? " (" + adresse + ")" : "");
     }
 
-    // Envoi de la demande et gestion sécurisée de l'affichage du tableau
+    function formaterNombre(num) {
+        return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+    }
+
     async function envoyerChiffrage() {
         const nomClient = document.getElementById('nomClient').value.trim();
         const input = document.getElementById('fichierDevis');
@@ -390,8 +400,8 @@
         btn.disabled = true;
         btnPDF.style.display = "none";
         badge.className = "status-badge status-running";
-        badge.textContent = "Analyse et chiffrage en cours...";
-        output.textContent = "Analyse et calcul de vos articles DZD en cours...";
+        badge.textContent = "Extraction et calcul DQE en cours...";
+        output.textContent = "Analyse et calcul de l'ensemble de vos articles DZD...";
 
         if (file && file.type.startsWith('image/')) {
             file = await compresserImage(file);
@@ -424,16 +434,94 @@
                 rawResult += decoder.decode(value, { stream: true });
             }
 
-            // Nettoyage des balises Markdown pour assurer le rendu d'un tableau HTML valide
-            let cleanHtml = rawResult
-                .replace(/```html/gi, '')
+            // Nettoyage de la chaîne JSON
+            let cleanJson = rawResult
+                .replace(/```json/gi, '')
                 .replace(/```/g, '')
                 .trim();
 
-            output.innerHTML = cleanHtml;
+            let articles = [];
+            try {
+                articles = JSON.parse(cleanJson);
+            } catch (jsonErr) {
+                // Secours en cas de JSON tronqué
+                const lastBracket = cleanJson.lastIndexOf('}');
+                if (lastBracket !== -1) {
+                    const fixedJson = cleanJson.substring(0, lastBracket + 1) + ']';
+                    articles = JSON.parse(fixedJson);
+                } else {
+                    throw new Error("Erreur de formatage du document. Veuillez réessayer.");
+                }
+            }
+
+            // Construction du Tableau HTML et Calcul des Montants Financiers
+            let totalHT = 0;
+            let htmlTable = `
+                <p><strong>Devis Quantitatif et Estimatif (DQE) - ${articles.length} Article(s) Détecté(s)</strong></p>
+                <table class="devis-table">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Désignation des Travaux</th>
+                            <th>Unité</th>
+                            <th>Qté</th>
+                            <th>P.U (DZD)</th>
+                            <th>Montant HT (DZD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            articles.forEach((art, idx) => {
+                const num = art.n || (idx + 1);
+                const des = art.d || "Article sans désignation";
+                const uni = art.u || "U";
+                const qte = parseFloat(art.q) || 1;
+                const pu = parseFloat(art.pu) || 0;
+                const montantLine = qte * pu;
+                totalHT += montantLine;
+
+                htmlTable += `
+                    <tr>
+                        <td style="text-align:center;">${num}</td>
+                        <td>${des}</td>
+                        <td style="text-align:center;">${uni}</td>
+                        <td style="text-align:right;">${formaterNombre(qte)}</td>
+                        <td style="text-align:right;">${formaterNombre(pu)}</td>
+                        <td style="text-align:right; font-weight:bold;">${formaterNombre(montantLine)}</td>
+                    </tr>
+                `;
+            });
+
+            const tva = totalHT * 0.19;
+            const totalTTC = totalHT + tva;
+
+            htmlTable += `
+                    </tbody>
+                </table>
+                
+                <div class="devis-summary">
+                    <table>
+                        <tr>
+                            <td><strong>Total Général HT :</strong></td>
+                            <td style="text-align:right; font-size:1.05em;"><strong>${formaterNombre(totalHT)} DZD</strong></td>
+                        </tr>
+                        <tr>
+                            <td>TVA (19%) :</td>
+                            <td style="text-align:right;">${formaterNombre(tva)} DZD</td>
+                        </tr>
+                        <tr style="border-top:2px solid #1e3a8a; font-size:1.15em; color:#1e3a8a;">
+                            <td><strong>Total Général TTC :</strong></td>
+                            <td style="text-align:right;"><strong>${formaterNombre(totalTTC)} DZD</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            output.innerHTML = htmlTable;
 
             badge.className = "status-badge status-success";
-            badge.textContent = "Tableau DQE généré avec succès";
+            badge.textContent = `Devis généré : ${articles.length} articles traités`;
             btnPDF.style.display = "inline-block";
 
         } catch (err) {
@@ -442,7 +530,7 @@
             badge.textContent = "Erreur de traitement";
             
             if (err.message.includes("Failed to fetch")) {
-                output.innerHTML = "❌ Connexion au serveur impossible.<br>Le serveur est peut-être en train de redémarrer. Patientez 30 secondes et réessayez.";
+                output.innerHTML = "❌ Connexion au serveur impossible.<br>Le serveur est en cours de redémarrage. Patientez 30 secondes et réessayez.";
             } else {
                 output.innerHTML = "❌ " + err.message;
             }
@@ -451,7 +539,6 @@
         }
     }
 
-    // Exportation au format PDF imprimable
     function exporterPDF() {
         const element = document.getElementById('zoneDevisPDF');
         const nomClient = document.getElementById('nomClient').value || "Client";
