@@ -42,6 +42,7 @@
         }
 
         .header-app h1 { margin: 0 0 10px 0; font-size: 1.8rem; }
+        .header-app p { margin: 0; opacity: 0.9; }
 
         .card {
             background: var(--card-bg);
@@ -50,6 +51,8 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
+
+        .card h3 { margin-top: 0; color: var(--primary); }
 
         .grid-2 {
             display: grid;
@@ -89,6 +92,7 @@
             box-sizing: border-box;
         }
 
+        /* Cadre d'aperçu du document importé */
         .preview-container {
             margin-top: 15px;
             display: none;
@@ -104,12 +108,14 @@
             border-radius: 6px;
             display: block;
             margin: 0 auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .preview-container iframe {
             width: 100%;
             height: 400px;
             border: none;
+            border-radius: 6px;
         }
 
         .btn-submit {
@@ -150,7 +156,7 @@
             overflow-x: auto;
         }
 
-        /* 🎨 STYLES SPÉCIFIQUES TABLEAU DEVIS BTP */
+        /* Style des tableaux DQE */
         .devis-table {
             width: 100%;
             border-collapse: collapse;
@@ -175,6 +181,7 @@
             background-color: #f8fafc;
         }
 
+        /* Style d'en-tête pour le document d'export PDF */
         .devis-header-print {
             display: flex;
             justify-content: space-between;
@@ -208,7 +215,7 @@
         <p>Remplissez vos coordonnées et fournissez votre métré ou scan pour obtenir votre devis estimatif.</p>
     </div>
 
-    <!-- FORMULAIRE CLIENT -->
+    <!-- FORMULAIRE CLIENT / MAÎTRE D'OUVRAGE -->
     <div class="card">
         <h3>👤 Coordonnées du Client / Maître d'Ouvrage</h3>
         <div class="grid-2">
@@ -233,7 +240,7 @@
         </div>
     </div>
 
-    <!-- PIÈCE JOINTE ET DESCRIPTION -->
+    <!-- DESCRIPTION DES TRAVAUX / PIÈCE JOINTE -->
     <div class="card">
         <h3>📋 Description du Projet / Travaux</h3>
         <div class="grid-2">
@@ -247,6 +254,7 @@
             </div>
         </div>
 
+        <!-- Zone d'aperçu instantané -->
         <div id="previewBox" class="preview-container">
             <h4 style="margin-top: 0; color: #1e3a8a;">📄 Aperçu du document sélectionné :</h4>
             <div id="previewContent"></div>
@@ -264,7 +272,9 @@
             <button id="btnExportPDF" class="btn-pdf" onclick="exporterPDF()">📄 Télécharger le Devis en PDF</button>
         </div>
 
+        <!-- ZONE DU DEVIS IMPRIMABLE ET EXPORTABLE EN PDF -->
         <div id="zoneDevisPDF" style="background: white; padding: 15px;">
+            
             <div class="devis-header-print" id="headerPrintDevis">
                 <div class="box-info">
                     <h3>ENTREPRISE BTP & SERVICE</h3>
@@ -279,8 +289,7 @@
                 </div>
             </div>
 
-            <!-- ZONE D'AFFICHAGE DU TABLEAU DQE -->
-            <div id="resultatOutput" class="output-box">Le devis détaillé sous forme de tableau apparaîtra ici...</div>
+            <div id="resultatOutput" class="output-box">Le devis détaillé sous forme de tableau DQE apparaîtra ici...</div>
         </div>
     </div>
 </div>
@@ -292,6 +301,7 @@
 
     const RENDER_URL = "https://logiciel-devis-btp.onrender.com/chiffrer-devis";
 
+    // Affichage instantané du document client en local (0 ms)
     function afficherDocumentInstantane() {
         const input = document.getElementById('fichierDevis');
         const previewBox = document.getElementById('previewBox');
@@ -316,6 +326,7 @@
         }
     }
 
+    // Compression d'image avant upload pour un transfert très rapide
     async function compresserImage(file) {
         if (!file.type.startsWith('image/')) return file;
         return new Promise((resolve) => {
@@ -342,6 +353,7 @@
         });
     }
 
+    // Mise à jour synchrone de l'en-tête d'impression
     function mettreAJourPrint() {
         const nom = document.getElementById('nomClient').value || "-";
         const tel = document.getElementById('telClient').value || "-";
@@ -353,6 +365,7 @@
         document.getElementById('printChantier').textContent = "Chantier: " + ville + (adresse ? " (" + adresse + ")" : "");
     }
 
+    // Envoi de la demande et gestion sécurisée de l'affichage du tableau
     async function envoyerChiffrage() {
         const nomClient = document.getElementById('nomClient').value.trim();
         const input = document.getElementById('fichierDevis');
@@ -363,7 +376,7 @@
         const btnPDF = document.getElementById('btnExportPDF');
 
         if (!nomClient) {
-            alert("Veuillez saisir votre Nom / Raison Sociale.");
+            alert("Veuillez saisir le Nom / Raison Sociale du Client.");
             return;
         }
 
@@ -377,8 +390,8 @@
         btn.disabled = true;
         btnPDF.style.display = "none";
         badge.className = "status-badge status-running";
-        badge.textContent = "Traitement et calcul DQE en cours...";
-        output.innerHTML = "Analyse et génération du tableau DQE...\n\n";
+        badge.textContent = "Analyse et chiffrage en cours...";
+        output.textContent = "Analyse et calcul de vos articles DZD en cours...";
 
         if (file && file.type.startsWith('image/')) {
             file = await compresserImage(file);
@@ -401,21 +414,23 @@
                 throw new Error(`Erreur ${response.status} : ${errText}`);
             }
 
-            output.innerHTML = "";
-            badge.className = "status-badge status-running";
-            badge.textContent = "Génération du tableau...";
-
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
-            let buffer = "";
+            let rawResult = "";
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                output.innerHTML = buffer;
-                output.scrollTop = output.scrollHeight;
+                rawResult += decoder.decode(value, { stream: true });
             }
+
+            // Nettoyage des balises Markdown pour assurer le rendu d'un tableau HTML valide
+            let cleanHtml = rawResult
+                .replace(/```html/gi, '')
+                .replace(/```/g, '')
+                .trim();
+
+            output.innerHTML = cleanHtml;
 
             badge.className = "status-badge status-success";
             badge.textContent = "Tableau DQE généré avec succès";
@@ -425,12 +440,18 @@
             console.error(err);
             badge.className = "status-badge status-error";
             badge.textContent = "Erreur de traitement";
-            output.innerHTML = "❌ " + err.message;
+            
+            if (err.message.includes("Failed to fetch")) {
+                output.innerHTML = "❌ Connexion au serveur impossible.<br>Le serveur est peut-être en train de redémarrer. Patientez 30 secondes et réessayez.";
+            } else {
+                output.innerHTML = "❌ " + err.message;
+            }
         } finally {
             btn.disabled = false;
         }
     }
 
+    // Exportation au format PDF imprimable
     function exporterPDF() {
         const element = document.getElementById('zoneDevisPDF');
         const nomClient = document.getElementById('nomClient').value || "Client";
