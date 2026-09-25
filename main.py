@@ -19,8 +19,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Variable globale pour la rotation circulaire des clés
+current_key_index = 0
+
 def get_api_keys_pool():
     keys = []
+    # Recherche dynamique de toutes les clés configurées
     for key, value in os.environ.items():
         if key.startswith("GEMINI_KEY_") or key == "GEMINI_API_KEY":
             if value and value.strip():
@@ -37,7 +41,7 @@ def read_root():
     keys_count = len(get_api_keys_pool())
     return {
         "status": "ok", 
-        "message": f"Serveur BTP Chiffrage opérationnel avec un pool de {keys_count} clé(s) API."
+        "message": f"Serveur BTP Chiffrage opérationnel avec un pool de {keys_count} clé(s) API réelles."
     }
 
 @app.post("/chiffrer-page")
@@ -47,12 +51,13 @@ async def chiffrer_page(
     page_num: int = Form(1),
     start_index: int = Form(1)
 ):
+    global current_key_index
     try:
         keys_pool = get_api_keys_pool()
         if not keys_pool:
             raise HTTPException(
                 status_code=500, 
-                detail="Aucune clé API disponible. Veuillez configurer GEMINI_KEY_1 dans Render."
+                detail="Aucune clé API disponible dans Render. Veuillez configurer GEMINI_KEY_1 à GEMINI_KEY_4."
             )
 
         prompt_base = (
@@ -83,14 +88,18 @@ async def chiffrer_page(
                     "data": file_bytes
                 })
 
-        # Forcer la génération JSON native
         generation_config = genai.GenerationConfig(
             max_output_tokens=4096,
             temperature=0.0,
             response_mime_type="application/json"
         )
 
-        for api_key in keys_pool:
+        # Essayer toutes les clés à partir de l'index de rotation actuel
+        total_keys = len(keys_pool)
+        for attempt in range(total_keys):
+            selected_key_idx = (current_key_index + attempt) % total_keys
+            api_key = keys_pool[selected_key_idx]
+
             genai.configure(api_key=api_key)
 
             for model_name in MODELS_PRIORITY:
@@ -104,20 +113,23 @@ async def chiffrer_page(
                     raw_text = response.text or "[]"
                     clean_json = raw_text.replace("```json", "").replace("```", "").strip()
 
+                    # Avancer l'index pour que la prochaine page utilise la clé suivante
+                    current_key_index = (selected_key_idx + 1) % total_keys
+
                     return JSONResponse(content={"page": page_num, "raw_json": clean_json})
 
                 except Exception as inner_e:
                     err_msg = str(inner_e).lower()
-                    print(f"Échec Modèle {model_name} : {err_msg}")
+                    print(f"Échec Clé N°{selected_key_idx + 1} ({model_name}) : {err_msg}")
                     if "429" in err_msg or "quota" in err_msg:
-                        time.sleep(2)
+                        time.sleep(1)
                         continue
                     else:
                         break
 
         raise HTTPException(
             status_code=429, 
-            detail="Canaux occupés ou quotas atteints. Réessai en cours..."
+            detail="Toutes les clés du pool sont actuellement sollicitées. Veuillez réessayer dans quelques secondes."
         )
 
     except Exception as e:
