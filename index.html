@@ -92,7 +92,6 @@
             box-sizing: border-box;
         }
 
-        /* AFFICHAGE DES PAGES EN VERTICAL (L'UNE SOUS L'AUTRE) */
         .pages-vertical-list {
             display: flex;
             flex-direction: column;
@@ -245,7 +244,6 @@
         <p>Importez chaque page de votre devis vierge. L'application traite et réunit l'ensemble des pages.</p>
     </div>
 
-    <!-- FORMULAIRE CLIENT -->
     <div class="card">
         <h3>👤 Coordonnées du Client / Maître d'Ouvrage</h3>
         <div class="grid-2">
@@ -270,7 +268,6 @@
         </div>
     </div>
 
-    <!-- SELECTION DEVIS VIERGE PAGE PAR PAGE -->
     <div class="card">
         <h3>📋 Devis Vierge (Importation Page par Page)</h3>
         <div>
@@ -278,7 +275,6 @@
             <input type="file" id="fichiersDevis" accept=".pdf,image/*" multiple onchange="afficherApercuPagesVerticales()">
         </div>
 
-        <!-- SIGNAL DU NOMBRE DE PAGES ET AFFICHAGE SOUS FORME DE LISTE VERTICALE -->
         <div id="compteurPages" style="margin-top: 12px; font-weight: bold; color: #1e3a8a;">
             📄 Aucune page sélectionnée
         </div>
@@ -293,7 +289,6 @@
         <button id="btnLancer" class="btn-submit" onclick="envoyerChiffrageMultiPages()">Lancer le Chiffrage des Pages Réunies</button>
     </div>
 
-    <!-- RÉSULTAT -->
     <div class="card">
         <div id="statusBadge" class="status-badge status-waiting">En attente des pages vierges</div>
         
@@ -331,7 +326,7 @@
     }
 
     const RENDER_BASE = "https://logiciel-devis-btp.onrender.com";
-    let articlesGlobauxSession = []; // Stocke la liste complète de tous les articles extraits
+    let articlesGlobauxSession = [];
 
     function afficherApercuPagesVerticales() {
         const input = document.getElementById('fichiersDevis');
@@ -433,29 +428,45 @@
                 formData.append('page_num', i + 1);
                 formData.append('start_index', currentIndex);
 
-                const response = await fetch(`${RENDER_BASE}/chiffrer-page`, {
-                    method: 'POST',
-                    body: formData
-                });
+                let success = false;
+                let retries = 0;
+                let maxRetries = 3;
 
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`Erreur lors du traitement de la Page ${i + 1} : ${errText}`);
-                }
+                while (!success && retries < maxRetries) {
+                    try {
+                        const response = await fetch(`${RENDER_BASE}/chiffrer-page`, {
+                            method: 'POST',
+                            body: formData
+                        });
 
-                const data = await response.json();
-                let cleanJson = data.raw_json.replace(/```json/gi, '').replace(/```/g, '').trim();
+                        if (response.status === 429) {
+                            retries++;
+                            badge.textContent = `Page ${i + 1}/${totalPages} : Serveur occupé, réessai dans 3s (Tentative ${retries}/${maxRetries})...`;
+                            await new Promise(res => setTimeout(res, 3000));
+                            continue;
+                        }
 
-                try {
-                    const pageArticles = JSON.parse(cleanJson);
-                    articlesGlobauxSession = articlesGlobauxSession.concat(pageArticles);
-                    currentIndex += pageArticles.length;
-                } catch (e) {
-                    console.warn(`Lecture partielle Page ${i + 1}`, e);
+                        if (!response.ok) {
+                            const errText = await response.text();
+                            throw new Error(`Erreur lors du traitement de la Page ${i + 1} : ${errText}`);
+                        }
+
+                        const data = await response.json();
+                        let cleanJson = data.raw_json.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+                        const pageArticles = JSON.parse(cleanJson);
+                        articlesGlobauxSession = articlesGlobauxSession.concat(pageArticles);
+                        currentIndex += pageArticles.length;
+                        success = true;
+
+                    } catch (errLoop) {
+                        if (retries >= maxRetries) throw errLoop;
+                        retries++;
+                        await new Promise(res => setTimeout(res, 3000));
+                    }
                 }
             }
 
-            // Génération du tableau global assemblé
             let totalHT = 0;
             let htmlTable = `
                 <p><strong>Devis Quantitatif et Estimatif (DQE) Réuni - Total : ${articlesGlobauxSession.length} Article(s) sur ${totalPages} Page(s)</strong></p>
@@ -536,7 +547,6 @@
         }
     }
 
-    // TELECHARGEMENT FICHIER EXCEL REUNI
     async function exporterExcel() {
         const nomClient = document.getElementById('nomClient').value || "Client";
         const telClient = document.getElementById('telClient').value || "-";
