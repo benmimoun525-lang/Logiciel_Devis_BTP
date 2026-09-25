@@ -454,7 +454,29 @@
                         const data = await response.json();
                         let cleanJson = data.raw_json.replace(/```json/gi, '').replace(/```/g, '').trim();
 
-                        const pageArticles = JSON.parse(cleanJson);
+                        // Extraction sécurisée du tableau JSON
+                        const startIdx = cleanJson.indexOf('[');
+                        const endIdx = cleanJson.lastIndexOf(']');
+                        
+                        if (startIdx !== -1 && endIdx !== -1) {
+                            cleanJson = cleanJson.substring(startIdx, endIdx + 1);
+                        }
+
+                        let pageArticles = [];
+                        try {
+                            pageArticles = JSON.parse(cleanJson);
+                        } catch (pErr) {
+                            console.warn(`Tentative de réparation JSON Page ${i + 1}...`);
+                            // Tentative d'auto-réparation en refermant le crochet
+                            const lastObject = cleanJson.lastIndexOf('}');
+                            if (lastObject !== -1) {
+                                const repairedJson = cleanJson.substring(0, lastObject + 1) + ']';
+                                pageArticles = JSON.parse(repairedJson);
+                            } else {
+                                throw pErr;
+                            }
+                        }
+
                         articlesGlobauxSession = articlesGlobauxSession.concat(pageArticles);
                         currentIndex += pageArticles.length;
                         success = true;

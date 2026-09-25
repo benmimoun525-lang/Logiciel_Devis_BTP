@@ -66,7 +66,7 @@ async def chiffrer_page(
             "CONSIGNES :\n"
             "- Ne fusionne aucun poste sur cette page.\n"
             "- Estime un Prix Unitaire 'pu' réaliste en DZD pour le marché algérien si non spécifié.\n"
-            "- Ne renvoie AUCUN autre texte, uniquement le tableau JSON."
+            "- Ne renvoie AUCUN autre texte, uniquement le tableau JSON pur."
         )
 
         contents_list = [prompt_base]
@@ -100,4 +100,128 @@ async def chiffrer_page(
                     response = model.generate_content(contents_list)
 
                     raw_text = response.text or "[]"
-                    clean_json = raw_text.replace("```json", "").replace("
+                    # Nettoyage strict côté serveur
+                    clean_json = raw_text.replace("```json", "").replace("```", "").strip()
+
+                    return JSONResponse(content={"page": page_num, "raw_json": clean_json})
+
+                except Exception as inner_e:
+                    err_msg = str(inner_e).lower()
+                    print(f"Échec Modèle {model_name} : {err_msg}")
+                    if "429" in err_msg or "quota" in err_msg:
+                        time.sleep(2)
+                        continue
+                    else:
+                        break
+
+        raise HTTPException(
+            status_code=429, 
+            detail="Canaux occupés. Veuillez retenter dans quelques secondes."
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/exporter-excel")
+async def exporter_excel(payload: dict = Body(...)):
+    try:
+        nom_client = payload.get("nom_client", "Client")
+        tel_client = payload.get("tel_client", "-")
+        chantier = payload.get("chantier", "-")
+        articles = payload.get("articles", [])
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "DQE Estimatif"
+
+        header_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+        bold_font = Font(name="Calibri", size=11, bold=True)
+        thin_border = Border(
+            left=Side(style='thin', color='CBD5E1'),
+            right=Side(style='thin', color='CBD5E1'),
+            top=Side(style='thin', color='CBD5E1'),
+            bottom=Side(style='thin', color='CBD5E1')
+        )
+
+        ws['A1'] = "DEVIS QUANTITATIF ET ESTIMATIF (DQE)"
+        ws['A1'].font = Font(name="Calibri", size=16, bold=True, color="1E3A8A")
+        
+        ws['A3'] = f"Client : {nom_client}"
+        ws['A4'] = f"Téléphone : {tel_client}"
+        ws['A5'] = f"Chantier : {chantier}"
+
+        headers = ["N°", "Désignation des Travaux", "Unité", "Quantité", "P.U (DZD)", "Montant HT (DZD)"]
+        ws.append([])
+        ws.append(headers)
+        
+        for col_num in range(1, 7):
+            cell = ws.cell(row=7, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        start_row = 8
+        total_ht = 0
+
+        for idx, art in enumerate(articles):
+            row_idx = start_row + idx
+            num = art.get("n", idx + 1)
+            des = art.get("d", "Article")
+            uni = art.get("u", "U")
+            qte = float(art.get("q", 1))
+            pu = float(art.get("pu", 0))
+            montant = qte * pu
+            total_ht += montant
+
+            ws.append([num, des, uni, qte, pu, montant])
+
+            ws.cell(row=row_idx, column=1).alignment = Alignment(horizontal="center")
+            ws.cell(row=row_idx, column=3).alignment = Alignment(horizontal="center")
+            ws.cell(row=row_idx, column=4).number_format = '#,##0.00'
+            ws.cell(row=row_idx, column=5).number_format = '#,##0.00'
+            ws.cell(row=row_idx, column=6).number_format = '#,##0.00'
+
+            for c in range(1, 7):
+                ws.cell(row=row_idx, column=c).border = thin_border
+
+        last_row = start_row + len(articles)
+        tva = total_ht * 0.19
+        total_ttc = total_ht + tva
+
+        ws.cell(row=last_row + 1, column=5, value="Total Général HT :").font = bold_font
+        ws.cell(row=last_row + 1, column=6, value=total_ht).font = bold_font
+        ws.cell(row=last_row + 1, column=6).number_format = '#,##0.00 DZD'
+
+        ws.cell(row=last_row + 2, column=5, value="TVA (19%) :")
+        ws.cell(row=last_row + 2, column=6, value=tva)
+        ws.cell(row=last_row + 2, column=6).number_format = '#,##0.00 DZD'
+
+        ws.cell(row=last_row + 3, column=5, value="Total Général TTC :").font = Font(name="Calibri", size=12, bold=True, color="1E3A8A")
+        ws.cell(row=last_row + 3, column=6, value=total_ttc).font = Font(name="Calibri", size=12, bold=True, color="1E3A8A")
+        ws.cell(row=last_row + 3, column=6).number_format = '#,##0.00 DZD'
+
+        ws.column_dimensions['A'].width = 8
+        ws.column_dimensions['B'].width = 50
+        ws.column_dimensions['C'].width = 10
+        ws.column_dimensions['D'].width = 15
+        ws.column_dimensions['E'].width = 18
+        ws.column_dimensions['F'].width = 22
+
+        output_stream = io.BytesIO()
+        wb.save(output_stream)
+        output_stream.seek(0)
+
+        filename = f"Devis_DQE_{nom_client.replace(' ', '_')}.xlsx"
+        headers_resp = {
+            'Content-Disposition': f'attachment; filename="{filename}"'
+        }
+
+        return StreamingResponse(
+            output_stream,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers=headers_resp
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
