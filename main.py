@@ -59,14 +59,14 @@ async def chiffrer_page(
             f"Tu es un expert métreur et chiffreur BTP en Algérie.\n"
             f"Analyse CETTE PAGE de document (Page {page_num}) et extrait TOUS les articles présents sur cette page sans en omettre aucun.\n"
             f"Commence la numérotation des articles à partir du N° {start_index}.\n\n"
-            "FORMAT DE RÉPONSE STRICT (JSON UNIQUEMENT, SANS BALISES HTML NI BLOCKS MARKDOWN) :\n"
+            "FORMAT DE RÉPONSE STRICT (JSON UNIQUEMENT) :\n"
             "[\n"
             f"  {{\"n\": {start_index}, \"d\": \"Désignation précise de l'article\", \"u\": \"m3\", \"q\": 10, \"pu\": 12000}}\n"
             "]\n\n"
             "CONSIGNES :\n"
             "- Ne fusionne aucun poste sur cette page.\n"
             "- Estime un Prix Unitaire 'pu' réaliste en DZD pour le marché algérien si non spécifié.\n"
-            "- Ne renvoie AUCUN autre texte, uniquement le tableau JSON pur."
+            "- Renvoie UNIQUEMENT le tableau JSON sans aucun texte additionnel."
         )
 
         contents_list = [prompt_base]
@@ -83,9 +83,11 @@ async def chiffrer_page(
                     "data": file_bytes
                 })
 
+        # Forcer la génération JSON native
         generation_config = genai.GenerationConfig(
             max_output_tokens=4096,
-            temperature=0.0
+            temperature=0.0,
+            response_mime_type="application/json"
         )
 
         for api_key in keys_pool:
@@ -100,7 +102,6 @@ async def chiffrer_page(
                     response = model.generate_content(contents_list)
 
                     raw_text = response.text or "[]"
-                    # Nettoyage strict côté serveur
                     clean_json = raw_text.replace("```json", "").replace("```", "").strip()
 
                     return JSONResponse(content={"page": page_num, "raw_json": clean_json})
@@ -116,7 +117,7 @@ async def chiffrer_page(
 
         raise HTTPException(
             status_code=429, 
-            detail="Canaux occupés. Veuillez retenter dans quelques secondes."
+            detail="Canaux occupés ou quotas atteints. Réessai en cours..."
         )
 
     except Exception as e:
