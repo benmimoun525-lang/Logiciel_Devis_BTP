@@ -2,6 +2,7 @@ import os
 import io
 import time
 import json
+import random
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body
@@ -32,8 +33,8 @@ def get_api_keys_pool():
     return keys
 
 MODELS_PRIORITY = [
-    'gemini-1.5-flash',
-    'gemini-1.5-pro'
+    'gemini-1.5-flash'
+    # 'gemini-1.5-pro' # Commenté pour éviter la limite stricte de 2 requêtes/min
 ]
 
 @app.get("/")
@@ -57,12 +58,12 @@ async def chiffrer_page(
         if not keys_pool:
             raise HTTPException(
                 status_code=500, 
-                detail="Aucune clé API disponible dans Render. Veuillez configurer GEMINI_KEY_1 à GEMINI_KEY_4."
+                detail="Aucune clé API disponible. Veuillez configurer le pool de clés dans le fichier .env ou sur Render."
             )
 
         prompt_base = (
             f"Tu es un expert métreur et chiffreur BTP en Algérie.\n"
-            f"Analyse CETTE PAGE de document (Page {page_num}) et extrait TOUS les articles présents sur cette page sans en omettre aucun.\n"
+            f"Analyse CETTE PAGE de document (Page {page_num}) et extrait TOUS les articles présents sans en omettre aucun.\n"
             f"Commence la numérotation des articles à partir du N° {start_index}.\n\n"
             "FORMAT DE RÉPONSE STRICT (JSON UNIQUEMENT) :\n"
             "[\n"
@@ -80,11 +81,16 @@ async def chiffrer_page(
             contents_list.append(f"\n--- DESCRIPTIF DE LA PAGE {page_num} ---\n{texte_descriptif.strip()}")
 
         if file:
+            allowed_types = ["image/jpeg", "image/png", "image/webp", "application/pdf"]
+            if file.content_type not in allowed_types:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Format de fichier non supporté. Utilisez une image (JPEG, PNG, WEBP) ou un PDF."
+                )
             file_bytes = await file.read()
             if file_bytes:
-                content_type = file.content_type or "image/jpeg"
                 contents_list.append({
-                    "mime_type": content_type,
+                    "mime_type": file.content_type,
                     "data": file_bytes
                 })
 
@@ -94,8 +100,9 @@ async def chiffrer_page(
             response_mime_type="application/json"
         )
 
-        # Essayer toutes les clés à partir de l'index de rotation actuel
         total_keys = len(keys_pool)
+        last_error_message = "Erreur inconnue"
+
         for attempt in range(total_keys):
             selected_key_idx = (current_key_index + attempt) % total_keys
             api_key = keys_pool[selected_key_idx]
@@ -103,35 +110,50 @@ async def chiffrer_page(
             genai.configure(api_key=api_key)
 
             for model_name in MODELS_PRIORITY:
-                try:
-                    model = genai.GenerativeModel(
-                        model_name=model_name,
-                        generation_config=generation_config
-                    )
-                    response = model.generate_content(contents_list)
+                backoff_delay = 1
+                success_flag = True
 
-                    raw_text = response.text or "[]"
-                    clean_json = raw_text.replace("```json", "").replace("```", "").strip()
+                for retry_attempt in range(3):
+                    try:
+                        model = genai.GenerativeModel(
+                            model_name=model_name,
+                            generation_config=generation_config
+                        )
+                        response = model.generate_content(contents_list)
 
-                    # Avancer l'index pour que la prochaine page utilise la clé suivante
-                    current_key_index = (selected_key_idx + 1) % total_keys
+                        raw_text = response.text or "[]"
+                        clean_json = raw_text.replace("```json", "").replace("```", "").strip()
 
-                    return JSONResponse(content={"page": page_num, "raw_json": clean_json})
+                        current_key_index = (selected_key_idx + 1) % total_keys
 
-                except Exception as inner_e:
-                    err_msg = str(inner_e).lower()
-                    print(f"Échec Clé N°{selected_key_idx + 1} ({model_name}) : {err_msg}")
-                    if "429" in err_msg or "quota" in err_msg:
-                        time.sleep(1)
-                        continue
-                    else:
-                        break
+                        return JSONResponse(content={"page": page_num, "raw_json": clean_json})
 
+                    except Exception as inner_e:
+                        err_msg = str(inner_e).lower()
+                        last_error_message = str(inner_e) # On sauvegarde la VRAIE erreur
+                        
+                        print(f"Échec Clé N°{selected_key_idx + 1} ({model_name}) - Tentative {retry_attempt + 1}: {last_error_message}")
+                        
+                        if "429" in err_msg or "quota" in err_msg or "resource_exhausted" in err_msg:
+                            sleep_time = backoff_delay + random.uniform(0.1, 0.4)
+                            time.sleep(sleep_time)
+                            backoff_delay *= 2
+                            continue
+                        else:
+                            success_flag = False
+                            break
+                
+                if not success_flag:
+                    break
+
+        # On affiche la vraie cause de l'échec si toutes les tentatives échouent
         raise HTTPException(
-            status_code=429, 
-            detail="Toutes les clés du pool sont actuellement sollicitées. Veuillez réessayer dans quelques secondes."
+            status_code=500, 
+            detail=f"Échec de l'API Gemini. Cause réelle : {last_error_message}"
         )
 
+    except HTTPException as he:
+        raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
