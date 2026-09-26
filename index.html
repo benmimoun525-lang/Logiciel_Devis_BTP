@@ -13,20 +13,22 @@
         input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
         .file-box { background: #f1f5f9; border: 2px dashed #94a3b8; padding: 15px; border-radius: 6px; text-align: center; }
 
-        /* Grille des vignettes instantanées comme avant */
+        /* Grille des vignettes instantanées */
         .thumbnails-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px; }
-        .thumb-card { width: 110px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+        .thumb-card { width: 120px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
         .thumb-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
         .thumb-card.active { border-color: #1d4ed8; background: #eff6ff; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
-        .thumb-img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; background: #e2e8f0; }
+        .thumb-icon { width: 100%; height: 70px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; border-radius: 4px; background: #e2e8f0; color: #1e40af; overflow: hidden; }
+        .thumb-img { width: 100%; height: 70px; object-fit: cover; border-radius: 4px; background: #e2e8f0; }
         .thumb-title { font-size: 0.75rem; font-weight: bold; margin-top: 5px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .thumb-status { font-size: 0.7rem; margin-top: 3px; font-weight: bold; }
         .status-attente { color: #d97706; }
         .status-traite { color: #16a34a; }
 
-        /* Zone d'affichage en grand de la page sélectionnée */
+        /* Panneau d'inspection grand format */
         .preview-pane { margin-top: 20px; border: 2px solid #3b82f6; border-radius: 8px; padding: 15px; background: #eff6ff; text-align: center; display: none; }
         .preview-pane img { max-width: 100%; max-height: 400px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .doc-preview-card { background: white; padding: 30px; border-radius: 6px; font-weight: bold; color: #1e3a8a; font-size: 1.1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         
         .btn { background: #d97706; color: white; border: none; padding: 16px; width: 100%; font-size: 1.1rem; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px; transition: 0.2s; }
         .btn:hover { background: #b45309; }
@@ -44,17 +46,17 @@
 
 <div class="container">
     <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white;">
-        <h1 style="color: white;">Chiffrage BTP - Aperçu & Contrôle Page par Page 📄</h1>
-        <p style="margin:0; opacity: 0.9;">Visualisez instantanément toutes les pages reçues du client, inspectez-les, et traitez-les une par une à votre rythme.</p>
+        <h1 style="color: white;">Chiffrage BTP - Aperçu & Contrôle par Page 📄</h1>
+        <p style="margin:0; opacity: 0.9;">Visualisez instantanément tous les devis reçus (Word, PDF, Images), inspectez-les, et traitez-les un par un.</p>
     </div>
 
     <div class="card">
         <label>👤 Nom du Projet ou du Client :</label>
         <input type="text" id="nomClient" placeholder="Ex: Projet Résidence Blida">
 
-        <label>📄 Téléchargez / Sélectionnez les pages du devis (WhatsApp / Images / PDF) :</label>
+        <label>📄 Sélectionnez les pages ou fichiers du devis (Word, PDF, Images...) :</label>
         <div class="file-box">
-            <input type="file" id="fichiersDevis" multiple accept=".pdf,image/*" onchange="chargerFichiersInstantane(event)">
+            <input type="file" id="fichiersDevis" multiple accept=".pdf,.doc,.docx,image/*" onchange="chargerFichiersInstantane(event)">
         </div>
 
         <!-- Grille des vignettes instantanées -->
@@ -64,7 +66,7 @@
         <div id="previewPane" class="preview-pane">
             <div id="previewTitle" style="font-weight: bold; margin-bottom: 8px; color: #1e3a8a; font-size: 1.1rem;"></div>
             <div id="previewContent"></div>
-            <button id="btnLancerPage" class="btn" style="margin-top: 15px; background: #2563eb;" onclick="traiterPageSelectionnee()">⚡ Traiter cette page sélectionnée</button>
+            <button id="btnLancerPage" class="btn" style="margin-top: 15px; background: #2563eb;" onclick="traiterPageSelectionnee()">⚡ Traiter ce fichier / page sélectionné</button>
         </div>
 
         <div style="margin-top: 25px; text-align: center;">
@@ -101,13 +103,14 @@
 
             const title = document.createElement('div');
             title.className = 'thumb-title';
-            title.textContent = `Page ${idx + 1}`;
+            title.textContent = file.name;
 
             const status = document.createElement('div');
             status.className = 'thumb-status status-attente';
             status.id = `status-${idx}`;
             status.textContent = 'En attente';
 
+            // Gestion de l'affichage de la vignette selon le type de fichier
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -118,15 +121,11 @@
                 }
                 reader.readAsDataURL(file);
             } else {
-                const pdfBox = document.createElement('div');
-                pdfBox.className = 'thumb-img';
-                pdfBox.style.display = 'flex';
-                pdfBox.style.alignItems = 'center';
-                pdfBox.style.justifyContent = 'center';
-                pdfBox.style.fontWeight = 'bold';
-                pdfBox.style.color = '#1e40af';
-                pdfBox.textContent = 'PDF';
-                card.prepend(pdfBox);
+                const badgeBox = document.createElement('div');
+                badgeBox.className = 'thumb-icon';
+                let ext = file.name.split('.').pop().toUpperCase();
+                badgeBox.textContent = ext || 'DOC';
+                card.prepend(badgeBox);
             }
 
             card.appendChild(title);
@@ -134,9 +133,8 @@
             grid.appendChild(card);
         });
 
-        document.getElementById('statusBadge').textContent = `${listeFichiers.length} page(s) chargée(s). Cliquez sur une vignette pour l'inspecter et la traiter.`;
-        // Sélectionne automatiquement la première page
-        selectionnerPage(0);
+        document.getElementById('statusBadge').textContent = `${listeFichiers.length} fichier(s) chargé(s). Cliquez sur une vignette pour l'inspecter.`;
+        selectionnerPage(0); // Sélectionne automatiquement le premier fichier
     }
 
     function selectionnerPage(idx) {
@@ -146,14 +144,13 @@
         const previewContent = document.getElementById('previewContent');
         const previewTitle = document.getElementById('previewTitle');
 
-        // Met en surbrillance la vignette active
         document.querySelectorAll('.thumb-card').forEach((c, i) => {
             if (i === idx) c.classList.add('active');
             else c.classList.remove('active');
         });
 
         previewPane.style.display = "block";
-        previewTitle.textContent = `Inspection de la Page ${idx + 1} : ${file.name}`;
+        previewTitle.textContent = `Fichier sélectionné : ${file.name}`;
         previewContent.innerHTML = "";
 
         if (file.type.startsWith('image/')) {
@@ -165,7 +162,10 @@
             }
             reader.readAsDataURL(file);
         } else {
-            previewContent.innerHTML = `<div style="padding: 25px; font-weight: bold; color: #1e40af; background: white; border-radius: 6px;">📄 Fichier PDF sélectionné. Prêt pour l'analyse.</div>`;
+            const cardInfo = document.createElement('div');
+            cardInfo.className = 'doc-preview-card';
+            cardInfo.innerHTML = `📄 Document prêt pour l'analyse : <br><span style="font-weight: normal; font-size: 0.9rem; color: #64748b;">${file.name} (${(file.size/1024).toFixed(1)} Ko)</span>`;
+            previewContent.appendChild(cardInfo);
         }
     }
 
@@ -182,8 +182,8 @@
         btnLancerPage.disabled = true;
         badge.style.background = "#fef3c7";
         badge.style.color = "#92400e";
-        badge.textContent = `Traitement de la page ${indexSelectionne + 1} en cours...`;
-        logs.textContent += `\n-> Envoi de la page ${indexSelectionne + 1} (${file.name}) à l'IA...\n`;
+        badge.textContent = `Traitement de "${file.name}" en cours...`;
+        logs.textContent += `\n-> Envoi de "${file.name}" à l'IA...\n`;
 
         const formData = new FormData();
         formData.append('file', file);
@@ -216,14 +216,13 @@
                 articlesGlobaux = articlesGlobaux.concat(pageArticles);
 
                 counterBadge.textContent = `Articles cumulés dans l'Excel : ${articlesGlobaux.length}`;
-                logs.textContent += `   ✅ Page ${indexSelectionne + 1} validée avec succès ! (${pageArticles.length} articles ajoutés)\n`;
+                logs.textContent += `   ✅ "${file.name}" validé avec succès ! (${pageArticles.length} articles ajoutés)\n`;
                 
-                // Met à jour l'état de la vignette
                 const statusEl = document.getElementById(`status-${indexSelectionne}`);
                 statusEl.textContent = 'Traité ✓';
                 statusEl.className = 'thumb-status status-traite';
 
-                badge.textContent = `Page ${indexSelectionne + 1} traitée ! Vous pouvez inspecter et traiter la page suivante.`;
+                badge.textContent = `Fichier traité ! Vous pouvez inspecter et traiter le fichier suivant.`;
                 badge.style.background = "#dcfce7";
                 badge.style.color = "#166534";
                 btnExcel.style.display = "block";
@@ -231,7 +230,6 @@
                 success = true;
                 pageSequenceNum++;
 
-                // Passe automatiquement à la page suivante s'il en reste une non traitée
                 if (indexSelectionne + 1 < listeFichiers.length) {
                     selectionnerPage(indexSelectionne + 1);
                 }
@@ -244,10 +242,10 @@
         }
 
         if (!success) {
-            badge.textContent = "Erreur lors du traitement de cette page.";
+            badge.textContent = "Erreur lors du traitement de ce fichier.";
             badge.style.background = "#fee2e2";
             badge.style.color = "#991b1b";
-            logs.textContent += `   ❌ Échec définitif sur cette page.\n`;
+            logs.textContent += `   ❌ Échec définitif sur ce fichier.\n`;
         }
 
         btnLancerPage.disabled = false;
