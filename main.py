@@ -28,7 +28,7 @@ def get_api_keys_pool():
                 keys.append(value.strip())
     return keys
 
-MODELS_PRIORITY = ['gemini-2.5-flash', 'gemini-2.0-flash']
+MODELS_PRIORITY = ['gemini-2.5-flash', 'gemini-3.8-flash']
 
 @app.get("/")
 def read_root():
