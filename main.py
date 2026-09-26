@@ -30,10 +30,10 @@ def get_api_keys_pool():
                 keys.append(value.strip())
     return keys
 
-# Modèles les plus stables et rapides
+# On garde uniquement le modèle Flash (plus rapide et toujours accessible)
 MODELS_PRIORITY = [
     'gemini-1.5-flash',
-    'gemini-1.5-pro'
+    'gemini-1.5-flash-latest'
 ]
 
 @app.get("/")
@@ -88,7 +88,6 @@ async def chiffrer_page(
                     "data": file_bytes
                 })
 
-        # Retrait du paramètre response_mime_type qui causait l'erreur 404
         generation_config = genai.GenerationConfig(
             max_output_tokens=4096,
             temperature=0.0
@@ -97,12 +96,15 @@ async def chiffrer_page(
         total_keys = len(keys_pool)
         last_error = ""
 
+        # Boucle sur les clés API (Rotation)
         for attempt in range(total_keys):
             selected_key_idx = (current_key_index + attempt) % total_keys
             api_key = keys_pool[selected_key_idx]
 
             genai.configure(api_key=api_key)
+            key_failed_due_to_quota = False
 
+            # Boucle sur les modèles
             for model_name in MODELS_PRIORITY:
                 try:
                     model = genai.GenerativeModel(
@@ -112,11 +114,9 @@ async def chiffrer_page(
                     response = model.generate_content(contents_list)
 
                     raw_text = response.text or "[]"
-                    
-                    # On nettoie le markdown éventuel que le frontend finalisera
                     clean_json = raw_text.replace("```json", "").replace("```", "").strip()
 
-                    # Avance la clé pour le prochain appel
+                    # Succès : on avance l'index de la clé pour la prochaine page
                     current_key_index = (selected_key_idx + 1) % total_keys
 
                     return JSONResponse(content={"page": page_num, "raw_json": clean_json})
@@ -127,14 +127,20 @@ async def chiffrer_page(
                     print(f"Échec Clé N°{selected_key_idx + 1} ({model_name}) : {err_msg}")
                     
                     if "429" in err_msg.lower() or "quota" in err_msg.lower():
-                        time.sleep(1) # Pause avant d'essayer la clé suivante
-                        continue
+                        key_failed_due_to_quota = True
+                        break # On sort de la boucle des modèles pour changer immédiatement de clé API
                     else:
-                        continue # Passe au modèle suivant ou à la clé suivante si erreur type 404
+                        continue # Erreur 404 ou autre, on essaie l'autre nom de modèle (flash-latest) avec la MÊME clé
 
+            # Si on est sorti de la boucle des modèles à cause d'un quota, on passe à la clé suivante
+            if key_failed_due_to_quota:
+                time.sleep(1)
+                continue
+
+        # Si on arrive ici, c'est que toutes les clés ont échoué
         raise HTTPException(
-            status_code=500, 
-            detail=f"Toutes les clés ont échoué. Dernière erreur : {last_error}"
+            status_code=429, 
+            detail=f"Toutes les clés sont épuisées temporairement. ({last_error})"
         )
 
     except Exception as e:
