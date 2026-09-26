@@ -18,7 +18,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Rotation des clés API
 current_key_index = 0
 
 def get_api_keys_pool():
@@ -29,7 +28,6 @@ def get_api_keys_pool():
                 keys.append(value.strip())
     return keys
 
-# Utilisation exclusive de Flash (plus rapide et moins de risques d'erreurs 404)
 MODELS_PRIORITY = ['gemini-1.5-flash']
 
 @app.get("/")
@@ -50,7 +48,6 @@ async def chiffrer_page(
         if not keys_pool:
             raise HTTPException(status_code=500, detail="Aucune clé API configurée.")
 
-        # PROMPT OPTIMISÉ : On demande juste l'extraction et l'estimation du PU HT.
         prompt_base = (
             f"Tu es un expert métreur BTP en Algérie.\n"
             f"Analyse CETTE PAGE (Page {page_num}) et extrait tous les articles.\n"
@@ -60,9 +57,9 @@ async def chiffrer_page(
             f"  {{\"n\": {start_index}, \"d\": \"Désignation précise\", \"u\": \"m3\", \"q\": 10, \"pu\": 12000}}\n"
             "]\n\n"
             "CONSIGNES :\n"
-            "- 'q' = Quantité trouvée sur le devis (mets 1 si vide).\n"
-            "- 'pu' = Estime un Prix Unitaire HT réaliste en DZD pour le marché algérien.\n"
-            "- NE CALCULE AUCUN TOTAL. Fournis juste les valeurs numériques pour q et pu.\n"
+            "- 'q' = Quantité (mets 1 si vide).\n"
+            "- 'pu' = Estime un Prix Unitaire HT réaliste en DZD.\n"
+            "- NE CALCULE AUCUN TOTAL.\n"
             "- RÈGLE ABSOLUE : Renvoie UNIQUEMENT le tableau JSON, aucun texte avant, aucun texte après."
         )
 
@@ -76,8 +73,6 @@ async def chiffrer_page(
                 content_type = file.content_type or "image/jpeg"
                 contents_list.append({"mime_type": content_type, "data": file_bytes})
 
-        generation_config = genai.GenerationConfig(max_output_tokens=2048, temperature=0.0)
-
         total_keys = len(keys_pool)
         last_error = ""
 
@@ -88,15 +83,18 @@ async def chiffrer_page(
 
             for model_name in MODELS_PRIORITY:
                 try:
-                    model = genai.GenerativeModel(model_name=model_name, generation_config=generation_config)
-                    response = model.generate_content(contents_list)
+                    model = genai.GenerativeModel(model_name=model_name)
+                    
+                    # Configuration passée sous forme de dictionnaire simple (ultra compatible)
+                    response = model.generate_content(
+                        contents_list,
+                        generation_config={"max_output_tokens": 2048, "temperature": 0.0}
+                    )
 
                     raw_text = response.text or "[]"
                     clean_json = raw_text.replace("```json", "").replace("```", "").strip()
 
                     current_key_index = (selected_key_idx + 1) % total_keys
-                    
-                    # Petite pause pour ménager l'API de Google
                     time.sleep(1.5)
 
                     return JSONResponse(content={"page": page_num, "raw_json": clean_json})
@@ -114,7 +112,7 @@ async def chiffrer_page(
                 time.sleep(1)
                 continue
 
-        raise HTTPException(status_code=429, detail=f"Blocage temporaire Google : {last_error}")
+        raise HTTPException(status_code=429, detail=f"Détail de l'erreur : {last_error}")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -133,14 +131,12 @@ async def exporter_excel(payload: dict = Body(...)):
         header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
         thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
-        # Informations du devis en haut
         ws['A1'] = f"DEVIS QUANTITATIF ET ESTIMATIF : {nom_client}"
         ws['A1'].font = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
         
-        # En-têtes du tableau (Ligne 3)
         headers = ["N°", "Désignation des Travaux", "Unité", "Quantité", "P.U HT (DZD)", "Montant HT (DZD)"]
-        ws.append([]) # Ligne 2 vide
-        ws.append(headers) # Ligne 3
+        ws.append([]) 
+        ws.append(headers) 
         
         for col_num in range(1, 7):
             cell = ws.cell(row=3, column=col_num)
@@ -150,7 +146,6 @@ async def exporter_excel(payload: dict = Body(...)):
 
         start_row = 4
 
-        # Remplissage des données et des FORMULES
         for idx, art in enumerate(articles):
             row_idx = start_row + idx
             num = art.get("n", idx + 1)
@@ -163,39 +158,32 @@ async def exporter_excel(payload: dict = Body(...)):
             ws.cell(row=row_idx, column=2, value=des)
             ws.cell(row=row_idx, column=3, value=uni).alignment = Alignment(horizontal="center")
             
-            # Quantité et Prix Unitaire
             ws.cell(row=row_idx, column=4, value=qte).number_format = '#,##0.00'
             ws.cell(row=row_idx, column=5, value=pu).number_format = '#,##0.00'
             
-            # FORMULE EXCEL POUR LE MONTANT LIGNE : =Quantité * P.U
             ws.cell(row=row_idx, column=6, value=f"=D{row_idx}*E{row_idx}").number_format = '#,##0.00'
 
             for c in range(1, 7):
                 ws.cell(row=row_idx, column=c).border = thin_border
 
-        # Création des totaux natifs en bas de tableau avec formules Excel
         last_data_row = start_row + len(articles) - 1
         if len(articles) == 0:
             last_data_row = start_row
 
         total_row = last_data_row + 2
 
-        # Formule TOTAL HT
         ws.cell(row=total_row, column=5, value="TOTAL HT :").font = Font(bold=True)
         ws.cell(row=total_row, column=6, value=f"=SUM(F{start_row}:F{last_data_row})").font = Font(bold=True)
         ws.cell(row=total_row, column=6).number_format = '#,##0.00 DZD'
 
-        # Formule TVA
         ws.cell(row=total_row+1, column=5, value="TVA (19%) :")
         ws.cell(row=total_row+1, column=6, value=f"=F{total_row}*0.19")
         ws.cell(row=total_row+1, column=6).number_format = '#,##0.00 DZD'
 
-        # Formule TOTAL TTC
         ws.cell(row=total_row+2, column=5, value="TOTAL TTC :").font = Font(bold=True, color="1E3A8A")
         ws.cell(row=total_row+2, column=6, value=f"=F{total_row}+F{total_row+1}").font = Font(bold=True, color="1E3A8A")
         ws.cell(row=total_row+2, column=6).number_format = '#,##0.00 DZD'
 
-        # Ajustement de la taille des colonnes
         ws.column_dimensions['A'].width = 6
         ws.column_dimensions['B'].width = 60
         ws.column_dimensions['C'].width = 8
