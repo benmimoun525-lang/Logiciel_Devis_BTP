@@ -3,190 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur de Devis BTP par Lots</title>
+    <title>Chiffrage BTP - Page par Page</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; color: #0f172a; padding: 20px; }
-        .container { max-width: 850px; margin: 0 auto; }
+        .container { max-width: 900px; margin: 0 auto; }
         .card { background: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h1 { color: #1e3a8a; font-size: 1.6rem; margin-top: 0; }
-        label { font-weight: bold; display: block; margin-bottom: 8px; margin-top: 20px; color: #334155; }
+        label { font-weight: bold; display: block; margin-bottom: 8px; margin-top: 15px; color: #334155; }
         input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
         .file-box { background: #f1f5f9; border: 2px dashed #94a3b8; padding: 15px; border-radius: 6px; text-align: center; }
-        .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-        .preview-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 2px solid #3b82f6; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: #1e3a8a; text-align: center; padding: 2px; overflow: hidden; }
-        .btn { background: #d97706; color: white; border: none; padding: 16px; width: 100%; font-size: 1.1rem; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 25px; transition: 0.2s; }
+        
+        /* Zone d'affichage grand format de la page en cours */
+        .preview-pane { margin-top: 20px; border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc; text-align: center; max-height: 400px; overflow: auto; display: none; }
+        .preview-pane img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .btn { background: #d97706; color: white; border: none; padding: 16px; width: 100%; font-size: 1.1rem; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px; transition: 0.2s; }
         .btn:hover { background: #b45309; }
         .btn:disabled { background: #94a3b8; cursor: not-allowed; }
         .btn-excel { background: #16a34a; display: none; margin-top: 15px; }
         .btn-excel:hover { background: #15803d; }
+        
         .status { padding: 15px; background: #e2e8f0; border-radius: 6px; margin-top: 20px; font-weight: bold; text-align: center; color: #475569; }
-        .log-box { background: #1e293b; color: #4ade80; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; margin-top: 10px; min-height: 150px; max-height: 350px; overflow-y: auto; white-space: pre-wrap; }
+        .log-box { background: #1e293b; color: #4ade80; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; margin-top: 10px; min-height: 120px; max-height: 250px; overflow-y: auto; white-space: pre-wrap; }
+        
+        .counter-badge { display: inline-block; background: #3b82f6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white;">
-        <h1 style="color: white;">Extracteur BTP - Devis par Lots 📊</h1>
-        <p style="margin:0; opacity: 0.9;">Gérez les devis segmentés par lots avec numérotation autonome et aperçu visuel instantané des fichiers reçus du client.</p>
+        <h1 style="color: white;">Chiffrage BTP - Contrôle Page par Page 📄</h1>
+        <p style="margin:0; opacity: 0.9;">Visualisez chaque page du devis en grand instantanément, contrôlez l'extraction des lots et des prix unitaires en toute sérénité.</p>
     </div>
 
     <div class="card">
         <label>👤 Nom du Projet ou du Client :</label>
-        <input type="text" id="nomClient" placeholder="Ex: Projet Bâtiment Oran">
+        <input type="text" id="nomClient" placeholder="Ex: Projet Résidence Blida">
 
-        <label>📄 Pages du Devis reçues (WhatsApp / Photos / PDF) :</label>
+        <label>📄 Transmettez la page du devis (WhatsApp / Image / PDF) :</label>
         <div class="file-box">
-            <input type="file" id="fichiersDevis" multiple accept=".pdf,image/*" onchange="afficherApercu(event)">
+            <input type="file" id="fichierPage" accept=".pdf,image/*" onchange="afficherPageVisuelle(event)">
         </div>
 
-        <!-- Zone d'aperçu visuel des documents du client -->
-        <div id="apercuZone" class="preview-container"></div>
+        <!-- Aperçu grand format de la page sélectionnée -->
+        <div id="previewPane" class="preview-pane">
+            <div id="previewTitle" style="font-weight: bold; margin-bottom: 8px; color: #1e3a8a;"></div>
+            <div id="previewContent"></div>
+        </div>
 
-        <button id="btnLancer" class="btn" onclick="lancerExtractionLots()">⚙️ Lancer l'Analyse par Lots</button>
+        <div style="margin-top: 20px;">
+            <span id="counterBadge" class="counter-badge">Articles cumulés : 0</span>
+        </div>
+
+        <button id="btnLancer" class="btn" onclick="traiterPageActuelle()" disabled>⚙️ Traiter cette Page</button>
         
-        <div id="statusBadge" class="status">En attente des documents...</div>
+        <div id="statusBadge" class="status">Veuillez sélectionner une page de devis...</div>
         <div id="logArea" class="log-box">Console prête...</div>
 
-        <button id="btnExportExcel" class="btn btn-excel" onclick="telechargerExcel()">📥 Télécharger le Devis Excel Structuré par Lots (.xlsx)</button>
+        <button id="btnExportExcel" class="btn btn-excel" onclick="telechargerExcel()">📥 Télécharger le Devis Global Excel (.xlsx)</button>
     </div>
 </div>
 
 <script>
     const RENDER_BASE = "https://logiciel-devis-btp.onrender.com";
     let articlesGlobaux = [];
+    let fichierActuel = null;
+    let pageNumeroSeq = 1;
 
-    // Fonction pour afficher l'aperçu visuel avant l'extraction
-    function afficherApercu(event) {
-        const zone = document.getElementById('apercuZone');
-        zone.innerHTML = "";
-        const files = event.target.files;
+    function afficherPageVisuelle(event) {
+        const file = event.target.files[0];
+        const previewPane = document.getElementById('previewPane');
+        const previewContent = document.getElementById('previewContent');
+        const previewTitle = document.getElementById('previewTitle');
+        const btnLancer = document.getElementById('btnLancer');
+        const badge = document.getElementById('statusBadge');
 
-        if (files.length === 0) return;
+        if (!file) return;
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const thumb = document.createElement('div');
-            thumb.className = 'preview-thumb';
+        fichierActuel = file;
+        previewPane.style.display = "block";
+        previewTitle.textContent = `Aperçu de la page en cours : ${file.name}`;
+        previewContent.innerHTML = "";
 
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    thumb.style.backgroundImage = `url(${e.target.result})`;
-                    thumb.style.backgroundSize = 'cover';
-                    thumb.style.color = 'transparent'; // Cache le texte si image
-                }
-                reader.readAsDataURL(file);
-            } else {
-                thumb.innerHTML = `PDF<br>P.${i+1}`;
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                previewContent.appendChild(img);
             }
-            zone.appendChild(thumb);
+            reader.readAsDataURL(file);
+        } else {
+            previewContent.innerHTML = `<div style="padding: 30px; font-weight: bold; color: #64748b;">Fichier PDF prêt pour l'analyse visuelle.</div>`;
         }
+
+        btnLancer.disabled = false;
+        badge.textContent = `Page prête à être traitée. Cliquez sur "Traiter cette Page".`;
+        badge.style.background = "#dbeafe";
+        badge.style.color = "#1e40af";
     }
 
-    async function lancerExtractionLots() {
-        const nomClient = document.getElementById('nomClient').value.trim() || "Client_Anonyme";
-        const input = document.getElementById('fichiersDevis');
+    async function traiterPageActuelle() {
+        if (!fichierActuel) return;
+
         const btn = document.getElementById('btnLancer');
         const badge = document.getElementById('statusBadge');
         const logs = document.getElementById('logArea');
         const btnExcel = document.getElementById('btnExportExcel');
+        const counterBadge = document.getElementById('counterBadge');
 
-        if (!input.files || input.files.length === 0) {
-            alert("Veuillez sélectionner les pages du devis.");
-            return;
-        }
-
-        const files = Array.from(input.files);
         btn.disabled = true;
-        btnExcel.style.display = "none";
-        articlesGlobaux = [];
-
         badge.style.background = "#fef3c7";
         badge.style.color = "#92400e";
-        logs.textContent = `🚀 Analyse des ${files.length} pages du devis par lots...\n`;
+        badge.textContent = `Analyse de la page ${pageNumeroSeq} en cours...`;
+        logs.textContent += `\n-> Envoi de la page ${pageNumeroSeq} à l'IA...\n`;
 
-        try {
-            for (let i = 0; i < files.length; i++) {
-                badge.textContent = `Traitement de la Page ${i + 1} / ${files.length}...`;
-                logs.textContent += `\n----------------------------------------\n`;
-                logs.textContent += `📄 Lecture de la page ${i + 1} (${files[i].name})...\n`;
+        const formData = new FormData();
+        formData.append('file', fichierActuel);
+        formData.append('page_num', pageNumeroSeq);
 
-                const formData = new FormData();
-                formData.append('file', files[i]);
-                formData.append('page_num', i + 1);
+        let success = false;
+        let retries = 0;
 
-                let success = false;
-                let retries = 0;
+        while (!success && retries < 3) {
+            try {
+                const response = await fetch(`${RENDER_BASE}/chiffrer-page`, {
+                    method: 'POST', body: formData
+                });
 
-                while (!success && retries < 3) {
-                    try {
-                        const response = await fetch(`${RENDER_BASE}/chiffrer-page`, {
-                            method: 'POST', body: formData
-                        });
-
-                        if (!response.ok) {
-                            let errorDetail = await response.text();
-                            throw new Error(`Erreur Serveur: ${errorDetail}`);
-                        }
-
-                        const data = await response.json();
-                        let cleanJson = data.raw_json ? data.raw_json.trim() : "[]";
-                        
-                        const startIdx = cleanJson.indexOf('[');
-                        const endIdx = cleanJson.lastIndexOf(']');
-                        if (startIdx !== -1 && endIdx !== -1) {
-                            cleanJson = cleanJson.substring(startIdx, endIdx + 1);
-                        }
-
-                        let pageArticles = [];
-                        try {
-                            pageArticles = JSON.parse(cleanJson);
-                        } catch (parseError) {
-                            const lastObject = cleanJson.lastIndexOf('}');
-                            if (lastObject !== -1) {
-                                pageArticles = JSON.parse(cleanJson.substring(0, lastObject + 1) + ']');
-                            }
-                        }
-
-                        articlesGlobaux = articlesGlobaux.concat(pageArticles);
-                        
-                        logs.textContent += `   ✅ Succès ! ${pageArticles.length} lignes extraites (Lots inclus).\n`;
-                        success = true;
-
-                    } catch (err) {
-                        retries++;
-                        logs.textContent += `   ⚠️ Tentative ${retries}/3 échouée. Relance... (${err.message})\n`;
-                        await new Promise(res => setTimeout(res, 2500));
-                    }
+                if (!response.ok) {
+                    let errText = await response.text();
+                    throw new Error(errText);
                 }
+
+                const data = await response.json();
+                let cleanJson = data.raw_json ? data.raw_json.trim() : "[]";
                 
-                if (!success) {
-                    logs.textContent += `   ❌ Erreur sur la page ${i + 1}. Passage à la suite.\n`;
+                const startIdx = cleanJson.indexOf('[');
+                const endIdx = cleanJson.lastIndexOf(']');
+                if (startIdx !== -1 && endIdx !== -1) {
+                    cleanJson = cleanJson.substring(startIdx, endIdx + 1);
                 }
-            }
 
-            if (articlesGlobaux.length === 0) {
-                badge.textContent = "Échec : Aucun article extrait.";
-                badge.style.background = "#fee2e2";
-                badge.style.color = "#991b1b";
-                logs.textContent += `\n❌ Aucun contenu valide récupéré.`;
-            } else {
-                badge.textContent = `Terminé ! ${articlesGlobaux.length} articles segmentés par lots.`;
+                let pageArticles = JSON.parse(cleanJson);
+                articlesGlobaux = articlesGlobaux.concat(pageArticles);
+
+                counterBadge.textContent = `Articles cumulés : ${articlesGlobaux.length}`;
+                logs.textContent += `   ✅ Page ${pageNumeroSeq} validée ! (${pageArticles.length} articles extraits avec leurs lots et PU).\n`;
+                
+                badge.textContent = `Page ${pageNumeroSeq} traitée avec succès ! Vous pouvez passer à la page suivante.`;
                 badge.style.background = "#dcfce7";
                 badge.style.color = "#166534";
-                logs.textContent += `\n🎉 Prêt ! Fichier Excel structuré par lots disponible au téléchargement.`;
                 btnExcel.style.display = "block";
-            }
+                
+                success = true;
+                pageNumeroSeq++; // Prépare le numéro pour la page suivante
+                
+                // Réinitialise l'input file pour permettre d'en choisir une autre
+                document.getElementById('fichierPage').value = "";
+                fichierActuel = null;
 
-        } catch (err) {
-            badge.textContent = "Erreur globale";
+            } catch (err) {
+                retries++;
+                logs.textContent += `   ⚠️ Tentative ${retries}/3 échouée (${err.message}). Relance...\n`;
+                await new Promise(res => setTimeout(res, 2000));
+            }
+        }
+
+        if (!success) {
+            badge.textContent = "Erreur lors du traitement de cette page.";
             badge.style.background = "#fee2e2";
             badge.style.color = "#991b1b";
-            logs.textContent += `\n🔥 ERREUR CRITIQUE : ${err.message}`;
-        } finally {
-            btn.disabled = false;
+            logs.textContent += `   ❌ Échec définitif sur cette page.\n`;
         }
+
+        btn.disabled = false;
     }
 
     async function telechargerExcel() {
@@ -202,7 +194,7 @@
                 })
             });
 
-            if (!response.ok) throw new Error("Échec de la génération Excel.");
+            if (!response.ok) throw new Error("Erreur de génération du fichier Excel.");
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
