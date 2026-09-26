@@ -3,19 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chiffrage BTP - Page par Page</title>
+    <title>Chiffrage BTP - Aperçu & Traitement par Page</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f8fafc; color: #0f172a; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
+        .container { max-width: 950px; margin: 0 auto; }
         .card { background: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         h1 { color: #1e3a8a; font-size: 1.6rem; margin-top: 0; }
         label { font-weight: bold; display: block; margin-bottom: 8px; margin-top: 15px; color: #334155; }
         input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
         .file-box { background: #f1f5f9; border: 2px dashed #94a3b8; padding: 15px; border-radius: 6px; text-align: center; }
-        
-        /* Zone d'affichage grand format de la page en cours */
-        .preview-pane { margin-top: 20px; border: 2px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc; text-align: center; max-height: 400px; overflow: auto; display: none; }
-        .preview-pane img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Grille des vignettes instantanées comme avant */
+        .thumbnails-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px; }
+        .thumb-card { width: 110px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+        .thumb-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+        .thumb-card.active { border-color: #1d4ed8; background: #eff6ff; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
+        .thumb-img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; background: #e2e8f0; }
+        .thumb-title { font-size: 0.75rem; font-weight: bold; margin-top: 5px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .thumb-status { font-size: 0.7rem; margin-top: 3px; font-weight: bold; }
+        .status-attente { color: #d97706; }
+        .status-traite { color: #16a34a; }
+
+        /* Zone d'affichage en grand de la page sélectionnée */
+        .preview-pane { margin-top: 20px; border: 2px solid #3b82f6; border-radius: 8px; padding: 15px; background: #eff6ff; text-align: center; display: none; }
+        .preview-pane img { max-width: 100%; max-height: 400px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
         .btn { background: #d97706; color: white; border: none; padding: 16px; width: 100%; font-size: 1.1rem; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 20px; transition: 0.2s; }
         .btn:hover { background: #b45309; }
@@ -24,66 +35,125 @@
         .btn-excel:hover { background: #15803d; }
         
         .status { padding: 15px; background: #e2e8f0; border-radius: 6px; margin-top: 20px; font-weight: bold; text-align: center; color: #475569; }
-        .log-box { background: #1e293b; color: #4ade80; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; margin-top: 10px; min-height: 120px; max-height: 250px; overflow-y: auto; white-space: pre-wrap; }
+        .log-box { background: #1e293b; color: #4ade80; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; margin-top: 10px; min-height: 100px; max-height: 220px; overflow-y: auto; white-space: pre-wrap; }
         
-        .counter-badge { display: inline-block; background: #3b82f6; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 10px; }
+        .counter-badge { display: inline-block; background: #3b82f6; color: white; padding: 6px 14px; border-radius: 20px; font-size: 1rem; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white;">
-        <h1 style="color: white;">Chiffrage BTP - Contrôle Page par Page 📄</h1>
-        <p style="margin:0; opacity: 0.9;">Visualisez chaque page du devis en grand instantanément, contrôlez l'extraction des lots et des prix unitaires en toute sérénité.</p>
+        <h1 style="color: white;">Chiffrage BTP - Aperçu & Contrôle Page par Page 📄</h1>
+        <p style="margin:0; opacity: 0.9;">Visualisez instantanément toutes les pages reçues du client, inspectez-les, et traitez-les une par une à votre rythme.</p>
     </div>
 
     <div class="card">
         <label>👤 Nom du Projet ou du Client :</label>
         <input type="text" id="nomClient" placeholder="Ex: Projet Résidence Blida">
 
-        <label>📄 Transmettez la page du devis (WhatsApp / Image / PDF) :</label>
+        <label>📄 Téléchargez / Sélectionnez les pages du devis (WhatsApp / Images / PDF) :</label>
         <div class="file-box">
-            <input type="file" id="fichierPage" accept=".pdf,image/*" onchange="afficherPageVisuelle(event)">
+            <input type="file" id="fichiersDevis" multiple accept=".pdf,image/*" onchange="chargerFichiersInstantane(event)">
         </div>
 
-        <!-- Aperçu grand format de la page sélectionnée -->
+        <!-- Grille des vignettes instantanées -->
+        <div id="thumbnailsGrid" class="thumbnails-grid"></div>
+
+        <!-- Panneau d'inspection grand format de la page active -->
         <div id="previewPane" class="preview-pane">
-            <div id="previewTitle" style="font-weight: bold; margin-bottom: 8px; color: #1e3a8a;"></div>
+            <div id="previewTitle" style="font-weight: bold; margin-bottom: 8px; color: #1e3a8a; font-size: 1.1rem;"></div>
             <div id="previewContent"></div>
+            <button id="btnLancerPage" class="btn" style="margin-top: 15px; background: #2563eb;" onclick="traiterPageSelectionnee()">⚡ Traiter cette page sélectionnée</button>
         </div>
 
-        <div style="margin-top: 20px;">
-            <span id="counterBadge" class="counter-badge">Articles cumulés : 0</span>
+        <div style="margin-top: 25px; text-align: center;">
+            <span id="counterBadge" class="counter-badge">Articles cumulés dans l'Excel : 0</span>
         </div>
 
-        <button id="btnLancer" class="btn" onclick="traiterPageActuelle()" disabled>⚙️ Traiter cette Page</button>
-        
-        <div id="statusBadge" class="status">Veuillez sélectionner une page de devis...</div>
+        <div id="statusBadge" class="status">En attente de vos documents...</div>
         <div id="logArea" class="log-box">Console prête...</div>
 
-        <button id="btnExportExcel" class="btn btn-excel" onclick="telechargerExcel()">📥 Télécharger le Devis Global Excel (.xlsx)</button>
+        <button id="btnExportExcel" class="btn btn-excel" onclick="telechargerExcel()">📥 Télécharger le Devis Global Excel par Lots (.xlsx)</button>
     </div>
 </div>
 
 <script>
     const RENDER_BASE = "https://logiciel-devis-btp.onrender.com";
+    let listeFichiers = [];
+    let indexSelectionne = null;
     let articlesGlobaux = [];
-    let fichierActuel = null;
-    let pageNumeroSeq = 1;
+    let pageSequenceNum = 1;
 
-    function afficherPageVisuelle(event) {
-        const file = event.target.files[0];
+    function chargerFichiersInstantane(event) {
+        listeFichiers = Array.from(event.target.files);
+        const grid = document.getElementById('thumbnailsGrid');
+        grid.innerHTML = "";
+        document.getElementById('previewPane').style.display = "none";
+
+        if (listeFichiers.length === 0) return;
+
+        listeFichiers.forEach((file, idx) => {
+            const card = document.createElement('div');
+            card.className = 'thumb-card';
+            card.id = `thumb-${idx}`;
+            card.onclick = () => selectionnerPage(idx);
+
+            const title = document.createElement('div');
+            title.className = 'thumb-title';
+            title.textContent = `Page ${idx + 1}`;
+
+            const status = document.createElement('div');
+            status.className = 'thumb-status status-attente';
+            status.id = `status-${idx}`;
+            status.textContent = 'En attente';
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.className = 'thumb-img';
+                    img.src = e.target.result;
+                    card.prepend(img);
+                }
+                reader.readAsDataURL(file);
+            } else {
+                const pdfBox = document.createElement('div');
+                pdfBox.className = 'thumb-img';
+                pdfBox.style.display = 'flex';
+                pdfBox.style.alignItems = 'center';
+                pdfBox.style.justifyContent = 'center';
+                pdfBox.style.fontWeight = 'bold';
+                pdfBox.style.color = '#1e40af';
+                pdfBox.textContent = 'PDF';
+                card.prepend(pdfBox);
+            }
+
+            card.appendChild(title);
+            card.appendChild(status);
+            grid.appendChild(card);
+        });
+
+        document.getElementById('statusBadge').textContent = `${listeFichiers.length} page(s) chargée(s). Cliquez sur une vignette pour l'inspecter et la traiter.`;
+        // Sélectionne automatiquement la première page
+        selectionnerPage(0);
+    }
+
+    function selectionnerPage(idx) {
+        indexSelectionne = idx;
+        const file = listeFichiers[idx];
         const previewPane = document.getElementById('previewPane');
         const previewContent = document.getElementById('previewContent');
         const previewTitle = document.getElementById('previewTitle');
-        const btnLancer = document.getElementById('btnLancer');
-        const badge = document.getElementById('statusBadge');
 
-        if (!file) return;
+        // Met en surbrillance la vignette active
+        document.querySelectorAll('.thumb-card').forEach((c, i) => {
+            if (i === idx) c.classList.add('active');
+            else c.classList.remove('active');
+        });
 
-        fichierActuel = file;
         previewPane.style.display = "block";
-        previewTitle.textContent = `Aperçu de la page en cours : ${file.name}`;
+        previewTitle.textContent = `Inspection de la Page ${idx + 1} : ${file.name}`;
         previewContent.innerHTML = "";
 
         if (file.type.startsWith('image/')) {
@@ -95,33 +165,29 @@
             }
             reader.readAsDataURL(file);
         } else {
-            previewContent.innerHTML = `<div style="padding: 30px; font-weight: bold; color: #64748b;">Fichier PDF prêt pour l'analyse visuelle.</div>`;
+            previewContent.innerHTML = `<div style="padding: 25px; font-weight: bold; color: #1e40af; background: white; border-radius: 6px;">📄 Fichier PDF sélectionné. Prêt pour l'analyse.</div>`;
         }
-
-        btnLancer.disabled = false;
-        badge.textContent = `Page prête à être traitée. Cliquez sur "Traiter cette Page".`;
-        badge.style.background = "#dbeafe";
-        badge.style.color = "#1e40af";
     }
 
-    async function traiterPageActuelle() {
-        if (!fichierActuel) return;
+    async function traiterPageSelectionnee() {
+        if (indexSelectionne === null) return;
 
-        const btn = document.getElementById('btnLancer');
+        const file = listeFichiers[indexSelectionne];
         const badge = document.getElementById('statusBadge');
         const logs = document.getElementById('logArea');
         const btnExcel = document.getElementById('btnExportExcel');
         const counterBadge = document.getElementById('counterBadge');
+        const btnLancerPage = document.getElementById('btnLancerPage');
 
-        btn.disabled = true;
+        btnLancerPage.disabled = true;
         badge.style.background = "#fef3c7";
         badge.style.color = "#92400e";
-        badge.textContent = `Analyse de la page ${pageNumeroSeq} en cours...`;
-        logs.textContent += `\n-> Envoi de la page ${pageNumeroSeq} à l'IA...\n`;
+        badge.textContent = `Traitement de la page ${indexSelectionne + 1} en cours...`;
+        logs.textContent += `\n-> Envoi de la page ${indexSelectionne + 1} (${file.name}) à l'IA...\n`;
 
         const formData = new FormData();
-        formData.append('file', fichierActuel);
-        formData.append('page_num', pageNumeroSeq);
+        formData.append('file', file);
+        formData.append('page_num', pageSequenceNum);
 
         let success = false;
         let retries = 0;
@@ -149,25 +215,31 @@
                 let pageArticles = JSON.parse(cleanJson);
                 articlesGlobaux = articlesGlobaux.concat(pageArticles);
 
-                counterBadge.textContent = `Articles cumulés : ${articlesGlobaux.length}`;
-                logs.textContent += `   ✅ Page ${pageNumeroSeq} validée ! (${pageArticles.length} articles extraits avec leurs lots et PU).\n`;
+                counterBadge.textContent = `Articles cumulés dans l'Excel : ${articlesGlobaux.length}`;
+                logs.textContent += `   ✅ Page ${indexSelectionne + 1} validée avec succès ! (${pageArticles.length} articles ajoutés)\n`;
                 
-                badge.textContent = `Page ${pageNumeroSeq} traitée avec succès ! Vous pouvez passer à la page suivante.`;
+                // Met à jour l'état de la vignette
+                const statusEl = document.getElementById(`status-${indexSelectionne}`);
+                statusEl.textContent = 'Traité ✓';
+                statusEl.className = 'thumb-status status-traite';
+
+                badge.textContent = `Page ${indexSelectionne + 1} traitée ! Vous pouvez inspecter et traiter la page suivante.`;
                 badge.style.background = "#dcfce7";
                 badge.style.color = "#166534";
                 btnExcel.style.display = "block";
                 
                 success = true;
-                pageNumeroSeq++; // Prépare le numéro pour la page suivante
-                
-                // Réinitialise l'input file pour permettre d'en choisir une autre
-                document.getElementById('fichierPage').value = "";
-                fichierActuel = null;
+                pageSequenceNum++;
+
+                // Passe automatiquement à la page suivante s'il en reste une non traitée
+                if (indexSelectionne + 1 < listeFichiers.length) {
+                    selectionnerPage(indexSelectionne + 1);
+                }
 
             } catch (err) {
                 retries++;
                 logs.textContent += `   ⚠️ Tentative ${retries}/3 échouée (${err.message}). Relance...\n`;
-                await new Promise(res => setTimeout(res, 2000));
+                await new Promise(res => setTimeout(res, 1500));
             }
         }
 
@@ -178,7 +250,7 @@
             logs.textContent += `   ❌ Échec définitif sur cette page.\n`;
         }
 
-        btn.disabled = false;
+        btnLancerPage.disabled = false;
     }
 
     async function telechargerExcel() {
