@@ -30,12 +30,10 @@ def get_api_keys_pool():
                 keys.append(value.strip())
     return keys
 
-# Modèles compatibles mis à jour
+# Modèles les plus stables et rapides
 MODELS_PRIORITY = [
-    'gemini-1.5-flash-latest',
     'gemini-1.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-pro-latest'
+    'gemini-1.5-pro'
 ]
 
 @app.get("/")
@@ -66,14 +64,14 @@ async def chiffrer_page(
             f"Tu es un expert métreur et chiffreur BTP en Algérie.\n"
             f"Analyse CETTE PAGE de document (Page {page_num}) et extrait TOUS les articles présents sur cette page sans en omettre aucun.\n"
             f"Commence la numérotation des articles à partir du N° {start_index}.\n\n"
-            "FORMAT DE RÉPONSE STRICT (JSON UNIQUEMENT) :\n"
+            "FORMAT DE RÉPONSE STRICT :\n"
             "[\n"
             f"  {{\"n\": {start_index}, \"d\": \"Désignation précise de l'article\", \"u\": \"m3\", \"q\": 10, \"pu\": 12000}}\n"
             "]\n\n"
             "CONSIGNES :\n"
             "- Ne fusionne aucun poste sur cette page.\n"
             "- Estime un Prix Unitaire 'pu' réaliste en DZD pour le marché algérien si non spécifié.\n"
-            "- Renvoie UNIQUEMENT le tableau JSON sans aucun texte additionnel."
+            "- RÈGLE ABSOLUE : Renvoie UNIQUEMENT le tableau JSON, aucun texte avant, aucun texte après."
         )
 
         contents_list = [prompt_base]
@@ -90,10 +88,10 @@ async def chiffrer_page(
                     "data": file_bytes
                 })
 
+        # Retrait du paramètre response_mime_type qui causait l'erreur 404
         generation_config = genai.GenerationConfig(
             max_output_tokens=4096,
-            temperature=0.0,
-            response_mime_type="application/json"
+            temperature=0.0
         )
 
         total_keys = len(keys_pool)
@@ -114,8 +112,11 @@ async def chiffrer_page(
                     response = model.generate_content(contents_list)
 
                     raw_text = response.text or "[]"
+                    
+                    # On nettoie le markdown éventuel que le frontend finalisera
                     clean_json = raw_text.replace("```json", "").replace("```", "").strip()
 
+                    # Avance la clé pour le prochain appel
                     current_key_index = (selected_key_idx + 1) % total_keys
 
                     return JSONResponse(content={"page": page_num, "raw_json": clean_json})
@@ -124,15 +125,16 @@ async def chiffrer_page(
                     err_msg = str(inner_e)
                     last_error = err_msg
                     print(f"Échec Clé N°{selected_key_idx + 1} ({model_name}) : {err_msg}")
+                    
                     if "429" in err_msg.lower() or "quota" in err_msg.lower():
-                        time.sleep(1)
+                        time.sleep(1) # Pause avant d'essayer la clé suivante
                         continue
                     else:
-                        continue
+                        continue # Passe au modèle suivant ou à la clé suivante si erreur type 404
 
         raise HTTPException(
             status_code=500, 
-            detail=f"Échec de l'API Gemini. Cause réelle : {last_error}"
+            detail=f"Toutes les clés ont échoué. Dernière erreur : {last_error}"
         )
 
     except Exception as e:
