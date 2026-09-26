@@ -2,7 +2,6 @@ import os
 import io
 import time
 import json
-import random
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body
@@ -20,21 +19,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Variable globale pour la rotation circulaire des clés
+# Variable globale pour la rotation circulaire des clés API
 current_key_index = 0
 
 def get_api_keys_pool():
     keys = []
-    # Recherche dynamique de toutes les clés configurées
     for key, value in os.environ.items():
         if key.startswith("GEMINI_KEY_") or key == "GEMINI_API_KEY":
             if value and value.strip():
                 keys.append(value.strip())
     return keys
 
+# Modèles compatibles mis à jour
 MODELS_PRIORITY = [
-    'gemini-1.5-flash'
-    # 'gemini-1.5-pro' # Commenté pour éviter la limite stricte de 2 requêtes/min
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-pro-latest'
 ]
 
 @app.get("/")
@@ -42,7 +43,7 @@ def read_root():
     keys_count = len(get_api_keys_pool())
     return {
         "status": "ok", 
-        "message": f"Serveur BTP Chiffrage opérationnel avec un pool de {keys_count} clé(s) API réelles."
+        "message": f"Serveur BTP Chiffrage opérationnel avec un pool de {keys_count} clé(s) API."
     }
 
 @app.post("/chiffrer-page")
@@ -58,12 +59,12 @@ async def chiffrer_page(
         if not keys_pool:
             raise HTTPException(
                 status_code=500, 
-                detail="Aucune clé API disponible. Veuillez configurer le pool de clés dans le fichier .env ou sur Render."
+                detail="Aucune clé API disponible. Veuillez configurer GEMINI_KEY_1 à GEMINI_KEY_4 dans Render."
             )
 
         prompt_base = (
             f"Tu es un expert métreur et chiffreur BTP en Algérie.\n"
-            f"Analyse CETTE PAGE de document (Page {page_num}) et extrait TOUS les articles présents sans en omettre aucun.\n"
+            f"Analyse CETTE PAGE de document (Page {page_num}) et extrait TOUS les articles présents sur cette page sans en omettre aucun.\n"
             f"Commence la numérotation des articles à partir du N° {start_index}.\n\n"
             "FORMAT DE RÉPONSE STRICT (JSON UNIQUEMENT) :\n"
             "[\n"
@@ -81,16 +82,11 @@ async def chiffrer_page(
             contents_list.append(f"\n--- DESCRIPTIF DE LA PAGE {page_num} ---\n{texte_descriptif.strip()}")
 
         if file:
-            allowed_types = ["image/jpeg", "image/png", "image/webp", "application/pdf"]
-            if file.content_type not in allowed_types:
-                raise HTTPException(
-                    status_code=400, 
-                    detail="Format de fichier non supporté. Utilisez une image (JPEG, PNG, WEBP) ou un PDF."
-                )
             file_bytes = await file.read()
             if file_bytes:
+                content_type = file.content_type or "image/jpeg"
                 contents_list.append({
-                    "mime_type": file.content_type,
+                    "mime_type": content_type,
                     "data": file_bytes
                 })
 
@@ -101,7 +97,7 @@ async def chiffrer_page(
         )
 
         total_keys = len(keys_pool)
-        last_error_message = "Erreur inconnue"
+        last_error = ""
 
         for attempt in range(total_keys):
             selected_key_idx = (current_key_index + attempt) % total_keys
@@ -110,50 +106,35 @@ async def chiffrer_page(
             genai.configure(api_key=api_key)
 
             for model_name in MODELS_PRIORITY:
-                backoff_delay = 1
-                success_flag = True
+                try:
+                    model = genai.GenerativeModel(
+                        model_name=model_name,
+                        generation_config=generation_config
+                    )
+                    response = model.generate_content(contents_list)
 
-                for retry_attempt in range(3):
-                    try:
-                        model = genai.GenerativeModel(
-                            model_name=model_name,
-                            generation_config=generation_config
-                        )
-                        response = model.generate_content(contents_list)
+                    raw_text = response.text or "[]"
+                    clean_json = raw_text.replace("```json", "").replace("```", "").strip()
 
-                        raw_text = response.text or "[]"
-                        clean_json = raw_text.replace("```json", "").replace("```", "").strip()
+                    current_key_index = (selected_key_idx + 1) % total_keys
 
-                        current_key_index = (selected_key_idx + 1) % total_keys
+                    return JSONResponse(content={"page": page_num, "raw_json": clean_json})
 
-                        return JSONResponse(content={"page": page_num, "raw_json": clean_json})
+                except Exception as inner_e:
+                    err_msg = str(inner_e)
+                    last_error = err_msg
+                    print(f"Échec Clé N°{selected_key_idx + 1} ({model_name}) : {err_msg}")
+                    if "429" in err_msg.lower() or "quota" in err_msg.lower():
+                        time.sleep(1)
+                        continue
+                    else:
+                        continue
 
-                    except Exception as inner_e:
-                        err_msg = str(inner_e).lower()
-                        last_error_message = str(inner_e) # On sauvegarde la VRAIE erreur
-                        
-                        print(f"Échec Clé N°{selected_key_idx + 1} ({model_name}) - Tentative {retry_attempt + 1}: {last_error_message}")
-                        
-                        if "429" in err_msg or "quota" in err_msg or "resource_exhausted" in err_msg:
-                            sleep_time = backoff_delay + random.uniform(0.1, 0.4)
-                            time.sleep(sleep_time)
-                            backoff_delay *= 2
-                            continue
-                        else:
-                            success_flag = False
-                            break
-                
-                if not success_flag:
-                    break
-
-        # On affiche la vraie cause de l'échec si toutes les tentatives échouent
         raise HTTPException(
             status_code=500, 
-            detail=f"Échec de l'API Gemini. Cause réelle : {last_error_message}"
+            detail=f"Échec de l'API Gemini. Cause réelle : {last_error}"
         )
 
-    except HTTPException as he:
-        raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
