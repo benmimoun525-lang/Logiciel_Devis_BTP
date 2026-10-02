@@ -1,176 +1,202 @@
 import os
+import json
 import io
-import time
-import tempfile
-import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
 import google.generativeai as genai
+import openpyxl
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl.utils import get_column_letter
 
-app = FastAPI()
+app = FastAPI(title="Logiciel Devis BTP - Extraction Gemini & Export Excel DZD")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configurer la clé Gemini depuis les variables d'environnement Render
+GEMINI_KEY = os.environ.get("GEMINI_KEY_1") or os.environ.get("GEMINI_API_KEY")
+if GEMINI_KEY:
+    genai.configure(api_key=GEMINI_KEY)
 
-current_key_index = 0
+# Prompts pour l'analyse des devis BTP
+SYSTEM_PROMPT = """
+Vous êtes un expert en métré et devis BTP.
+Analysez l'image ou le document PDF fourni et extrayez la liste de tous les articles/prestation du devis.
 
-def get_api_keys_pool():
-    keys = []
-    for key, value in os.environ.items():
-        if key.startswith("GEMINI_KEY_") or key in ("GEMINI_API_KEY", "GEMINI_KEY", "GEMINI_API_KEYS"):
-            if value and value.strip():
-                keys.append(value.strip())
-    return keys
+Retournez EXCLUSIVEMENT un objet JSON valide suivant exactement ce schéma (aucun texte avant ou après, pas de balises markdown) :
+{
+  "titre_devis": "Titre ou Référence du Devis",
+  "client": "Nom du client si disponible",
+  "items": [
+    {
+      "designation": "Description des travaux ou fourniture",
+      "unite": "m2, m3, ml, kg, ens, u, etc.",
+      "quantite": 0.0,
+      "prix_unitaire_ht": 0.0
+    }
+  ]
+}
+"""
 
-# Modèles Gemini officiels et valides par ordre de priorité
-MODELS_PRIORITY = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+
+def parse_gemini_response(response_text: str) -> dict:
+    """Nettoie la réponse texte de Gemini pour extraire le JSON valide."""
+    clean_text = response_text.strip()
+    if clean_text.startswith("```json"):
+        clean_text = clean_text[7:]
+    if clean_text.startswith("```"):
+        clean_text = clean_text[3:]
+    if clean_text.endswith("```"):
+        clean_text = clean_text[:-3]
+    clean_text = clean_text.strip()
+    return json.loads(clean_text)
+
+
+def create_excel_dzd(devis_data: dict) -> io.BytesIO:
+    """Génère un fichier Excel professionnel aux normes algériennes (TVA 19% + DZD)."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Devis BTP"
+    ws.views.sheetView[0].showGridLines = True
+
+    # Couleurs & Styles
+    header_fill = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
+    header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    bold_font = Font(name="Calibri", size=11, bold=True)
+    normal_font = Font(name="Calibri", size=11)
+    
+    thin_border = Border(
+        left=Side(style='thin', color='D9D9D9'),
+        right=Side(style='thin', color='D9D9D9'),
+        top=Side(style='thin', color='D9D9D9'),
+        bottom=Side(style='thin', color='D9D9D9')
+    )
+    
+    # Format numérique monétaire DZD
+    dzd_format = '#,##0.00 "DZD"'
+
+    # En-tête du document
+    ws['A1'] = "DEVIS BTP / FACTURE PROFORMA"
+    ws['A1'].font = Font(name="Calibri", size=16, bold=True, color="1F4E78")
+    
+    titre = devis_data.get("titre_devis", "Devis BTP")
+    client = devis_data.get("client", "Client")
+    ws['A3'] = f"Référence / Objet : {titre}"
+    ws['A3'].font = bold_font
+    ws['A4'] = f"Client : {client}"
+    ws['A4'].font = bold_font
+
+    # Entêtes du tableau
+    headers = ["N°", "Désignation des travaux", "Unité", "Quantité", "P.U HT (DZD)", "Montant HT (DZD)"]
+    start_row = 6
+    
+    for col_num, header_title in enumerate(headers, 1):
+        cell = ws.cell(row=start_row, column=col_num)
+        cell.value = header_title
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center" if col_num in [1, 3] else "left", vertical="center")
+
+    items = devis_data.get("items", [])
+    current_row = start_row + 1
+
+    # Injection des lignes du devis
+    for idx, item in enumerate(items, 1):
+        ws.cell(row=current_row, column=1, value=idx).alignment = Alignment(horizontal="center")
+        ws.cell(row=current_row, column=2, value=item.get("designation", ""))
+        ws.cell(row=current_row, column=3, value=item.get("unite", "")).alignment = Alignment(horizontal="center")
+        
+        qty_cell = ws.cell(row=current_row, column=4, value=float(item.get("quantite", 0)))
+        qty_cell.number_format = "#,##0.00"
+        
+        pu_cell = ws.cell(row=current_row, column=5, value=float(item.get("prix_unitaire_ht", 0)))
+        pu_cell.number_format = dzd_format
+        
+        # Formule pour le Total HT de la ligne
+        total_cell = ws.cell(row=current_row, column=6, value=f"=D{current_row}*E{current_row}")
+        total_cell.number_format = dzd_format
+
+        for col_num in range(1, 7):
+            c = ws.cell(row=current_row, column=col_num)
+            c.font = normal_font
+            c.border = thin_border
+
+        current_row += 1
+
+    # Totaux (Total HT, TVA 19%, Total TTC)
+    totaux_start = current_row + 1
+    
+    # Total HT
+    ws.cell(row=totaux_start, column=5, value="Total HT :").font = bold_font
+    tht_cell = ws.cell(row=totaux_start, column=6, value=f"=SUM(F{start_row + 1}:F{current_row - 1})")
+    tht_cell.font = bold_font
+    tht_cell.number_format = dzd_format
+
+    # TVA 19%
+    ws.cell(row=totaux_start + 1, column=5, value="TVA (19%) :").font = bold_font
+    tva_cell = ws.cell(row=totaux_start + 1, column=6, value=f"=F{totaux_start}*0.19")
+    tva_cell.font = bold_font
+    tva_cell.number_format = dzd_format
+
+    # Total TTC
+    ws.cell(row=totaux_start + 2, column=5, value="Total TTC :").font = Font(name="Calibri", size=12, bold=True, color="1F4E78")
+    ttc_cell = ws.cell(row=totaux_start + 2, column=6, value=f"=F{totaux_start}+F{totaux_start + 1}")
+    ttc_cell.font = Font(name="Calibri", size=12, bold=True, color="1F4E78")
+    ttc_cell.number_format = dzd_format
+
+    # Ajustement automatique de la largeur des colonnes
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        col_letter = get_column_letter(col[0].column)
+        ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+    ws.column_dimensions['B'].width = 45  # Plus large pour la désignation
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+
 
 @app.get("/")
-def afficher_interface():
-    if os.path.exists("index.html"):
-        return FileResponse("index.html")
-    return JSONResponse(content={"status": "ok", "message": "Serveur BTP opérationnel."})
+def root():
+    return {"status": "ok", "message": "API Logiciel Devis BTP - Operational"}
 
-@app.get("/status")
-def read_status():
-    keys_count = len(get_api_keys_pool())
-    return {"status": "ok", "message": f"Serveur BTP opérationnel ({keys_count} clés API détectées)."}
 
-@app.post("/chiffrer-page")
-async def chiffrer_page(
-    file: UploadFile = File(None),
-    texte_descriptif: str = Form(None),
-    page_num: int = Form(1)
-):
-    global current_key_index
-    tmp_file_path = None
-    
+@app.post("/extract-devis/")
+async def extract_devis(file: UploadFile = File(...)):
+    """Reçoit une image ou un PDF, extrait les données via Gemini et renvoie le JSON."""
+    if not GEMINI_KEY:
+        raise HTTPException(status_code=500, detail="Clé GEMINI_KEY_1 non configurée sur Render.")
+
     try:
-        keys_pool = get_api_keys_pool()
-        if not keys_pool:
-            raise HTTPException(
-                status_code=500, 
-                detail="Aucune clé API configurée sur Render. Ajoutez GEMINI_API_KEY dans les variables d'environnement."
-            )
+        content = await file.read()
+        mime_type = file.content_type or "image/jpeg"
 
-        prompt_base = (
-            f"Tu es un expert métreur BTP en Algérie.\n"
-            f"Analyse CETTE PAGE (Page {page_num}) d'un devis chiffré par LOTS.\n"
-            "Extrait tous les articles en identifiant clairement les LOTS (ex: 'Lot 01: Terrassement') et la numérotation des articles qui recommence à 1 pour chaque lot.\n\n"
-            "FORMAT DE RÉPONSE STRICT (JSON UNIQUEMENT) :\n"
-            "[\n"
-            "  {\"lot\": \"Nom du Lot ou de la Section\", \"n\": 1, \"d\": \"Désignation précise\", \"u\": \"m3\", \"q\": 10, \"pu\": 12000}\n"
-            "]\n\n"
-            "CONSIGNES :\n"
-            "- Si la page commence par un nouveau lot, indique-le dans le champ 'lot'.\n"
-            "- 'n' = Numéro de l'article dans son lot (recommence à 1 par lot).\n"
-            "- 'pu' = Estime un Prix Unitaire HT réaliste en DZD pour le marché algérien.\n"
-            "- RÈGLE ABSOLUE : Renvoie UNIQUEMENT le tableau JSON, aucun texte avant, aucun texte après."
-        )
+        # Utilisation du modèle stable 'gemini-1.5-flash'
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        
+        image_part = {
+            "mime_type": mime_type,
+            "data": content
+        }
 
-        contents_list = [prompt_base]
-        if texte_descriptif and texte_descriptif.strip():
-            contents_list.append(f"\n--- DESCRIPTIF ---\n{texte_descriptif.strip()}")
+        response = model.generate_content([SYSTEM_PROMPT, image_part])
+        parsed_json = parse_gemini_response(response.text)
+        
+        return {"success": True, "data": parsed_json}
 
-        if file:
-            file_bytes = await file.read()
-            if file_bytes:
-                filename = (file.filename or "").lower()
-                content_type = (file.content_type or "").lower()
-                
-                # Rejet explicite des fichiers Word (.docx)
-                if filename.endswith(('.doc', '.docx')) or "word" in content_type:
-                    raise HTTPException(
-                        status_code=400, 
-                        detail="Les fichiers Word (.docx) ne sont pas supportés directement par l'IA. Veuillez les convertir en PDF ou envoyer une image."
-                    )
-                
-                # Traitement des fichiers PDF via l'API File de Google Gemini
-                if filename.endswith('.pdf') or "pdf" in content_type:
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-                        tmp_file.write(file_bytes)
-                        tmp_file_path = tmp_file.name
-                
-                # Traitement des images (JPG, PNG, WEBP, etc.)
-                else:
-                    mime = content_type if "image" in content_type else "image/jpeg"
-                    contents_list.append({"mime_type": mime, "data": file_bytes})
-
-        total_keys = len(keys_pool)
-        last_error = ""
-
-        for attempt in range(total_keys):
-            selected_key_idx = (current_key_index + attempt) % total_keys
-            active_key = keys_pool[selected_key_idx]
-            genai.configure(api_key=active_key)
-            key_failed_due_to_quota = False
-
-            # Transfert du PDF à l'API File Gemini si présent
-            gemini_file_part = None
-            if tmp_file_path:
-                try:
-                    gemini_file_part = genai.upload_file(tmp_file_path, mime_type="application/pdf")
-                except Exception as upload_err:
-                    last_error = f"Erreur Upload PDF: {str(upload_err)}"
-                    continue
-
-            current_contents = list(contents_list)
-            if gemini_file_part:
-                current_contents.append(gemini_file_part)
-
-            for model_name in MODELS_PRIORITY:
-                try:
-                    model = genai.GenerativeModel(model_name=model_name)
-                    response = model.generate_content(
-                        current_contents,
-                        generation_config={"max_output_tokens": 4096, "temperature": 0.0}
-                    )
-
-                    raw_text = response.text or "[]"
-                    clean_json = raw_text.replace("```json", "").replace("```", "").strip()
-
-                    current_key_index = (selected_key_idx + 1) % total_keys
-                    time.sleep(0.5)
-
-                    # Nettoyage du fichier distant chez Gemini
-                    if gemini_file_part:
-                        try:
-                            genai.delete_file(gemini_file_part.name)
-                        except Exception:
-                            pass
-
-                    return JSONResponse(content={"page": page_num, "raw_json": clean_json})
-
-                except Exception as inner_e:
-                    err_msg = str(inner_e).lower()
-                    last_error = f"Modèle {model_name}: {str(inner_e)}"
-                    if "429" in err_msg or "quota" in err_msg or "resource_exhausted" in err_msg:
-                        key_failed_due_to_quota = True
-                        break
-                    else:
-                        continue
-
-            if key_failed_due_to_quota:
-                time.sleep(1)
-                continue
-
-        raise HTTPException(status_code=500, detail=f"Erreur d'extraction Gemini : {last_error}")
-
-    except HTTPException as http_e:
-        raise http_e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur interne du serveur : {str(e)}")
-    finally:
-        # Suppression du fichier temporaire local
-        if tmp_file_path and os.path.exists(tmp_file_path):
-            try:
-                os.remove(tmp_file_path)
-            except Exception:
-                pass
+        raise HTTPException(status_code=500, detail=f"Erreur d'extraction : {str(e)}")
+
+
+@app.post("/generate-excel/")
+async def generate_excel_endpoint(devis_data: dict):
+    """Reçoit le JSON du devis et génère le fichier Excel DZD avec TVA 19%."""
+    try:
+        excel_stream = create_excel_dzd(devis_data)
+        filename = "Devis_BTP_19percent.xlsx"
+        
+        return StreamingResponse(
+            excel_stream,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur de génération Excel : {str(e)}")
