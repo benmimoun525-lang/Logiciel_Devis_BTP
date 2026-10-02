@@ -18,7 +18,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Chargement intelligent des clés GEMINI_KEY_X
 def get_gemini_keys():
     keys = []
     for k, v in os.environ.items():
@@ -27,23 +26,6 @@ def get_gemini_keys():
     return list(set(keys))
 
 API_KEYS = get_gemini_keys()
-
-def configure_random_key():
-    if not API_KEYS:
-        raise HTTPException(status_code=500, detail="Aucune clé GEMINI_KEY configurée sur Render.")
-    selected_key = random.choice(API_KEYS)
-    genai.configure(api_key=selected_key)
-    return selected_key
-
-def get_gemini_model():
-    configure_random_key()
-    # Modèles actifs supportés
-    for model_name in ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash-latest"]:
-        try:
-            return genai.GenerativeModel(model_name)
-        except Exception:
-            continue
-    return genai.GenerativeModel("gemini-2.5-flash")
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
@@ -69,51 +51,71 @@ async def chiffrer_page(
     if not file and not texte_descriptif.strip():
         raise HTTPException(status_code=400, detail="Veuillez fournir un fichier ou un descriptif textuel.")
 
-    model = get_gemini_model()
-    prompt = """
-    Tu es un métreur expert en BTP algérien. 
-    Analyse ce document/descriptif et extrait la liste des articles avec leurs prix sous forme de tableau JSON strict.
-    
-    Structure JSON attendue (sans balises markdown extra, uniquement le tableau JSON) :
-    [
-      {
-        "lot": "Nom du lot (ex: Maçonnerie, Béton, Peinture)",
-        "n": 1,
-        "d": "Désignation claire des travaux",
-        "u": "Unité (m², m³, kg, u, ens)",
-        "q": 10.0,
-        "pu": 1500.0
-      }
-    ]
-    Si le prix unitaire n'est pas précisé, estime-le selon les tarifs moyens BTP en DZD.
-    """
+    if not API_KEYS:
+        raise HTTPException(status_code=500, detail="Aucune clé GEMINI_KEY configurée sur Render.")
 
-    try:
-        contents = [prompt]
-        
-        if file:
-            file_bytes = await file.read()
-            mime_type = file.content_type or "image/jpeg"
+    # Lecture du fichier en mémoire avant la boucle d'essais
+    file_bytes = None
+    mime_type = "image/jpeg"
+    if file:
+        file_bytes = await file.read()
+        mime_type = file.content_type or "image/jpeg"
+
+    last_exception = None
+
+    # Test successif de chaque clé API jusqu'à succès
+    for key in API_KEYS:
+        try:
+            genai.configure(api_key=key)
             
-            if "pdf" in mime_type:
-                temp_filename = f"temp_{file.filename}"
-                with open(temp_filename, "wb") as f_out:
-                    f_out.write(file_bytes)
-                uploaded_file = genai.upload_file(temp_filename)
-                contents.append(uploaded_file)
-            else:
-                contents.append({"mime_type": mime_type, "data": file_bytes})
+            # Modèle actif Gemini
+            model = genai.GenerativeModel("gemini-2.5-flash")
 
-        if texte_descriptif.strip():
-            contents.append(f"Consignes supplémentaires : {texte_descriptif}")
+            prompt = """
+            Tu es un métreur expert en BTP algérien. 
+            Analyse ce document/descriptif et extrait la liste des articles avec leurs prix sous forme de tableau JSON strict.
+            
+            Structure JSON attendue (sans balises markdown extra, uniquement le tableau JSON) :
+            [
+              {
+                "lot": "Nom du lot (ex: Maçonnerie, Béton, Peinture)",
+                "n": 1,
+                "d": "Désignation claire des travaux",
+                "u": "Unité (m², m³, kg, u, ens)",
+                "q": 10.0,
+                "pu": 1500.0
+              }
+            ]
+            Si le prix unitaire n'est pas précisé, estime-le selon les tarifs moyens BTP en DZD.
+            """
 
-        response = model.generate_content(contents)
-        raw_text = response.text.replace("```json", "").replace("```", "").strip()
-        
-        return {"raw_json": raw_text}
+            contents = [prompt]
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur d'extraction Gemini : {str(e)}")
+            if file_bytes:
+                if "pdf" in mime_type:
+                    temp_filename = f"temp_{random.randint(1000, 9999)}.pdf"
+                    with open(temp_filename, "wb") as f_out:
+                        f_out.write(file_bytes)
+                    uploaded_file = genai.upload_file(temp_filename)
+                    contents.append(uploaded_file)
+                    if os.path.exists(temp_filename):
+                        os.remove(temp_filename)
+                else:
+                    contents.append({"mime_type": mime_type, "data": file_bytes})
+
+            if texte_descriptif.strip():
+                contents.append(f"Consignes supplémentaires : {texte_descriptif}")
+
+            response = model.generate_content(contents)
+            raw_text = response.text.replace("```json", "").replace("```", "").strip()
+            
+            return {"raw_json": raw_text}
+
+        except Exception as e:
+            last_exception = e
+            continue  # Essayer la clé suivante en cas d'erreur
+
+    raise HTTPException(status_code=500, detail=f"Échec avec toutes les clés. Dernière erreur : {str(last_exception)}")
 
 @app.post("/exporter-excel")
 async def exporter_excel(data: dict):
