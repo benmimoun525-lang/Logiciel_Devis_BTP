@@ -127,7 +127,11 @@ async def chiffrer_page(
 
             for model_name in MODELS_PRIORITY:
                 try:
-                    model = genai.GenerativeModel(model_name=model_name)
+                    # Essai prioritaire sur le modèle 2.0 / 2.5 flash, puis bascule automatique
+try:
+    model = genai.GenerativeModel("gemini-2.0-flash")
+except Exception:
+    model = genai.GenerativeModel("gemini-2.5-flash")
                     response = model.generate_content(
                         current_contents,
                         generation_config={"max_output_tokens": 4096, "temperature": 0.0}
