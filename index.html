@@ -2,1779 +2,294 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Devis BTP Algérie - Chiffrage par IA & Devis par Lots</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e3a8a">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1048/1048953.png">
-    
-    <!-- PDF.js pour extraction visuelle multi-pages instantanée -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logiciel Devis BTP - Chiffrage IA</title>
+    <!-- Tailwind CSS pour un design propre et mobile-friendly -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #1e3a8a;
-            --primary-light: #2563eb;
-            --primary-bg: #eff6ff;
-            --secondary: #0f172a;
-            --accent: #d97706;
-            --accent-hover: #b45309;
-            --success: #16a34a;
-            --success-bg: #dcfce7;
-            --danger: #dc2626;
-            --danger-bg: #fee2e2;
-            --gray-50: #f8fafc;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
-            --modal-shadow: 0 20px 25px -5px rgba(0,0,0,0.2), 0 8px 10px -6px rgba(0,0,0,0.1);
-        }
-
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #f1f5f9;
-            color: var(--secondary);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.5;
-        }
-
-        .container { max-width: 1200px; margin: 0 auto; }
-
-        /* Header moderne */
-        .app-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 70%, #2563eb 100%);
-            color: white;
-            border-radius: 14px;
-            padding: 24px 30px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .app-header h1 {
-            margin: 0;
-            font-size: 1.65rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .app-header p {
-            margin: 5px 0 0;
-            opacity: 0.88;
-            font-size: 0.95rem;
-        }
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .btn-header {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.88rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.2s;
-        }
-        .btn-header:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-1px);
-        }
-
-        /* Cartes & sections */
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 22px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 22px;
-            border: 1px solid var(--gray-200);
-        }
-        .card-title {
-            margin: 0 0 16px;
-            font-size: 1.25rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 2px solid var(--primary-bg);
-            padding-bottom: 10px;
-        }
-
-        /* Grilles & Formulaires */
-        .form-grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-bottom: 6px;
-        }
-        .form-control {
-            padding: 10px 12px;
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            transition: border-color 0.2s;
-            outline: none;
-        }
-        .form-control:focus {
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-
-        /* Zone d'importation drag-and-drop */
-        .dropzone {
-            border: 2px dashed #3b82f6;
-            background: #eff6ff;
-            border-radius: 10px;
-            padding: 28px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            position: relative;
-        }
-        .dropzone:hover {
-            background: #dbeafe;
-            border-color: #1d4ed8;
-        }
-        .dropzone input[type="file"] {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; cursor: pointer;
-        }
-        .dropzone-icon { font-size: 2.5rem; margin-bottom: 8px; }
-        .dropzone-text { font-weight: 600; color: #1e40af; margin-bottom: 4px; }
-        .dropzone-hint { font-size: 0.82rem; color: #64748b; }
-
-        /* Grille des vignettes */
-        .thumbnails-grid {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-top: 18px;
-        }
-        .thumb-card {
-            width: 140px;
-            background: white;
-            border: 2px solid var(--gray-300);
-            border-radius: 10px;
-            padding: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-        }
-        .thumb-card:hover {
-            border-color: var(--primary-light);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-        }
-        .thumb-card.active {
-            border-color: var(--primary-light);
-            background: var(--primary-bg);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
-        }
-        .thumb-img {
-            width: 100%;
-            height: 95px;
-            object-fit: cover;
-            border-radius: 6px;
-            background: var(--gray-200);
-        }
-        .thumb-title {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--secondary);
-            margin: 6px 0 2px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .thumb-badge {
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-top: auto;
-        }
-        .badge-attente { background: #fef3c7; color: #92400e; }
-        .badge-cours { background: #e0e7ff; color: #3730a3; }
-        .badge-traite { background: #dcfce7; color: #166534; }
-        .badge-erreur { background: #fee2e2; color: #991b1b; }
-
-        .thumb-tools {
-            display: flex;
-            justify-content: center;
-            gap: 4px;
-            margin-top: 6px;
-        }
-        .btn-mini {
-            background: var(--gray-100);
-            border: 1px solid var(--gray-300);
-            border-radius: 4px;
-            padding: 2px 5px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-        .btn-mini:hover { background: var(--gray-200); }
-
-        /* Panneau d'inspection grand format */
-        .preview-pane {
-            margin-top: 20px;
-            border: 2px solid var(--primary-light);
-            border-radius: 12px;
-            padding: 16px;
-            background: #f8fafc;
-            display: none;
-        }
-        .preview-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .preview-title { font-weight: 700; color: var(--primary); font-size: 1.05rem; }
-        .preview-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .preview-content {
-            background: #0f172a;
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            max-height: 520px;
-            overflow: auto;
-            position: relative;
-        }
-        .preview-content img, .preview-content canvas {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-        }
-
-        /* Boutons d'action */
-        .btn {
-            background: var(--primary-light);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        .btn:hover { background: #1d4ed8; transform: translateY(-1px); }
-        .btn:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
-
-        .btn-accent { background: var(--accent); }
-        .btn-accent:hover { background: var(--accent-hover); }
-
-        .btn-success { background: var(--success); }
-        .btn-success:hover { background: #15803d; }
-
-        .btn-outline {
-            background: white;
-            border: 1px solid var(--gray-300);
-            color: var(--secondary);
-        }
-        .btn-outline:hover { background: var(--gray-100); }
-
-        .btn-danger { background: var(--danger); }
-        .btn-danger:hover { background: #b91c1c; }
-
-        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
-
-        /* Barre de progression */
-        .progress-box {
-            display: none;
-            margin-top: 15px;
-            background: #e2e8f0;
-            border-radius: 8px;
-            height: 18px;
-            overflow: hidden;
-            position: relative;
-        }
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #10b981);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        .progress-label {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: #0f172a;
-            line-height: 18px;
-        }
-
-        /* Console d'état */
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        .status-idle { background: #e2e8f0; color: #475569; }
-        .status-busy { background: #fef3c7; color: #92400e; }
-        .status-done { background: #dcfce7; color: #166534; }
-        .status-err { background: #fee2e2; color: #991b1b; }
-
-        .log-box {
-            background: #0f172a;
-            color: #4ade80;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-family: 'Consolas', monospace;
-            font-size: 0.85rem;
-            margin-top: 12px;
-            max-height: 160px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            border-left: 4px solid #3b82f6;
-        }
-
-        /* TABLEAU DU DEVIS INTERACTIF (Le Coeur de l'outil) */
-        .devis-table-wrapper {
-            overflow-x: auto;
-            margin-top: 15px;
-        }
-        .lot-block {
-            background: white;
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            margin-bottom: 18px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .lot-header {
-            background: #1e3a8a;
-            color: white;
-            padding: 10px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 700;
-            font-size: 1rem;
-        }
-        .lot-header input {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            font-weight: 700;
-            font-size: 1rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-            width: 60%;
-        }
-        .lot-header input:focus { background: white; color: #0f172a; outline: none; }
-        .lot-subtotal-badge {
-            background: #3b82f6;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.88rem;
-            font-weight: bold;
-        }
-
-        .devis-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-        .devis-table th {
-            background: #f8fafc;
-            color: #475569;
-            font-weight: 700;
-            padding: 10px 12px;
-            border-bottom: 2px solid var(--gray-200);
-            text-align: left;
-        }
-        .devis-table td {
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--gray-200);
-            vertical-align: middle;
-        }
-        .devis-table tr:hover { background: #f8fafc; }
-        .devis-table input, .devis-table select {
-            width: 100%;
-            padding: 6px 8px;
-            border: 1px solid var(--gray-300);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-        .devis-table input:focus, .devis-table select:focus {
-            border-color: var(--primary-light);
-            background: #eff6ff;
-        }
-        .col-num { width: 55px; text-align: center; }
-        .col-des { width: 44%; }
-        .col-uni { width: 85px; }
-        .col-qte { width: 100px; text-align: right; }
-        .col-pu { width: 130px; text-align: right; }
-        .col-tot { width: 140px; text-align: right; font-weight: bold; color: #1e3a8a; }
-        .col-act { width: 80px; text-align: center; }
-
-        .lot-footer {
-            padding: 10px 16px;
-            background: #f8fafc;
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Dashboard Récapitulatif BTP & Totaux */
-        .summary-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        @media (max-width: 850px) {
-            .summary-grid { grid-template-columns: 1fr; }
-        }
-
-        .recap-card {
-            background: #f8fafc;
-            border-radius: 10px;
-            border: 1px solid var(--gray-300);
-            padding: 16px;
-        }
-        .recap-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-        .recap-table td {
-            padding: 6px 10px;
-            border-bottom: 1px solid var(--gray-200);
-        }
-        .recap-table td.val {
-            text-align: right;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .totals-card {
-            background: #eff6ff;
-            border-radius: 10px;
-            border: 2px solid #bfdbfe;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.95rem;
-        }
-        .total-row.grand-total {
-            border-top: 2px dashed #93c5fd;
-            padding-top: 10px;
-            margin-top: 6px;
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: #1e3a8a;
-        }
-        .lettres-box {
-            background: white;
-            border: 1px solid #bfdbfe;
-            border-radius: 6px;
-            padding: 10px;
-            font-style: italic;
-            font-size: 0.85rem;
-            color: #334155;
-            margin-top: 10px;
-        }
-
-        /* Modals */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.65);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-        .modal {
-            background: white;
-            border-radius: 14px;
-            max-width: 650px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--modal-shadow);
-            padding: 24px;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-            border-bottom: 1px solid var(--gray-200);
-            padding-bottom: 10px;
-        }
-        .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
-        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; }
-
-        /* Carte des abonnements / formules */
-        .plan-card {
-            border: 2px solid var(--gray-300);
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 12px;
-            transition: 0.2s;
-        }
-        .plan-card:hover { border-color: var(--primary-light); background: var(--primary-bg); }
-        .plan-title { font-weight: 700; font-size: 1.05rem; color: var(--primary); }
-        .plan-price { font-weight: 800; font-size: 1.15rem; color: var(--accent); margin: 4px 0; }
-        .plan-desc { font-size: 0.85rem; color: var(--gray-600); }
-
-        /* ADAPTATION SPÉCIALE SMARTPHONE */
-        @media (max-width: 768px) {
-            body { padding: 10px; }
-            .app-header { padding: 16px; }
-            .app-header h1 { font-size: 1.3rem; }
-            .card { padding: 14px; }
-            .form-grid-3 { grid-template-columns: 1fr; }
-            .thumb-card { width: 105px; padding: 6px; }
-            .thumb-img { height: 75px; }
-            .devis-table th, .devis-table td { padding: 6px 8px; font-size: 0.82rem; }
-            .col-des { min-width: 180px; }
-            .btn { width: 100%; justify-content: center; }
-            .btn-group { width: 100%; }
-        }
-
-        /* STYLES IMPRESSION / PDF PRO */
-        @media print {
-            body { background: white; padding: 0; color: black; font-size: 10pt; }
-            .container { max-width: 100%; }
-            .no-print, .app-header, .dropzone, .thumbnails-grid, .preview-pane, .log-box, .status-pill, .btn, .lot-footer, .col-act, .btn-header {
-                display: none !important;
-            }
-            .card { border: none; box-shadow: none; padding: 0; margin-bottom: 10px; }
-            .print-header { display: flex !important; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; }
-            .devis-table th { background: #1e3a8a !important; color: white !important; -webkit-print-color-adjust: exact; }
-            .lot-header { background: #dbeafe !important; color: #1e3a8a !important; -webkit-print-color-adjust: exact; }
-            .lot-header input { border: none; background: transparent; color: #1e3a8a; font-weight: bold; }
-            .devis-table td input, .devis-table td select { border: none; background: transparent; }
-            .print-signatures { display: flex !important; justify-content: space-between; margin-top: 40px; page-break-inside: avoid; }
-            .sig-box { width: 45%; border: 1px solid #94a3b8; height: 110px; padding: 10px; font-weight: bold; text-align: center; }
-        }
-        .print-header, .print-signatures { display: none; }
+        body { background-color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .bg-navy { background-color: #1e3a8a; }
+        .text-navy { color: #1e3a8a; }
+        .border-navy { border-color: #1e3a8a; }
     </style>
 </head>
-<body>
+<body class="pb-12">
 
-<div class="container">
-
-    <!-- En-tête officiel imprimable -->
-    <div id="printHeader" class="print-header">
-        <div>
-            <h2 id="pEntNom" style="margin: 0; color: #1e3a8a;">ENTREPRISE TRAVAUX BTP</h2>
-            <div id="pEntAdr" style="font-size: 0.85rem; color: #475569;">Adresse de l'entreprise</div>
-            <div id="pEntTel" style="font-size: 0.85rem; color: #475569;">Tél : 0550 00 00 00</div>
-            <div id="pEntNif" style="font-size: 0.82rem; color: #64748b;">NIF / RC : En cours</div>
-        </div>
-        <div style="text-align: right;">
-            <h3 id="pNumDevis" style="margin: 0; color: #1e3a8a;">DEVIS ESTIMATIF</h3>
-            <div id="pDateDevis" style="font-size: 0.85rem;">Date : --/--/----</div>
-            <div id="pClient" style="font-size: 0.95rem; font-weight: bold; margin-top: 5px;">Client : ---</div>
-            <div id="pProjet" style="font-size: 0.85rem; color: #475569;">Projet : ---</div>
-        </div>
-    </div>
-
-    <!-- Header Interactif Application -->
-    <header class="app-header no-print">
-        <div>
-            <h1>🏗️ Chiffrage Devis BTP <span style="font-size: 0.85rem; background: #3b82f6; padding: 3px 8px; border-radius: 6px;">IA Algérie</span></h1>
-            <p>Traitement instantané des photos WhatsApp & PDF multi-pages en devis par lots aux normes algériennes.</p>
-        </div>
-        <div class="header-actions">
-            <button class="btn-header" onclick="ouvrirModalEntreprise()">🏢 Profil Entreprise</button>
-            <button class="btn-header" onclick="ouvrirModalAbonnements()">💳 Tarifs & Abonnements</button>
-            <button class="btn-header" onclick="nouveauDevis()">🔄 Nouveau Devis</button>
+    <!-- En-tête -->
+    <header class="bg-navy text-white shadow-md py-4 px-6 mb-6 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-helmet-safety text-amber-400 text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wide">Devis Express BTP</h1>
+            </div>
+            <span id="server-status" class="text-xs bg-blue-900 text-blue-200 px-3 py-1 rounded-full flex items-center">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full mr-2"></span> Connecté
+            </span>
         </div>
     </header>
 
-    <!-- Étape 1 : Paramètres du Devis & Client -->
-    <div class="card no-print">
-        <div class="card-title">
-            <span>📋 1. Identification du Devis & Client</span>
-            <span id="storageStatus" style="font-size: 0.8rem; font-weight: normal; color: var(--gray-600);">Auto-sauvegardé ✓</span>
-        </div>
-        <div class="form-grid-3">
-            <div class="form-group">
-                <label>👤 Nom du Client ou Maître d'Ouvrage :</label>
-                <input type="text" id="nomClient" class="form-control" placeholder="Ex: Promotion Immobilière El Bahdja" oninput="sauvegarderLocalement()">
+    <main class="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-12 gap-6">
+
+        <!-- PANNEAU GAUCHE : Saisie et Fichier -->
+        <section class="md:col-span-5 bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+            <h2 class="text-lg font-semibold text-slate-800 border-b pb-2 flex items-center">
+                <i class="fa-solid fa-file-invoice text-navy mr-2"></i> Document à chiffrer
+            </h2>
+
+            <!-- Nom du projet -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Nom du Projet / Client</label>
+                <input type="text" id="nom_client" value="Projet_BTP_Client" 
+                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
-            <div class="form-group">
-                <label>🏗️ Intitulé du Chantier / Projet :</label>
-                <input type="text" id="nomProjet" class="form-control" placeholder="Ex: Construction Villa R+2 Blida" oninput="sauvegarderLocalement()">
-            </div>
-            <div class="form-group">
-                <label>🔢 N° de Devis & Date :</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="numDevis" class="form-control" style="width: 55%;" placeholder="DEV-2026-001" oninput="sauvegarderLocalement()">
-                    <input type="text" id="dateDevis" class="form-control" style="width: 45%;" oninput="sauvegarderLocalement()">
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Étape 2 : Chargement des Documents -->
-    <div class="card no-print">
-        <div class="card-title">
-            <span>📄 2. Photos WhatsApp & Documents Numérisés</span>
-            <span id="badgeFichiers" style="font-size: 0.85rem; font-weight: normal; color: #1e40af;">0 document(s)</span>
-        </div>
-
-        <div class="dropzone" id="dropzone">
-            <input type="file" id="fichiersDevis" multiple accept=".pdf,.doc,.docx,image/*" onchange="chargerFichiersInstantane(event)">
-            <div class="dropzone-icon">📥</div>
-            <div class="dropzone-text">Glissez vos photos WhatsApp ou vos fichiers PDF ici</div>
-            <div class="dropzone-hint">Supporte les photos smartphone, scans CamScanner et PDF multi-pages (Compression ultra-rapide)</div>
-        </div>
-
-        <!-- Galerie des vignettes dynamiques -->
-        <div id="thumbnailsGrid" class="thumbnails-grid"></div>
-
-        <!-- Panneau d'inspection grand format avec outils de rotation & zoom -->
-        <div id="previewPane" class="preview-pane">
-            <div class="preview-header">
-                <div id="previewTitle" class="preview-title">Aperçu visuel</div>
-                <div class="preview-toolbar">
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="pivoterImage(-90)">↺ Pivoter -90°</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="pivoterImage(90)">↻ Pivoter +90°</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="zoomImage(0.15)">🔍 Zoom +</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="zoomImage(-0.15)">🔎 Zoom -</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="resetZoom()">⟲ Reset</button>
+            <!-- Upload Fichier -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Photo ou PDF du Devis</label>
+                <div class="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors bg-slate-50"
+                     onclick="document.getElementById('file-input').click()">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
+                    <p class="text-xs text-slate-600 font-medium">Prendre une photo ou choisir un fichier</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Formats : JPG, PNG, WEBP, PDF</p>
+                    <input type="file" id="file-input" accept="image/*,application/pdf" class="hidden" onchange="apercuFichier(event)">
                 </div>
             </div>
 
-            <div id="previewContent" class="preview-content"></div>
-
-            <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="btnLancerPage" class="btn" onclick="traiterPageSelectionnee()">
-                    ⚡ Traiter cette page sélectionnée
-                </button>
-                <button id="btnTraiterTout" class="btn btn-accent" onclick="traiterToutesLesPages()">
-                    🚀 Tout traiter automatiquement (<span id="pagesRestantesBadge">0</span> restantes)
-                </button>
+            <!-- Zone Aperçu Visuel -->
+            <div id="preview-container" class="hidden border rounded-lg overflow-hidden bg-black/5 max-h-56 flex justify-center items-center p-2">
+                <img id="image-preview" src="" alt="Aperçu" class="max-h-52 object-contain hidden">
+                <div id="pdf-preview" class="text-center p-4 hidden">
+                    <i class="fa-solid fa-file-pdf text-red-500 text-4xl mb-2"></i>
+                    <p id="pdf-name" class="text-xs font-medium text-slate-700"></p>
+                </div>
             </div>
-        </div>
 
-        <!-- Barre de progression -->
-        <div id="progressBox" class="progress-box">
-            <div id="progressBar" class="progress-bar"></div>
-            <div id="progressLabel" class="progress-label">0%</div>
-        </div>
+            <!-- Remarques optionnelles -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Descriptif ou consignes particulières</label>
+                <textarea id="texte_descriptif" rows="2" placeholder="ex: Devis pour villa R+1, béton dosé à 350kg..." 
+                    class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+            </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px;">
-            <div id="statusBadge" class="status-pill status-idle">En attente de vos photos ou documents BTP...</div>
-            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="toggleConsole()">
-                🖥️ Console & Logs
+            <!-- Bouton Lancer l'Analyse -->
+            <button onclick="chiffrerPage()" id="btn-analyser" 
+                class="w-full bg-navy hover:bg-blue-900 text-white font-semibold py-2.5 px-4 rounded-lg shadow transition-colors flex justify-center items-center space-x-2 text-sm">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                <span>Extraire & Chiffrer avec l'IA</span>
             </button>
-        </div>
 
-        <div id="logArea" class="log-box" style="display: block;">Console prête. Connecté au moteur de chiffrage BTP.</div>
-    </div>
+            <!-- Message d'état -->
+            <div id="status-message" class="hidden text-center text-xs p-2 rounded-lg"></div>
+        </section>
 
-    <!-- Étape 3 : Tableau Interactif de Révision & Chiffrage par Lots -->
-    <div class="card" id="sectionDevis">
-        <div class="card-title">
-            <span>📊 3. Tableau de Chiffrage par Lots (Articles extraits : <span id="compteurArticles">0</span>)</span>
-            <div class="no-print btn-group">
-                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="ajouterNouveauLot()">
-                    + Ajouter un Lot BTP
+        <!-- PANNEAU DROIT : Résultats et Édition -->
+        <section class="md:col-span-7 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between min-h-[450px]">
+            <div>
+                <div class="flex justify-between items-center border-b pb-2 mb-4">
+                    <h2 class="text-lg font-semibold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-list-check text-navy mr-2"></i> Articles Extraits
+                    </h2>
+                    <span id="count-articles" class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-medium">0 article</span>
+                </div>
+
+                <!-- Tableau interactif -->
+                <div class="overflow-x-auto max-h-[380px] overflow-y-auto border rounded-lg">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold sticky top-0">
+                            <tr>
+                                <th class="p-2 border-b">Lot / N°</th>
+                                <th class="p-2 border-b">Désignation</th>
+                                <th class="p-2 border-b text-center">Unité</th>
+                                <th class="p-2 border-b text-right">Qté</th>
+                                <th class="p-2 border-b text-right">P.U HT (DZD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-articles" class="divide-y divide-slate-200">
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-slate-400">
+                                    <i class="fa-solid fa-arrow-left text-xl mb-2 block hidden md:block"></i>
+                                    Chargez un document et cliquez sur "Extraire" pour générer les prix.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Zone Exportation -->
+            <div class="mt-4 pt-3 border-t flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="text-xs text-slate-500">
+                    Calcul automatique : <span class="font-bold text-slate-700">TVA 19%</span> incluse à l'export.
+                </div>
+                <button onclick="exporterExcel()" id="btn-export" disabled
+                    class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors flex items-center justify-center space-x-2 text-sm">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>Télécharger Devis Excel (.xlsx)</span>
                 </button>
             </div>
-        </div>
+        </section>
 
-        <div id="devisContainer">
-            <div id="emptyDevisState" style="text-align: center; padding: 40px 20px; color: var(--gray-600);">
-                <div style="font-size: 3rem; margin-bottom: 10px;">📋</div>
-                <div style="font-weight: 600; font-size: 1.1rem;">Aucun article chiffré pour le moment</div>
-                <div style="font-size: 0.9rem;">Sélectionnez vos documents ci-dessus et cliquez sur <b>"⚡ Traiter"</b> ou <b>"🚀 Tout traiter"</b>.<br>L'IA identifiera automatiquement les lots, quantités et prix en Dinars Algériens.</div>
-            </div>
-        </div>
+    </main>
 
-        <!-- Étape 4 : Récapitulatif BTP & Totaux Financiers -->
-        <div class="summary-grid" id="summaryGrid" style="display: none;">
-            <div class="recap-card">
-                <h4 style="margin: 0 0 10px; color: var(--primary);">📑 Récapitulatif Général des Lots</h4>
-                <table class="recap-table" id="recapTable"></table>
-            </div>
+    <script>
+        // Chemin relatif universel pour fonctionner sur PC et Render
+        const RENDER_BASE = "";
+        let articlesExtraits = [];
 
-            <div class="totals-card">
-                <div class="total-row">
-                    <span>Total Général H.T :</span>
-                    <span id="totHT" style="font-weight: 700; font-size: 1.05rem;">0.00 DZD</span>
-                </div>
-                
-                <div class="total-row no-print" style="gap: 10px;">
-                    <span style="font-size: 0.88rem;">Remise commerciale (%) :</span>
-                    <input type="number" id="remisePct" class="form-control" style="width: 85px; padding: 4px 8px; text-align: right;" value="0" min="0" max="100" step="0.5" oninput="calculerTotaux()">
-                </div>
+        // Aperçu du fichier lors de la sélection
+        function apercuFichier(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-                <div class="total-row no-print" style="gap: 10px;">
-                    <span style="font-size: 0.88rem;">Taux de TVA :</span>
-                    <select id="tauxTVA" class="form-control" style="width: 140px; padding: 4px 8px;" onchange="calculerTotaux()">
-                        <option value="19" selected>TVA 19% (Standard)</option>
-                        <option value="9">TVA 9% (BTP Réduit)</option>
-                        <option value="0">TVA 0% (Exonéré)</option>
-                    </select>
-                </div>
+            const previewContainer = document.getElementById('preview-container');
+            const imgPreview = document.getElementById('image-preview');
+            const pdfPreview = document.getElementById('pdf-preview');
+            const pdfName = document.getElementById('pdf-name');
 
-                <div class="total-row">
-                    <span>Montant T.V.A :</span>
-                    <span id="totTVA" style="font-weight: 700;">0.00 DZD</span>
-                </div>
+            previewContainer.classList.remove('hidden');
 
-                <div class="total-row grand-total">
-                    <span>TOTAL T.T.C :</span>
-                    <span id="totTTC">0.00 DZD</span>
-                </div>
-
-                <div class="lettres-box" id="montantLettres">
-                    Arrêté le présent devis à la somme de : Zéro Dinar Algérien TTC.
-                </div>
-            </div>
-        </div>
-
-        <!-- Signatures pour impression -->
-        <div class="print-signatures">
-            <div class="sig-box">
-                Pour l'Entreprise<br>
-                <span style="font-size: 0.8rem; font-weight: normal;">(Signature et Cachet)</span>
-            </div>
-            <div class="sig-box">
-                Le Client<br>
-                <span style="font-size: 0.8rem; font-weight: normal;">(Mention manuscrite "Bon pour accord" et signature)</span>
-            </div>
-        </div>
-
-        <!-- Boutons d'exportation -->
-        <div class="no-print" style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
-            <button id="btnExportExcel" class="btn btn-success" style="display: none;" onclick="telechargerExcel()">
-                📥 Télécharger le Devis Excel par Lots (.xlsx)
-            </button>
-            <button id="btnPrintPDF" class="btn btn-primary" style="display: none;" onclick="imprimerOuExporterPDF()">
-                🖨️ Imprimer / Sauvegarder en PDF
-            </button>
-        </div>
-    </div>
-
-</div>
-
-<!-- Modal Profil Entreprise -->
-<div id="modalEntreprise" class="modal-overlay">
-    <div class="modal">
-        <div class="modal-header">
-            <div class="modal-title">🏢 Profil de votre Entreprise BTP</div>
-            <button class="close-modal" onclick="fermerModalEntreprise()">&times;</button>
-        </div>
-        <p style="font-size: 0.88rem; color: #64748b; margin-top: 0;">Ces informations figureront automatiquement sur les en-têtes de vos devis Excel et PDF.</p>
-        <div class="form-group" style="margin-bottom: 12px;">
-            <label>Nom ou Raison Sociale :</label>
-            <input type="text" id="entNom" class="form-control" placeholder="Ex: SARL BATIMENT ET TRAVAUX EL BAHI">
-        </div>
-        <div class="form-group" style="margin-bottom: 12px;">
-            <label>Numéro de Téléphone :</label>
-            <input type="text" id="entTel" class="form-control" placeholder="Ex: 0550 12 34 56 / 023 45 67 89">
-        </div>
-        <div class="form-group" style="margin-bottom: 12px;">
-            <label>Adresse du Siège :</label>
-            <input type="text" id="entAdr" class="form-control" placeholder="Ex: Cité 500 Logements, Bab Ezzouar, Alger">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-            <div class="form-group">
-                <label>NIF :</label>
-                <input type="text" id="entNif" class="form-control" placeholder="Ex: 001216012345678">
-            </div>
-            <div class="form-group">
-                <label>RC / Article d'Imposition :</label>
-                <input type="text" id="entRc" class="form-control" placeholder="Ex: 16/00-1234567B18">
-            </div>
-        </div>
-        <button class="btn btn-primary" style="width: 100%;" onclick="sauvegarderEntreprise()">💾 Enregistrer mon Profil</button>
-    </div>
-</div>
-
-<!-- Modal Tarifs & Abonnements -->
-<div id="modalAbonnements" class="modal-overlay">
-    <div class="modal">
-        <div class="modal-header">
-            <div class="modal-title">💳 Modèles d'Abonnement BTP & Encaissement</div>
-            <button class="close-modal" onclick="fermerModalAbonnements()">&times;</button>
-        </div>
-        <p style="font-size: 0.9rem; color: #475569;">Formules adaptées aux artisans, métreurs et entrepreneurs en Algérie :</p>
-
-        <div class="plan-card">
-            <div class="plan-title">Formule 1 : Paiement "Au Devis" (À l'acte)</div>
-            <div class="plan-price">500 à 1 000 DZD / devis</div>
-            <div class="plan-desc">Idéal pour les artisans et sous-traitants ayant des besoins occasionnels. Traitement jusqu'à 10 pages.</div>
-        </div>
-
-        <div class="plan-card" style="border-color: #3b82f6; background: #eff6ff;">
-            <div class="plan-title">Formule 2 : Abonnement Mensuel Professionnel</div>
-            <div class="plan-price">3 000 à 5 000 DZD / mois</div>
-            <div class="plan-desc">Recommandé pour bureaux d'études et entreprises BTP régulières. Accès illimité jusqu'à 25 devis complets par mois.</div>
-        </div>
-
-        <div class="plan-card">
-            <div class="plan-title">Formule 3 : Packs de Crédits Pages</div>
-            <div class="plan-price">Pack 50 Pages = 4 000 DZD</div>
-            <div class="plan-desc">Chaque page numérisée consomme 1 crédit. Aucune date d'expiration.</div>
-        </div>
-
-        <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-top: 15px;">
-            <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 5px;">📲 Encaissement en Algérie :</div>
-            <div style="font-size: 0.85rem; color: #334155;">
-                • <b>BaridiMob / CCP</b> : Virement instantané vers RIP avec envoi de capture d'écran.<br>
-                • <b>Carte Edahabia / CIB</b> : Règlement sécurisé en ligne.<br>
-                • <b>Espèces</b> : Remise en main propre lors de la finalisation des métrés.
-            </div>
-        </div>
-
-        <button class="btn btn-outline" style="width: 100%; margin-top: 15px;" onclick="fermerModalAbonnements()">Fermer</button>
-    </div>
-</div>
-
-<script>
-    // ==========================================
-    // CONFIGURATION DU SERVEUR
-    // Si votre API FastAPI tourne sur votre PC, laissez "http://127.0.0.1:8000"
-    // Si vous la déployez sur Render, remplacez par "https://votre-app.onrender.com"
-    // ==========================================
-    let API_BASE = "https://saas-estimation-btp.onrender.com"; 
-    
-    // Si l'utilisateur a un serveur Render connu, le script essaiera de s'y connecter
-    if (window.location.protocol.startsWith('http') && window.location.hostname.includes('onrender')) {
-        API_BASE = ""; 
-    }
-
-    // État global de l'application
-    let pagesQueue = [];          // { id, file, name, type, dataUrl, pageNum, status: 'attente'|'cours'|'traite'|'erreur', articles: [] }
-    let indexSelectionne = null;
-    let devisLots = {};           // { "Nom du Lot": [ { n, d, u, q, pu, total } ] }
-    let zoomLevel = 1.0;
-    let rotationAngle = 0;
-
-    // Initialisation au chargement
-    window.addEventListener('DOMContentLoaded', () => {
-        const today = new Date();
-        document.getElementById('dateDevis').value = today.toLocaleDateString('fr-FR');
-        if (!document.getElementById('numDevis').value) {
-            document.getElementById('numDevis').value = "DEV-" + today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+            if (file.type.includes('image')) {
+                imgPreview.src = URL.createObjectURL(file);
+                imgPreview.classList.remove('hidden');
+                pdfPreview.classList.add('hidden');
+            } else if (file.type.includes('pdf')) {
+                pdfName.textContent = file.name;
+                pdfPreview.classList.remove('hidden');
+                imgPreview.classList.add('hidden');
+            }
         }
 
-        chargerEntrepriseLocale();
-        chargerDevisSauvegarde();
-        verifierConnexionServeur();
-    });
+        // Envoi au serveur Python pour extraction IA
+        async function chiffrerPage() {
+            const fileInput = document.getElementById('file-input');
+            const texteDescriptif = document.getElementById('texte_descriptif').value;
+            const statusMsg = document.getElementById('status-message');
+            const btnAnalyser = document.getElementById('btn-analyser');
 
-    // Vérification de l'état du serveur
-    async function verifierConnexionServeur() {
-        try {
-            const res = await fetch(`${API_BASE}/`);
-            if (res.ok) {
-                const data = await res.json();
-                ajouterLog(`✅ Connecté au serveur API : ${data.message}`);
+            if (!fileInput.files[0] && !texteDescriptif.trim()) {
+                alert("Veuillez sélectionner une photo, un PDF ou saisir un descriptif.");
                 return;
             }
-        } catch (e) {
-            ajouterLog(`⚠️ Impossible de contacter le serveur Python sur ${API_BASE}. Assurez-vous qu'il est allumé.`);
-        }
-    }
 
-    // Gestion du Drag and Drop
-    const dropzone = document.getElementById('dropzone');
-    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.background = '#dbeafe'; });
-    dropzone.addEventListener('dragleave', () => { dropzone.style.background = '#eff6ff'; });
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.style.background = '#eff6ff';
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            traiterFichiersImportes(Array.from(e.dataTransfer.files));
-        }
-    });
+            // Interface en chargement
+            btnAnalyser.disabled = true;
+            btnAnalyser.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Analyse IA en cours...</span>`;
+            statusMsg.className = "text-center text-xs p-2 rounded-lg bg-blue-50 text-blue-700 block";
+            statusMsg.textContent = "Extraction et calcul des tarifs en cours...";
 
-    function chargerFichiersInstantane(event) {
-        if (event.target.files && event.target.files.length > 0) {
-            traiterFichiersImportes(Array.from(event.target.files));
-        }
-    }
+            const formData = new FormData();
+            if (fileInput.files[0]) formData.append('file', fileInput.files[0]);
+            formData.append('texte_descriptif', texteDescriptif);
+            formData.append('page_num', 1);
 
-    // Traitement des fichiers avec compression automatique pour smartphone
-    async function traiterFichiersImportes(fichiers) {
-        const statusBadge = document.getElementById('statusBadge');
-        statusBadge.className = 'status-pill status-busy';
-        statusBadge.textContent = "Préparation et optimisation des pages...";
-
-        for (const file of fichiers) {
-            if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-                await extrairePagesDuPDF(file);
-            } else {
-                await ajouterImageALaFile(file);
-            }
-        }
-
-        rafraichirGrilleVignettes();
-        statusBadge.className = 'status-pill status-done';
-        statusBadge.textContent = `${pagesQueue.length} page(s) prête(s) à être analysée(s).`;
-        document.getElementById('badgeFichiers').textContent = `${pagesQueue.length} page(s)`;
-        document.getElementById('pagesRestantesBadge').textContent = pagesQueue.filter(p => p.status !== 'traite').length;
-
-        if (indexSelectionne === null && pagesQueue.length > 0) {
-            selectionnerPage(0);
-        }
-    }
-
-    // Compression ultra-légère côté smartphone/navigateur
-    function ajouterImageALaFile(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width;
-                    let h = img.height;
-                    const maxDim = 1920; 
-
-                    if (w > maxDim || h > maxDim) {
-                        if (w > h) {
-                            h = Math.round((h * maxDim) / w);
-                            w = maxDim;
-                        } else {
-                            w = Math.round((w * maxDim) / h);
-                            h = maxDim;
-                        }
-                    }
-
-                    canvas.width = w;
-                    canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
-
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-                    canvas.toBlob((blob) => {
-                        const optFile = new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
-                        pagesQueue.push({
-                            id: 'page_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                            file: optFile,
-                            name: file.name,
-                            type: 'image/jpeg',
-                            dataUrl: dataUrl,
-                            status: 'attente',
-                            articles: []
-                        });
-                        resolve();
-                    }, 'image/jpeg', 0.88);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // Découpage automatique des PDF multi-pages
-    async function extrairePagesDuPDF(pdfFile) {
-        try {
-            const arrayBuffer = await pdfFile.arrayBuffer();
-            const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            ajouterLog(`PDF détecté : "${pdfFile.name}" contient ${pdfDoc.numPages} page(s). Découpage en cours...`);
-
-            for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-                const page = await pdfDoc.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 1.5 });
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
-
-                const blob = await (await fetch(dataUrl)).blob();
-                const pageFile = new File([blob], `${pdfFile.name.replace(/\.pdf$/i, '')}_page_${pageNum}.jpg`, { type: 'image/jpeg' });
-
-                pagesQueue.push({
-                    id: 'pdf_' + Date.now() + '_' + pageNum,
-                    file: pageFile,
-                    name: `${pdfFile.name} (P.${pageNum})`,
-                    type: 'image/jpeg',
-                    dataUrl: dataUrl,
-                    status: 'attente',
-                    articles: []
-                });
-            }
-        } catch (err) {
-            ajouterLog(`Erreur lecture PDF "${pdfFile.name}": ${err.message}`);
-        }
-    }
-
-    // Affichage des vignettes
-    function rafraichirGrilleVignettes() {
-        const grid = document.getElementById('thumbnailsGrid');
-        grid.innerHTML = "";
-
-        pagesQueue.forEach((page, idx) => {
-            const card = document.createElement('div');
-            card.className = `thumb-card ${idx === indexSelectionne ? 'active' : ''}`;
-            card.onclick = (e) => {
-                if (e.target.closest('.btn-mini')) return;
-                selectionnerPage(idx);
-            };
-
-            const img = document.createElement('img');
-            img.className = 'thumb-img';
-            img.src = page.dataUrl;
-
-            const title = document.createElement('div');
-            title.className = 'thumb-title';
-            title.textContent = page.name;
-            title.title = page.name;
-
-            const badge = document.createElement('div');
-            badge.className = `thumb-badge badge-${page.status}`;
-            badge.textContent = page.status === 'traite' ? `Traité (${page.articles.length})` 
-                : page.status === 'cours' ? 'En cours...' 
-                : page.status === 'erreur' ? 'Erreur' 
-                : 'En attente';
-
-            const tools = document.createElement('div');
-            tools.className = 'thumb-tools';
-            tools.innerHTML = `
-                <button class="btn-mini" title="Déplacer vers la gauche" onclick="deplacerPage(${idx}, -1)">◀</button>
-                <button class="btn-mini" title="Déplacer vers la droite" onclick="deplacerPage(${idx}, 1)">▶</button>
-                <button class="btn-mini" title="Supprimer" style="color: red;" onclick="supprimerPage(${idx})">✖</button>
-            `;
-
-            card.appendChild(img);
-            card.appendChild(title);
-            card.appendChild(badge);
-            card.appendChild(tools);
-            grid.appendChild(card);
-        });
-
-        document.getElementById('pagesRestantesBadge').textContent = pagesQueue.filter(p => p.status !== 'traite').length;
-    }
-
-    function deplacerPage(idx, direction) {
-        const newIdx = idx + direction;
-        if (newIdx < 0 || newIdx >= pagesQueue.length) return;
-        const temp = pagesQueue[idx];
-        pagesQueue[idx] = pagesQueue[newIdx];
-        pagesQueue[newIdx] = temp;
-        if (indexSelectionne === idx) indexSelectionne = newIdx;
-        else if (indexSelectionne === newIdx) indexSelectionne = idx;
-        rafraichirGrilleVignettes();
-    }
-
-    function supprimerPage(idx) {
-        pagesQueue.splice(idx, 1);
-        if (indexSelectionne >= pagesQueue.length) indexSelectionne = pagesQueue.length - 1;
-        if (pagesQueue.length === 0) {
-            indexSelectionne = null;
-            document.getElementById('previewPane').style.display = 'none';
-        } else {
-            selectionnerPage(Math.max(0, indexSelectionne));
-        }
-        rafraichirGrilleVignettes();
-    }
-
-    function selectionnerPage(idx) {
-        if (idx < 0 || idx >= pagesQueue.length) return;
-        indexSelectionne = idx;
-        const page = pagesQueue[idx];
-
-        document.querySelectorAll('.thumb-card').forEach((c, i) => {
-            if (i === idx) c.classList.add('active');
-            else c.classList.remove('active');
-        });
-
-        const previewPane = document.getElementById('previewPane');
-        const previewTitle = document.getElementById('previewTitle');
-        const previewContent = document.getElementById('previewContent');
-
-        previewPane.style.display = 'block';
-        previewTitle.textContent = `Aperçu Haute Définition : ${page.name} (${idx + 1} / ${pagesQueue.length})`;
-
-        zoomLevel = 1.0;
-        rotationAngle = 0;
-        previewContent.innerHTML = `<img id="previewImg" src="${page.dataUrl}" style="transform: scale(${zoomLevel}) rotate(${rotationAngle}deg);">`;
-    }
-
-    // Manipulation de l'image
-    function zoomImage(delta) {
-        zoomLevel = Math.max(0.4, Math.min(3.5, zoomLevel + delta));
-        appliquerTransformations();
-    }
-    function resetZoom() {
-        zoomLevel = 1.0;
-        rotationAngle = 0;
-        appliquerTransformations();
-    }
-    function pivoterImage(angle) {
-        rotationAngle = (rotationAngle + angle) % 360;
-        appliquerTransformations();
-    }
-    function appliquerTransformations() {
-        const img = document.getElementById('previewImg');
-        if (img) {
-            img.style.transform = `scale(${zoomLevel}) rotate(${rotationAngle}deg)`;
-        }
-    }
-
-    async function traiterPageSelectionnee() {
-        if (indexSelectionne === null) return;
-        await executerTraitementPage(indexSelectionne);
-    }
-
-    // Traitement automatique résistant aux erreurs pour les devis multi-pages
-    async function traiterToutesLesPages() {
-        const btnTout = document.getElementById('btnTraiterTout');
-        const btnPage = document.getElementById('btnLancerPage');
-        const pBox = document.getElementById('progressBox');
-        const pBar = document.getElementById('progressBar');
-        const pLbl = document.getElementById('progressLabel');
-
-        const pagesNonTraitees = pagesQueue.map((p, idx) => ({ p, idx })).filter(item => item.p.status !== 'traite');
-        if (pagesNonTraitees.length === 0) {
-            alert("Toutes les pages ont déjà été traitées avec succès !");
-            return;
-        }
-
-        btnTout.disabled = true;
-        btnPage.disabled = true;
-        pBox.style.display = 'block';
-
-        let traitees = 0;
-        for (const item of pagesNonTraitees) {
-            selectionnerPage(item.idx);
-            await executerTraitementPage(item.idx);
-            traitees++;
-            const pct = Math.round((traitees / pagesNonTraitees.length) * 100);
-            pBar.style.width = pct + '%';
-            pLbl.textContent = `${traitees} / ${pagesNonTraitees.length} (${pct}%)`;
-        }
-
-        btnTout.disabled = false;
-        btnPage.disabled = false;
-        setTimeout(() => { pBox.style.display = 'none'; }, 2500);
-    }
-
-    // Exécution robuste du chiffrage IA (Mise à jour pour afficher les VRAIES ERREURS)
-    async function executerTraitementPage(idx) {
-        const page = pagesQueue[idx];
-        const statusBadge = document.getElementById('statusBadge');
-        page.status = 'cours';
-        rafraichirGrilleVignettes();
-
-        statusBadge.className = 'status-pill status-busy';
-        statusBadge.textContent = `Analyse IA en cours pour "${page.name}"...`;
-        ajouterLog(`-> Envoi de "${page.name}" vers ${API_BASE}/chiffrer-page ...`);
-
-        const formData = new FormData();
-        formData.append('file', page.file);
-        formData.append('page_num', idx + 1);
-
-        let success = false;
-        let retries = 0;
-        let lastErreurMessage = "Erreur de connexion au serveur.";
-
-        while (!success && retries < 2) {
             try {
-                const response = await fetch(`${API_BASE}/chiffrer-page`, {
+                const response = await fetch(`${RENDER_BASE}/chiffrer-page`, {
                     method: 'POST',
                     body: formData
                 });
 
                 if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(errText); // On force la capture de l'erreur du serveur
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Erreur lors de l'extraction.");
                 }
 
                 const data = await response.json();
+                let cleanJson = data.raw_json || "[]";
                 
-                // Pré-remplir automatiquement le client/projet s'il est détecté sur le document
-                if (data.client && !document.getElementById('nomClient').value) {
-                    document.getElementById('nomClient').value = data.client;
-                }
-                if (data.projet && !document.getElementById('nomProjet').value) {
-                    document.getElementById('nomProjet').value = data.projet;
-                }
+                articlesExtraits = JSON.parse(cleanJson);
+                afficherArticles(articlesExtraits);
 
-                let articlesExtraits = [];
-                if (Array.isArray(data.articles) && data.articles.length > 0) {
-                    articlesExtraits = data.articles;
-                } else if (data.raw_json) {
-                    try { articlesExtraits = JSON.parse(data.raw_json); } catch(e){}
-                }
-
-                if (articlesExtraits.length > 0) {
-                    integrerArticlesDansDevis(articlesExtraits);
-                    page.status = 'traite';
-                    page.articles = articlesExtraits;
-                    success = true;
-                    ajouterLog(`✅ Succès ! ${articlesExtraits.length} article(s) trouvé(s) sur "${page.name}".`);
-                    statusBadge.className = 'status-pill status-done';
-                    statusBadge.textContent = `Page traitée ! ${articlesExtraits.length} articles ajoutés.`;
-                } else {
-                    page.status = 'traite';
-                    success = true;
-                    ajouterLog(`⚠️ Aucun article BTP détecté sur "${page.name}".`);
-                }
+                statusMsg.className = "text-center text-xs p-2 rounded-lg bg-emerald-50 text-emerald-700 block";
+                statusMsg.textContent = "Extraction réussie ! Vous pouvez ajuster les prix ci-dessous.";
 
             } catch (err) {
-                retries++;
-                lastErreurMessage = err.message;
-                ajouterLog(`⚠️ Tentative ${retries}/2 échouée. Raison: ${lastErreurMessage}`);
-                await new Promise(r => setTimeout(r, 1200));
+                statusMsg.className = "text-center text-xs p-2 rounded-lg bg-red-50 text-red-700 block";
+                statusMsg.textContent = "Erreur : " + err.message;
+            } finally {
+                btnAnalyser.disabled = false;
+                btnAnalyser.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> <span>Extraire & Chiffrer avec l'IA</span>`;
             }
         }
 
-        if (!success) {
-            page.status = 'erreur';
-            statusBadge.className = 'status-pill status-err';
-            statusBadge.textContent = `Erreur sur "${page.name}". Consultez les logs.`;
-            ajouterLog(`❌ Échec définitif sur "${page.name}". Raison: ${lastErreurMessage}`);
-        }
+        // Affichage des articles dans le tableau
+        function afficherArticles(articles) {
+            const tbody = document.getElementById('tbody-articles');
+            const btnExport = document.getElementById('btn-export');
+            const countArticles = document.getElementById('count-articles');
 
-        rafraichirGrilleVignettes();
-        sauvegarderLocalement();
-    }
+            tbody.innerHTML = "";
+            countArticles.textContent = `${articles.length} article(s)`;
 
-    // Intégration et fusion des articles par Lots BTP
-    function integrerArticlesDansDevis(nouveauxArticles) {
-        nouveauxArticles.forEach(art => {
-            const lotNom = (art.lot || "TRAVAUX GÉNÉRAUX").trim();
-            if (!devisLots[lotNom]) {
-                devisLots[lotNom] = [];
+            if (!articles || articles.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">Aucun article détecté.</td></tr>`;
+                btnExport.disabled = true;
+                return;
             }
-            const q = parseFloat(art.q) || 1.0;
-            const pu = parseFloat(art.pu) || 0.0;
-            devisLots[lotNom].push({
-                n: devisLots[lotNom].length + 1,
-                d: art.d || "Prestation BTP",
-                u: art.u || "m2",
-                q: q,
-                pu: pu,
-                total: Math.round(q * pu * 100) / 100
-            });
-        });
 
-        reconstruireTableauDevis();
-    }
+            let currentLot = "";
 
-    // Reconstitution dynamique du Tableau de Chiffrage BTP
-    function reconstruireTableauDevis() {
-        const container = document.getElementById('devisContainer');
-        const emptyState = document.getElementById('emptyDevisState');
-        const summaryGrid = document.getElementById('summaryGrid');
-        const btnExcel = document.getElementById('btnExportExcel');
-        const btnPrint = document.getElementById('btnPrintPDF');
-
-        const lotsKeys = Object.keys(devisLots);
-        let totalArticles = 0;
-        lotsKeys.forEach(k => totalArticles += devisLots[k].length);
-        document.getElementById('compteurArticles').textContent = totalArticles;
-
-        if (lotsKeys.length === 0 || totalArticles === 0) {
-            if (emptyState) emptyState.style.display = 'block';
-            summaryGrid.style.display = 'none';
-            btnExcel.style.display = 'none';
-            btnPrint.style.display = 'none';
-            return;
-        }
-
-        if (emptyState) emptyState.style.display = 'none';
-        summaryGrid.style.display = 'grid';
-        btnExcel.style.display = 'inline-flex';
-        btnPrint.style.display = 'inline-flex';
-
-        let html = '';
-
-        lotsKeys.forEach(lotNom => {
-            const articles = devisLots[lotNom];
-            let sousTotalLot = 0;
-            articles.forEach(a => sousTotalLot += (parseFloat(a.q) || 0) * (parseFloat(a.pu) || 0));
-
-            html += `
-            <div class="lot-block" data-lot="${escapeHtml(lotNom)}">
-                <div class="lot-header">
-                    <input type="text" value="${escapeHtml(lotNom)}" onchange="renommerLot('${escapeHtml(lotNom)}', this.value)" title="Cliquez pour modifier le nom du lot">
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <span class="lot-subtotal-badge">Sous-total : ${formaterMontant(sousTotalLot)} DZD</span>
-                        <button class="btn-mini no-print" style="color: white; background: rgba(255,255,255,0.2);" title="Supprimer ce lot entier" onclick="supprimerLot('${escapeHtml(lotNom)}')">🗑️</button>
-                    </div>
-                </div>
-
-                <div class="devis-table-wrapper">
-                    <table class="devis-table">
-                        <thead>
-                            <tr>
-                                <th class="col-num">N°</th>
-                                <th class="col-des">Désignation des Travaux</th>
-                                <th class="col-uni">Unité</th>
-                                <th class="col-qte">Quantité</th>
-                                <th class="col-pu">P.U HT (DZD)</th>
-                                <th class="col-tot">Montant HT</th>
-                                <th class="col-act no-print">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            articles.forEach((art, artIdx) => {
-                const totalLigne = (parseFloat(art.q) || 0) * (parseFloat(art.pu) || 0);
-                html += `
-                    <tr>
-                        <td class="col-num" style="font-weight: 600;">${art.n || (artIdx + 1)}</td>
-                        <td class="col-des">
-                            <input type="text" value="${escapeHtml(art.d)}" oninput="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'd', this.value)">
-                        </td>
-                        <td class="col-uni">
-                            <select onchange="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'u', this.value)">
-                                ${['m3','m2','ml','kg','tonne','U','ens','f','j'].map(u => 
-                                    `<option value="${u}" ${art.u === u ? 'selected' : ''}>${u}</option>`
-                                ).join('')}
-                            </select>
-                        </td>
-                        <td class="col-qte">
-                            <input type="number" step="any" style="text-align: right;" value="${art.q}" oninput="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'q', this.value)">
-                        </td>
-                        <td class="col-pu">
-                            <input type="number" step="any" style="text-align: right;" value="${art.pu}" oninput="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'pu', this.value)">
-                        </td>
-                        <td class="col-tot">${formaterMontant(totalLigne)}</td>
-                        <td class="col-act no-print">
-                            <button class="btn-mini" title="Dupliquer" onclick="dupliquerArticle('${escapeHtml(lotNom)}', ${artIdx})">📋</button>
-                            <button class="btn-mini" style="color: red;" title="Supprimer" onclick="supprimerArticle('${escapeHtml(lotNom)}', ${artIdx})">🗑️</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="lot-footer no-print">
-                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.82rem;" onclick="ajouterArticleDansLot('${escapeHtml(lotNom)}')">
-                        + Ajouter un article dans ce lot
-                    </button>
-                    <span style="font-size: 0.85rem; color: #475569;">${articles.length} article(s)</span>
-                </div>
-            </div>
-            `;
-        });
-
-        container.innerHTML = html;
-        calculerTotaux();
-    }
-
-    function modifierArticle(lotNom, artIdx, champ, valeur) {
-        if (!devisLots[lotNom] || !devisLots[lotNom][artIdx]) return;
-        const art = devisLots[lotNom][artIdx];
-        if (champ === 'q' || champ === 'pu') {
-            art[champ] = parseFloat(valeur) || 0;
-            art.total = Math.round(art.q * art.pu * 100) / 100;
-        } else {
-            art[champ] = valeur;
-        }
-        reconstruireTableauDevis();
-        sauvegarderLocalement();
-    }
-
-    function ajouterArticleDansLot(lotNom) {
-        if (!devisLots[lotNom]) return;
-        devisLots[lotNom].push({
-            n: devisLots[lotNom].length + 1,
-            d: "Nouvel article de travaux",
-            u: "m2",
-            q: 1,
-            pu: 1000,
-            total: 1000
-        });
-        reconstruireTableauDevis();
-        sauvegarderLocalement();
-    }
-
-    function dupliquerArticle(lotNom, artIdx) {
-        const art = devisLots[lotNom][artIdx];
-        devisLots[lotNom].splice(artIdx + 1, 0, {
-            ...art,
-            n: devisLots[lotNom].length + 1,
-            d: art.d + " (Copie)"
-        });
-        reconstruireTableauDevis();
-        sauvegarderLocalement();
-    }
-
-    function supprimerArticle(lotNom, artIdx) {
-        if (!confirm("Voulez-vous supprimer cet article ?")) return;
-        devisLots[lotNom].splice(artIdx, 1);
-        devisLots[lotNom].forEach((a, i) => a.n = i + 1);
-        reconstruireTableauDevis();
-        sauvegarderLocalement();
-    }
-
-    function ajouterNouveauLot() {
-        const nom = prompt("Nom du nouveau Lot BTP (ex: 'LOT 05: REVÊTEMENTS') :", "NOUVEAU LOT");
-        if (nom && nom.trim()) {
-            const nomClean = nom.trim().toUpperCase();
-            if (!devisLots[nomClean]) {
-                devisLots[nomClean] = [{
-                    n: 1,
-                    d: "Prestation BTP",
-                    u: "m2",
-                    q: 1,
-                    pu: 1500,
-                    total: 1500
-                }];
-                reconstruireTableauDevis();
-                sauvegarderLocalement();
-            }
-        }
-    }
-
-    function renommerLot(ancienNom, nouveauNom) {
-        if (!nouveauNom || !nouveauNom.trim() || ancienNom === nouveauNom) return;
-        const newClean = nouveauNom.trim().toUpperCase();
-        devisLots[newClean] = devisLots[ancienNom];
-        delete devisLots[ancienNom];
-        reconstruireTableauDevis();
-        sauvegarderLocalement();
-    }
-
-    function supprimerLot(lotNom) {
-        if (!confirm(`Supprimer le lot "${lotNom}" et tous ses articles ?`)) return;
-        delete devisLots[lotNom];
-        reconstruireTableauDevis();
-        sauvegarderLocalement();
-    }
-
-    // Calculs financiers récapitulatifs
-    function calculerTotaux() {
-        const recapTable = document.getElementById('recapTable');
-        recapTable.innerHTML = '';
-
-        let totalHT = 0;
-        Object.keys(devisLots).forEach(lotNom => {
-            let st = 0;
-            devisLots[lotNom].forEach(a => st += (parseFloat(a.q) || 0) * (parseFloat(a.pu) || 0));
-            totalHT += st;
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${escapeHtml(lotNom)}</td><td class="val">${formaterMontant(st)} DZD</td>`;
-            recapTable.appendChild(tr);
-        });
-
-        const remisePct = parseFloat(document.getElementById('remisePct').value) || 0;
-        const tauxTVA = parseFloat(document.getElementById('tauxTVA').value) || 19;
-
-        const montantRemise = totalHT * (remisePct / 100);
-        const totalHTNet = totalHT - montantRemise;
-        const montantTVA = totalHTNet * (tauxTVA / 100);
-        const totalTTC = totalHTNet + montantTVA;
-
-        document.getElementById('totHT').textContent = `${formaterMontant(totalHT)} DZD`;
-        document.getElementById('totTVA').textContent = `${formaterMontant(montantTVA)} DZD`;
-        document.getElementById('totTTC').textContent = `${formaterMontant(totalTTC)} DZD`;
-
-        const enLettres = convertirNombreEnLettres(totalTTC);
-        document.getElementById('montantLettres').textContent = `Arrêté le présent devis estimatif à la somme de : ${enLettres} Toutes Taxes Comprises.`;
-    }
-
-    // Téléchargement Excel Professionnel (.xlsx)
-    async function telechargerExcel() {
-        const nomClient = document.getElementById('nomClient').value || "Client";
-        const nomProjet = document.getElementById('nomProjet').value || "";
-        const numDevis = document.getElementById('numDevis').value || "DEV-01";
-        const dateDevis = document.getElementById('dateDevis').value || "";
-        const tauxTVA = parseFloat(document.getElementById('tauxTVA').value) || 19;
-        const remisePct = parseFloat(document.getElementById('remisePct').value) || 0;
-
-        const articlesAExporter = [];
-        Object.keys(devisLots).forEach(lotNom => {
-            devisLots[lotNom].forEach(a => {
-                articlesAExporter.push({
-                    lot: lotNom,
-                    n: a.n,
-                    d: a.d,
-                    u: a.u,
-                    q: a.q,
-                    pu: a.pu
-                });
-            });
-        });
-
-        if (articlesAExporter.length === 0) {
-            alert("Aucun article à exporter dans le fichier Excel.");
-            return;
-        }
-
-        try {
-            const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
-            const response = await fetch(`${API_BASE}/exporter-excel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nom_client: nomClient,
-                    nom_projet: nomProjet,
-                    num_devis: numDevis,
-                    date_devis: dateDevis,
-                    taux_tva: tauxTVA,
-                    remise_pct: remisePct,
-                    entreprise: entreprise,
-                    articles: articlesAExporter
-                })
-            });
-
-            if (!response.ok) throw new Error("Erreur serveur lors de la création du fichier Excel.");
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Devis_BTP_${nomClient.replace(/\s+/g, '_')}_${numDevis}.xlsx`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            ajouterLog(`📥 Fichier Excel professionnel téléchargé avec succès !`);
-        } catch (e) {
-            alert("Erreur de téléchargement : " + e.message);
-        }
-    }
-
-    // Impression directe et Export PDF
-    function imprimerOuExporterPDF() {
-        const ent = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
-        document.getElementById('pEntNom').textContent = ent.nom || "ENTREPRISE BTP";
-        document.getElementById('pEntAdr').textContent = ent.adresse ? `Adresse : ${ent.adresse}` : "";
-        document.getElementById('pEntTel').textContent = ent.tel ? `Tél : ${ent.tel}` : "";
-        document.getElementById('pEntNif').textContent = (ent.nif || ent.rc) ? `NIF : ${ent.nif || ''} | RC : ${ent.rc || ''}` : "";
-
-        document.getElementById('pNumDevis').textContent = `DEVIS N° ${document.getElementById('numDevis').value || '---'}`;
-        document.getElementById('pDateDevis').textContent = `Date : ${document.getElementById('dateDevis').value || '---'}`;
-        document.getElementById('pClient').textContent = `Client : ${document.getElementById('nomClient').value || '---'}`;
-        document.getElementById('pProjet').textContent = `Projet : ${document.getElementById('nomProjet').value || '---'}`;
-
-        window.print();
-    }
-
-    function sauvegarderLocalement() {
-        const donnees = {
-            nomClient: document.getElementById('nomClient').value,
-            nomProjet: document.getElementById('nomProjet').value,
-            numDevis: document.getElementById('numDevis').value,
-            dateDevis: document.getElementById('dateDevis').value,
-            remisePct: document.getElementById('remisePct').value,
-            tauxTVA: document.getElementById('tauxTVA').value,
-            lots: devisLots
-        };
-        localStorage.setItem('btp_devis_actif', JSON.stringify(donnees));
-        const st = document.getElementById('storageStatus');
-        if (st) {
-            st.textContent = "Sauvegardé ✓";
-            setTimeout(() => { st.textContent = "Auto-sauvegardé ✓"; }, 1500);
-        }
-    }
-
-    function chargerDevisSauvegarde() {
-        try {
-            const raw = localStorage.getItem('btp_devis_actif');
-            if (raw) {
-                const d = JSON.parse(raw);
-                if (d.nomClient) document.getElementById('nomClient').value = d.nomClient;
-                if (d.nomProjet) document.getElementById('nomProjet').value = d.nomProjet;
-                if (d.numDevis) document.getElementById('numDevis').value = d.numDevis;
-                if (d.dateDevis) document.getElementById('dateDevis').value = d.dateDevis;
-                if (d.remisePct) document.getElementById('remisePct').value = d.remisePct;
-                if (d.tauxTVA) document.getElementById('tauxTVA').value = d.tauxTVA;
-                if (d.lots && Object.keys(d.lots).length > 0) {
-                    devisLots = d.lots;
-                    reconstruireTableauDevis();
+            articles.forEach((art, index) => {
+                // Entête de lot si nouveau lot
+                if (art.lot && art.lot !== currentLot) {
+                    currentLot = art.lot;
+                    const trLot = document.createElement('tr');
+                    trLot.className = "bg-blue-50 font-bold text-navy";
+                    trLot.innerHTML = `<td colspan="5" class="p-2 border-b">■ ${art.lot.toUpperCase()}</td>`;
+                    tbody.appendChild(trLot);
                 }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-2 border-b text-center text-slate-500 font-medium">${art.n || (index + 1)}</td>
+                    <td class="p-2 border-b text-slate-800">${art.d || ''}</td>
+                    <td class="p-2 border-b text-center text-slate-600">${art.u || 'u'}</td>
+                    <td class="p-2 border-b text-right font-medium">${art.q || 0}</td>
+                    <td class="p-2 border-b text-right font-bold text-navy">${(art.pu || 0).toLocaleString()} DZD</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            btnExport.disabled = false;
+        }
+
+        // Exportation vers le fichier Excel
+        async function exporterExcel() {
+            const nomClient = document.getElementById('nom_client').value || "Projet_BTP";
+            const btnExport = document.getElementById('btn-export');
+
+            btnExport.disabled = true;
+            btnExport.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Génération...</span>`;
+
+            try {
+                const response = await fetch(`${RENDER_BASE}/exporter-excel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nom_client: nomClient,
+                        articles: articlesExtraits
+                    })
+                });
+
+                if (!response.ok) throw new Error("Échec de la génération Excel.");
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Devis_BTP_${nomClient.replace(/[^a-z0-9]/gi, '_')}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+            } catch (err) {
+                alert("Erreur lors du téléchargement : " + err.message);
+            } finally {
+                btnExport.disabled = false;
+                btnExport.innerHTML = `<i class="fa-solid fa-file-excel"></i> <span>Télécharger Devis Excel (.xlsx)</span>`;
             }
-        } catch (e) {
-            console.error("Erreur chargement devis sauvegardé:", e);
         }
-    }
-
-    function nouveauDevis() {
-        if (!confirm("Voulez-vous réinitialiser le devis et commencer un nouveau projet ?")) return;
-        localStorage.removeItem('btp_devis_actif');
-        devisLots = {};
-        pagesQueue = [];
-        indexSelectionne = null;
-        document.getElementById('nomClient').value = "";
-        document.getElementById('nomProjet').value = "";
-        const today = new Date();
-        document.getElementById('numDevis').value = "DEV-" + today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
-        document.getElementById('thumbnailsGrid').innerHTML = "";
-        document.getElementById('previewPane').style.display = "none";
-        reconstruireTableauDevis();
-    }
-
-    function ouvrirModalEntreprise() { document.getElementById('modalEntreprise').style.display = 'flex'; }
-    function fermerModalEntreprise() { document.getElementById('modalEntreprise').style.display = 'none'; }
-    function sauvegarderEntreprise() {
-        const ent = {
-            nom: document.getElementById('entNom').value,
-            tel: document.getElementById('entTel').value,
-            adresse: document.getElementById('entAdr').value,
-            nif: document.getElementById('entNif').value,
-            rc: document.getElementById('entRc').value
-        };
-        localStorage.setItem('btp_entreprise', JSON.stringify(ent));
-        fermerModalEntreprise();
-        alert("Profil entreprise enregistré !");
-    }
-    function chargerEntrepriseLocale() {
-        const ent = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
-        if (ent.nom) document.getElementById('entNom').value = ent.nom;
-        if (ent.tel) document.getElementById('entTel').value = ent.tel;
-        if (ent.adresse) document.getElementById('entAdr').value = ent.adresse;
-        if (ent.nif) document.getElementById('entNif').value = ent.nif;
-        if (ent.rc) document.getElementById('entRc').value = ent.rc;
-    }
-
-    function ouvrirModalAbonnements() { document.getElementById('modalAbonnements').style.display = 'flex'; }
-    function fermerModalAbonnements() { document.getElementById('modalAbonnements').style.display = 'none'; }
-
-    function ajouterLog(msg) {
-        const logs = document.getElementById('logArea');
-        const heure = new Date().toLocaleTimeString('fr-FR');
-        logs.textContent += `\n[${heure}] ${msg}`;
-        logs.scrollTop = logs.scrollHeight;
-    }
-
-    function toggleConsole() {
-        const logs = document.getElementById('logArea');
-        logs.style.display = logs.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function formaterMontant(val) {
-        const num = parseFloat(val) || 0;
-        return num.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function escapeHtml(text) {
-        if (!text) return "";
-        return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-
-    // Convertisseur Nombres en Lettres
-    function convertirNombreEnLettres(montant) {
-        const entier = Math.floor(Math.abs(montant));
-        const centimes = Math.round((Math.abs(montant) - entier) * 100);
-
-        if (entier === 0) return "Zéro Dinar Algérien et zéro centime";
-
-        const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
-        const dizaines = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante-dix', 'quatre-vingt', 'quatre-vingt-dix'];
-        const particuliers = {
-            11: 'onze', 12: 'douze', 13: 'treize', 14: 'quatorze', 15: 'quinze', 16: 'seize',
-            71: 'soixante-et-onze', 72: 'soixante-douze', 73: 'soixante-treize', 74: 'soixante-quatorze',
-            75: 'soixante-quinze', 76: 'soixante-seize', 77: 'soixante-dix-sept', 78: 'soixante-dix-huit', 79: 'soixante-dix-neuf',
-            80: 'quatre-vingts', 91: 'quatre-vingt-onze', 92: 'quatre-vingt-douze', 93: 'quatre-vingt-treize',
-            94: 'quatre-vingt-quatorze', 95: 'quatre-vingt-quinze', 96: 'quatre-vingt-seize', 97: 'quatre-vingt-dix-sept',
-            98: 'quatre-vingt-dix-huit', 99: 'quatre-vingt-dix-neuf'
-        };
-
-        function infCent(n) {
-            if (particuliers[n]) return particuliers[n];
-            const d = Math.floor(n / 10);
-            const u = n % 10;
-            if (d === 0) return unites[u];
-            if (d === 1) return ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'][u];
-            if (u === 1 && d !== 8 && d !== 9) return dizaines[d] + '-et-un';
-            if (u === 0) return dizaines[d];
-            return dizaines[d] + '-' + unites[u];
-        }
-
-        function infMille(n) {
-            const c = Math.floor(n / 100);
-            const r = n % 100;
-            let res = '';
-            if (c === 1) res = 'cent';
-            else if (c > 1) res = unites[c] + ' cent' + (r === 0 ? 's' : '');
-            if (r > 0) res = (res + ' ' + infCent(r)).trim();
-            return res;
-        }
-
-        const milliards = Math.floor(entier / 1000000000);
-        let reste = entier % 1000000000;
-        const millions = Math.floor(reste / 1000000);
-        reste = reste % 1000000;
-        const mille = Math.floor(reste / 1000);
-        const unitesVal = reste % 1000;
-
-        const parties = [];
-        if (milliards) parties.push(infMille(milliards) + ' milliard' + (milliards > 1 ? 's' : ''));
-        if (millions) parties.push(infMille(millions) + ' million' + (millions > 1 ? 's' : ''));
-        if (mille) {
-            if (mille === 1) parties.push('mille');
-            else parties.push(infMille(mille) + ' mille');
-        }
-        if (unitesVal) parties.push(infMille(unitesVal));
-
-        const texteEntier = parties.join(' ').trim();
-        let resFinal = (texteEntier.charAt(0).toUpperCase() + texteEntier.slice(1)) + " Dinars Algériens";
-        if (centimes > 0) resFinal += ` et ${centimes} centimes`;
-        else resFinal += ` et zéro centime`;
-
-        return resFinal;
-    }
-</script>
-
+    </script>
 </body>
 </html>
