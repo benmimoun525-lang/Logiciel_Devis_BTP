@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
 
 app = FastAPI(title="Logiciel Devis BTP - Backend")
 
@@ -19,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Chargement intelligent de toutes les clés GEMINI_KEY_X
+# Chargement intelligent des clés GEMINI_KEY_X
 def get_gemini_keys():
     keys = []
     for k, v in os.environ.items():
@@ -31,20 +30,20 @@ API_KEYS = get_gemini_keys()
 
 def configure_random_key():
     if not API_KEYS:
-        raise HTTPException(status_code=500, detail="Aucune clé GEMINI_KEY configurée sur le serveur Render.")
+        raise HTTPException(status_code=500, detail="Aucune clé GEMINI_KEY configurée sur Render.")
     selected_key = random.choice(API_KEYS)
     genai.configure(api_key=selected_key)
     return selected_key
 
 def get_gemini_model():
     configure_random_key()
-    # Test des noms de modèles supportés
-    for model_name in ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash-latest"]:
+    # Modèles actifs supportés
+    for model_name in ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash-latest"]:
         try:
             return genai.GenerativeModel(model_name)
         except Exception:
             continue
-    return genai.GenerativeModel("gemini-2.0-flash")
+    return genai.GenerativeModel("gemini-2.5-flash")
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
@@ -97,14 +96,12 @@ async def chiffrer_page(
             mime_type = file.content_type or "image/jpeg"
             
             if "pdf" in mime_type:
-                # Gestion PDF via genai.upload_file ou bytes
                 temp_filename = f"temp_{file.filename}"
                 with open(temp_filename, "wb") as f_out:
                     f_out.write(file_bytes)
                 uploaded_file = genai.upload_file(temp_filename)
                 contents.append(uploaded_file)
             else:
-                # Images (JPG, PNG, WEBP)
                 contents.append({"mime_type": mime_type, "data": file_bytes})
 
         if texte_descriptif.strip():
@@ -127,7 +124,6 @@ async def exporter_excel(data: dict):
     ws = wb.active
     ws.title = "Devis BTP"
 
-    # En-tête du document
     ws['A1'] = "DEVIS ESTIMATIF BTP"
     ws['A1'].font = Font(size=16, bold=True, color="1E3A8A")
     ws['A2'] = f"Client / Projet : {nom_client}"
@@ -156,14 +152,11 @@ async def exporter_excel(data: dict):
         ws.cell(row=row_idx, column=4, value=art.get("u", "u"))
         ws.cell(row=row_idx, column=5, value=art.get("q", 0))
         ws.cell(row=row_idx, column=6, value=art.get("pu", 0))
-        
-        # Formule Excel native Montant HT = Quantité * PU
         ws.cell(row=row_idx, column=7, value=f"=E{row_idx}*F{row_idx}")
         row_idx += 1
 
     end_row = row_idx - 1
 
-    # Totaux avec formules Excel
     ws.cell(row=row_idx + 1, column=6, value="TOTAL HT (DZD) :").font = Font(bold=True)
     ws.cell(row=row_idx + 1, column=7, value=f"=SUM(G{start_row}:G{end_row})").font = Font(bold=True)
 
