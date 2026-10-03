@@ -626,6 +626,25 @@
         </div>
     </header>
 
+    <!-- Bannière d'installation PWA Mobile Smartphone -->
+    <div id="pwaInstallBanner" style="display: none; background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border-radius: 12px; padding: 14px 20px; margin-bottom: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: var(--card-shadow);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.8rem;">📲</span>
+            <div>
+                <div style="font-weight: 700; font-size: 1rem;">Installer l'application sur votre smartphone</div>
+                <div style="font-size: 0.82rem; opacity: 0.9;">Accédez au logiciel directement depuis votre écran d'accueil comme une application native.</div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn btn-accent" style="padding: 8px 16px; font-size: 0.88rem;" onclick="installerApplicationPWA()">
+                Installer l'App
+            </button>
+            <button class="btn btn-outline" style="padding: 8px 12px; color: white; border-color: rgba(255,255,255,0.4);" onclick="document.getElementById('pwaInstallBanner').style.display='none'">
+                ✕
+            </button>
+        </div>
+    </div>
+
     <!-- Étape 1 : Paramètres du Devis & Client -->
     <div class="card no-print">
         <div class="card-title">
@@ -656,6 +675,19 @@
         <div class="card-title">
             <span>📄 2. Photos WhatsApp & Documents Numérisés</span>
             <span id="badgeFichiers" style="font-size: 0.85rem; font-weight: normal; color: #1e40af;">0 document(s)</span>
+        </div>
+
+        <!-- Boutons d'accès direct Smartphone : Caméra Chantier & Galerie -->
+        <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+            <label for="cameraDevis" class="btn" style="flex: 1; min-width: 180px; text-align: center; cursor: pointer; padding: 12px; background: #1e3a8a; color: white; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>📸</span> <span>Prendre Photo Chantier</span>
+            </label>
+            <input type="file" id="cameraDevis" accept="image/*" capture="environment" style="display: none;" onchange="chargerFichiersInstantane(event)">
+
+            <label for="fichiersDevisMobile" class="btn" style="flex: 1; min-width: 180px; text-align: center; cursor: pointer; padding: 12px; background: #059669; color: white; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>📁</span> <span>Galerie / PDF WhatsApp</span>
+            </label>
+            <input type="file" id="fichiersDevisMobile" multiple accept=".pdf,.doc,.docx,image/*" style="display: none;" onchange="chargerFichiersInstantane(event)">
         </div>
 
         <div class="dropzone" id="dropzone">
@@ -790,11 +822,14 @@
 
         <!-- Boutons d'exportation -->
         <div class="no-print" style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
+            <button id="btnShareWhatsApp" class="btn" style="background: #25D366; color: white; display: none; font-weight: 600;" onclick="partagerParWhatsApp()">
+                📲 Partager par WhatsApp
+            </button>
             <button id="btnExportExcel" class="btn btn-success" style="display: none;" onclick="telechargerExcel()">
-                📥 Télécharger le Devis Excel par Lots (.xlsx)
+                📥 Télécharger Excel (.xlsx)
             </button>
             <button id="btnPrintPDF" class="btn btn-primary" style="display: none;" onclick="imprimerOuExporterPDF()">
-                🖨️ Imprimer / Sauvegarder en PDF
+                🖨️ Imprimer / PDF
             </button>
         </div>
     </div>
@@ -1566,6 +1601,7 @@
         const summaryGrid = document.getElementById('summaryGrid');
         const btnExcel = document.getElementById('btnExportExcel');
         const btnPrint = document.getElementById('btnPrintPDF');
+        const btnWhatsApp = document.getElementById('btnShareWhatsApp');
 
         const lotsKeys = Object.keys(devisLots);
         let totalArticles = 0;
@@ -1577,6 +1613,7 @@
             summaryGrid.style.display = 'none';
             btnExcel.style.display = 'none';
             btnPrint.style.display = 'none';
+            if (btnWhatsApp) btnWhatsApp.style.display = 'none';
             return;
         }
 
@@ -1584,6 +1621,7 @@
         summaryGrid.style.display = 'grid';
         btnExcel.style.display = 'inline-flex';
         btnPrint.style.display = 'inline-flex';
+        if (btnWhatsApp) btnWhatsApp.style.display = 'inline-flex';
 
         let html = '';
 
@@ -2364,6 +2402,74 @@
         else resFinal += ` et zéro centime`;
 
         return resFinal;
+    }
+
+    // ============================================================
+    // PARTAGE DIRECT DU DEVIS SUR WHATSAPP
+    // ============================================================
+    function partagerParWhatsApp() {
+        const nomClient = document.getElementById('nomClient').value || 'Client';
+        const numDevis = document.getElementById('numDevis').value || 'DEV';
+        const dateDevis = document.getElementById('dateDevis').value || '';
+        const totTTC = document.getElementById('totTTC').textContent;
+        const totHT = document.getElementById('totHT').textContent;
+        const totTVA = document.getElementById('totTVA').textContent;
+        const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
+        const nomEnt = entreprise.nom || 'Entreprise BTP Algérie';
+
+        let msg = `*DEVIS ESTIMATIF BTP*\n`;
+        msg += `---------------------------------\n`;
+        msg += `🏢 *Entreprise :* ${nomEnt}\n`;
+        msg += `👤 *Client :* ${nomClient}\n`;
+        msg += `📄 *Devis N° :* ${numDevis}\n`;
+        msg += `📅 *Date :* ${dateDevis}\n`;
+        msg += `---------------------------------\n`;
+        msg += `💰 *Total H.T :* ${totHT}\n`;
+        msg += `🏷️ *T.V.A :* ${totTVA}\n`;
+        msg += `✅ *TOTAL T.T.C :* ${totTTC}\n`;
+        msg += `---------------------------------\n`;
+        msg += `_Établi et chiffré par l'IA Devis BTP Algérie._`;
+
+        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+    }
+
+    // ============================================================
+    // GESTION DE L'INSTALLATION PWA SUR SMARTPHONE (ANDROID / IOS)
+    // ============================================================
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const banner = document.getElementById('pwaInstallBanner');
+        if (banner) banner.style.display = 'flex';
+    });
+
+    function installerApplicationPWA() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choice) => {
+                if (choice.outcome === 'accepted') {
+                    const banner = document.getElementById('pwaInstallBanner');
+                    if (banner) banner.style.display = 'none';
+                    ajouterLog('✅ Application Devis BTP installée sur votre écran d\'accueil !');
+                }
+                deferredPrompt = null;
+            });
+        } else {
+            alert("Pour installer cette application sur votre écran d'accueil :\n\n📱 Sur Android (Chrome) :\nAppuyez sur les 3 points en haut à droite du navigateur, puis sur 'Installer l'application' ou 'Ajouter à l'écran d'accueil'.\n\n🍏 Sur iPhone (Safari) :\nAppuyez sur le bouton Partager (icône avec flèche vers le haut), puis faites défiler et touchez 'Sur l'écran d'accueil'.");
+        }
+    }
+
+    // Enregistrement du Service Worker pour fonctionnement PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(() => {
+                console.log('PWA Service Worker actif');
+            }).catch((err) => {
+                console.log('Erreur SW:', err);
+            });
+        });
     }
 </script>
 
