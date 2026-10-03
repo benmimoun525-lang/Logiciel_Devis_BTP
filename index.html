@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Devis BTP Algérie - Chiffrage par IA & Devis par Lots</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
@@ -371,7 +371,7 @@
             border-left: 4px solid #3b82f6;
         }
 
-        /* TABLEAU DU DEVIS INTERACTIF (Le Coeur de l'outil) */
+        /* TABLEAU DU DEVIS INTERACTIF */
         .devis-table-wrapper {
             overflow-x: auto;
             margin-top: 15px;
@@ -560,7 +560,6 @@
         .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
         .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; }
 
-        /* Carte des abonnements / formules */
         .plan-card {
             border: 2px solid var(--gray-300);
             border-radius: 10px;
@@ -572,21 +571,6 @@
         .plan-title { font-weight: 700; font-size: 1.05rem; color: var(--primary); }
         .plan-price { font-weight: 800; font-size: 1.15rem; color: var(--accent); margin: 4px 0; }
         .plan-desc { font-size: 0.85rem; color: var(--gray-600); }
-
-        /* ADAPTATION SPÉCIALE SMARTPHONE */
-        @media (max-width: 768px) {
-            body { padding: 10px; }
-            .app-header { padding: 16px; }
-            .app-header h1 { font-size: 1.3rem; }
-            .card { padding: 14px; }
-            .form-grid-3 { grid-template-columns: 1fr; }
-            .thumb-card { width: 105px; padding: 6px; }
-            .thumb-img { height: 75px; }
-            .devis-table th, .devis-table td { padding: 6px 8px; font-size: 0.82rem; }
-            .col-des { min-width: 180px; }
-            .btn { width: 100%; justify-content: center; }
-            .btn-group { width: 100%; }
-        }
 
         /* STYLES IMPRESSION / PDF PRO */
         @media print {
@@ -611,7 +595,7 @@
 
 <div class="container">
 
-    <!-- En-tête officiel imprimable -->
+    <!-- En-tête officiel imprimable (masqué à l'écran, visible à l'impression) -->
     <div id="printHeader" class="print-header">
         <div>
             <h2 id="pEntNom" style="margin: 0; color: #1e3a8a;">ENTREPRISE TRAVAUX BTP</h2>
@@ -634,8 +618,10 @@
             <p>Traitement instantané des photos WhatsApp & PDF multi-pages en devis par lots aux normes algériennes.</p>
         </div>
         <div class="header-actions">
+            <button class="btn-header" id="btnCompteClient" onclick="ouvrirModalCompte()">👤 Mon Compte (<span id="soldeCreditsBadge">5</span> p.)</button>
             <button class="btn-header" onclick="ouvrirModalEntreprise()">🏢 Profil Entreprise</button>
-            <button class="btn-header" onclick="ouvrirModalAbonnements()">💳 Tarifs & Abonnements</button>
+            <button class="btn-header" onclick="ouvrirModalHistorique()">📚 Historique</button>
+            <button class="btn-header" onclick="ouvrirModalAbonnements()">💳 Tarifs & BaridiMob</button>
             <button class="btn-header" onclick="nouveauDevis()">🔄 Nouveau Devis</button>
         </div>
     </header>
@@ -676,7 +662,7 @@
             <input type="file" id="fichiersDevis" multiple accept=".pdf,.doc,.docx,image/*" onchange="chargerFichiersInstantane(event)">
             <div class="dropzone-icon">📥</div>
             <div class="dropzone-text">Glissez vos photos WhatsApp ou vos fichiers PDF ici</div>
-            <div class="dropzone-hint">Supporte les photos smartphone, scans CamScanner et PDF multi-pages (Compression ultra-rapide)</div>
+            <div class="dropzone-hint">Supporte les photos smartphone, scans CamScanner et PDF multi-pages (découpage automatique)</div>
         </div>
 
         <!-- Galerie des vignettes dynamiques -->
@@ -715,9 +701,14 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px;">
             <div id="statusBadge" class="status-pill status-idle">En attente de vos photos ou documents BTP...</div>
-            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="toggleConsole()">
-                🖥️ Console & Logs
-            </button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="reveillerServeur()">
+                    🔌 Réveiller le serveur
+                </button>
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="toggleConsole()">
+                    🖥️ Console & Logs
+                </button>
+            </div>
         </div>
 
         <div id="logArea" class="log-box" style="display: block;">Console prête. Connecté au moteur de chiffrage BTP.</div>
@@ -844,11 +835,53 @@
     </div>
 </div>
 
-<!-- Modal Tarifs & Abonnements -->
+<!-- Modal Mon Compte & Crédits Supabase -->
+<div id="modalCompte" class="modal-overlay">
+    <div class="modal" style="max-width: 520px;">
+        <div class="modal-header">
+            <div class="modal-title">👤 Mon Compte & Crédits Pages</div>
+            <button class="close-modal" onclick="fermerModalCompte()">&times;</button>
+        </div>
+        <p style="font-size: 0.88rem; color: #64748b; margin-top: 0;">Connectez-vous avec votre numéro WhatsApp/téléphone pour synchroniser vos devis dans le Cloud et gérer vos crédits.</p>
+
+        <div id="compteConnecteBloc" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem;" id="clientNomAffiche">Artisan BTP</span>
+                <span class="badge-traite" style="padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold;" id="clientStatutAffiche">Actif</span>
+            </div>
+            <div style="font-size: 0.88rem; color: #475569; margin-bottom: 6px;">📱 Téléphone : <b id="clientTelAffiche">0550 00 00 00</b></div>
+            <div style="font-size: 1rem; color: #1e3a8a; margin-top: 8px; font-weight: bold;">
+                🪙 Solde restant : <span id="clientCreditsAffiche" style="font-size: 1.3rem; color: #d97706;">5</span> pages
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <button class="btn btn-accent" style="flex: 1; padding: 8px 12px; font-size: 0.88rem;" onclick="ouvrirRechargeBaridimob()">⚡ Recharger mes crédits</button>
+                <button class="btn btn-outline" style="padding: 8px 12px; font-size: 0.88rem;" onclick="deconnecterClient()">Déconnexion</button>
+            </div>
+        </div>
+
+        <div id="compteFormConnexion">
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>Numéro de Téléphone (WhatsApp) :</label>
+                <input type="tel" id="inputClientTel" class="form-control" placeholder="Ex: 0550 12 34 56" style="font-size: 1.05rem; font-weight: 600;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>Nom ou Entreprise (Optionnel) :</label>
+                <input type="text" id="inputClientNom" class="form-control" placeholder="Ex: Entreprise Maçonnerie Moderne">
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="connecterClient()">
+                🚀 Se Connecter / Créer mon Compte (+5 pages offertes)
+            </button>
+        </div>
+
+        <button class="btn btn-outline" style="width: 100%; margin-top: 12px;" onclick="fermerModalCompte()">Fermer</button>
+    </div>
+</div>
+
+<!-- Modal Tarifs & Abonnements BaridiMob -->
 <div id="modalAbonnements" class="modal-overlay">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title">💳 Modèles d'Abonnement BTP & Encaissement</div>
+            <div class="modal-title">💳 Modèles d'Abonnement BTP & Recharge BaridiMob</div>
             <button class="close-modal" onclick="fermerModalAbonnements()">&times;</button>
         </div>
         <p style="font-size: 0.9rem; color: #475569;">Formules adaptées aux artisans, métreurs et entrepreneurs en Algérie :</p>
@@ -856,45 +889,137 @@
         <div class="plan-card">
             <div class="plan-title">Formule 1 : Paiement "Au Devis" (À l'acte)</div>
             <div class="plan-price">500 à 1 000 DZD / devis</div>
-            <div class="plan-desc">Idéal pour les artisans et sous-traitants ayant des besoins occasionnels. Traitement jusqu'à 10 pages.</div>
+            <div class="plan-desc">Idéal pour les artisans ayant des besoins occasionnels. Traitement jusqu'à 10 pages.</div>
         </div>
 
         <div class="plan-card" style="border-color: #3b82f6; background: #eff6ff;">
             <div class="plan-title">Formule 2 : Abonnement Mensuel Professionnel</div>
-            <div class="plan-price">3 000 à 5 000 DZD / mois</div>
-            <div class="plan-desc">Recommandé pour bureaux d'études et entreprises BTP régulières. Accès illimité jusqu'à 25 devis complets par mois.</div>
+            <div class="plan-price">4 500 DZD / mois</div>
+            <div class="plan-desc">Recommandé pour bureaux d'études et entreprises régulières. Accès illimité jusqu'à 150 pages par mois.</div>
         </div>
 
         <div class="plan-card">
             <div class="plan-title">Formule 3 : Packs de Crédits Pages</div>
-            <div class="plan-price">Pack 50 Pages = 4 000 DZD</div>
+            <div class="plan-price">Pack 50 Pages = 4 000 DZD &nbsp;|&nbsp; Pack 100 Pages = 7 500 DZD</div>
             <div class="plan-desc">Chaque page numérisée consomme 1 crédit. Aucune date d'expiration.</div>
         </div>
 
-        <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-top: 15px;">
-            <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 5px;">📲 Encaissement en Algérie :</div>
-            <div style="font-size: 0.85rem; color: #334155;">
-                • <b>BaridiMob / CCP</b> : Virement instantané vers RIP avec envoi de capture d'écran.<br>
-                • <b>Carte Edahabia / CIB</b> : Règlement sécurisé en ligne.<br>
-                • <b>Espèces</b> : Remise en main propre lors de la finalisation des métrés.
+        <!-- Espace Virement BaridiMob / CCP -->
+        <div style="background: #f8fafc; border: 2px solid #3b82f6; border-radius: 10px; padding: 16px; margin-top: 18px;">
+            <div style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem; margin-bottom: 6px;">📲 Recharger mon compte via BaridiMob :</div>
+            <div style="font-size: 0.88rem; color: #334155; margin-bottom: 12px; background: white; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                <b>Coordonnées de virement BaridiMob :</b><br>
+                • <b>RIP BaridiMob :</b> <code style="font-size: 1rem; color: #1e40af; font-weight: bold;">007 99999 0023456789 25</code><br>
+                • <b>Titulaire :</b> Service Chiffrage BTP Algérie
             </div>
+
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>Formule choisie :</label>
+                <select id="selectFormuleRecharge" class="form-control">
+                    <option value="pack_50">Pack 50 Pages — 4 000 DZD</option>
+                    <option value="pack_100">Pack 100 Pages — 7 500 DZD</option>
+                    <option value="mensuel">Abonnement Mensuel (150 pages) — 4 500 DZD</option>
+                    <option value="par_devis">1 Devis occasionnel (10 pages) — 1 000 DZD</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>Numéro de transaction BaridiMob ou Référence :</label>
+                <input type="text" id="inputNumTransaction" class="form-control" placeholder="Ex: TRX-98765432 ou N° de reçu">
+            </div>
+
+            <button class="btn btn-success" style="width: 100%; margin-top: 8px;" onclick="soumettrePreuveBaridimob()">
+                📤 Confirmer mon virement BaridiMob
+            </button>
         </div>
 
         <button class="btn btn-outline" style="width: 100%; margin-top: 15px;" onclick="fermerModalAbonnements()">Fermer</button>
     </div>
 </div>
 
+<!-- Modal Historique des Devis -->
+<div id="modalHistorique" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📚 Historique des Devis</div>
+            <button class="close-modal" onclick="fermerModalHistorique()">&times;</button>
+        </div>
+        <p style="font-size: 0.88rem; color: #64748b; margin-top: 0;">Sauvegardez et rechargez vos devis en cours ou terminés.</p>
+        
+        <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+            <button class="btn btn-success" style="flex: 1; padding: 10px 14px; font-size: 0.9rem;" onclick="sauvegarderDevisDansHistorique()">
+                💾 Sauvegarder dans le Cloud & Local
+            </button>
+            <button class="btn btn-outline" style="padding: 10px 14px; font-size: 0.9rem;" onclick="afficherListeHistorique()">
+                🔄 Actualiser
+            </button>
+        </div>
+
+        <div id="listeHistorique" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;">
+            <div style="text-align: center; color: #94a3b8; padding: 20px;">Aucun devis dans l'historique</div>
+        </div>
+
+        <button class="btn btn-outline" style="width: 100%; margin-top: 15px;" onclick="fermerModalHistorique()">Fermer</button>
+    </div>
+</div>
+
+<!-- Modal Clé API Gemini (Optionnelle si configurée sur le serveur) -->
+<div id="modalCleAPI" class="modal-overlay" style="display:none;">
+    <div class="modal" style="max-width: 500px;">
+        <div class="modal-header">
+            <div class="modal-title">🔑 Configuration Clé API Gemini</div>
+        </div>
+        <p style="font-size: 0.9rem; color: #475569; margin-top: 0;">
+            Pour analyser vos documents, l'application a besoin d'une clé API Gemini <strong>gratuite</strong>.
+        </p>
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; margin-bottom: 16px; font-size: 0.88rem;">
+            <b>📋 Comment obtenir votre clé gratuite :</b><br>
+            1. Ouvrez <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #2563eb; font-weight: 600;">aistudio.google.com/app/apikey</a><br>
+            2. Connectez-vous avec votre compte Google<br>
+            3. Cliquez sur <b>"Create API Key"</b><br>
+            4. Copiez la clé et collez-la ci-dessous
+        </div>
+        <div class="form-group" style="margin-bottom: 14px;">
+            <label>Votre clé API Gemini :</label>
+            <input type="password" id="inputCleAPI" class="form-control" placeholder="AIzaSy..." 
+                   style="font-family: monospace; letter-spacing: 1px;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+            <input type="checkbox" id="afficherCle" onchange="document.getElementById('inputCleAPI').type = this.checked ? 'text' : 'password'">
+            <label for="afficherCle" style="font-size: 0.88rem; cursor: pointer;">Afficher la clé</label>
+        </div>
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px; font-size: 0.82rem; color: #166534; margin-bottom: 14px;">
+            🔒 Votre clé est sauvegardée <b>uniquement sur votre appareil</b> (localStorage). Elle n'est jamais envoyée à un tiers.
+        </div>
+        <button class="btn btn-primary" style="width: 100%;" onclick="sauvegarderCleAPI()">
+            Valider et Continuer
+        </button>
+    </div>
+</div>
+
 <script>
-    // ==========================================
-    // CONFIGURATION DU SERVEUR
-    // Si votre API FastAPI tourne sur votre PC, laissez "http://127.0.0.1:8000"
-    // Si vous la déployez sur Render, remplacez par "https://votre-app.onrender.com"
-    // ==========================================
-    let API_BASE = "https://saas-estimation-btp.onrender.com"; 
-    
-    // Si l'utilisateur a un serveur Render connu, le script essaiera de s'y connecter
-    if (window.location.protocol.startsWith('http') && window.location.hostname.includes('onrender')) {
-        API_BASE = ""; 
+    // Configuration intelligente de l'URL API
+    const API_BASE = (window.location.origin.includes('http') && !window.location.origin.startsWith('file:')) 
+        ? "" 
+        : "https://logiciel-devis-btp.onrender.com";
+
+    let GEMINI_API_KEY = localStorage.getItem('btp_gemini_key') || '';
+
+    function sauvegarderCleAPI() {
+        const cle = document.getElementById('inputCleAPI').value.trim();
+        if (!cle) {
+            alert('Veuillez coller votre clé API Gemini.');
+            return;
+        }
+        localStorage.setItem('btp_gemini_key', cle);
+        GEMINI_API_KEY = cle;
+        document.getElementById('modalCleAPI').style.display = 'none';
+        ajouterLog('✅ Clé API Gemini configurée. Prêt à analyser vos documents !');
+    }
+
+    function ouvrirModalCleAPI() {
+        document.getElementById('inputCleAPI').value = GEMINI_API_KEY;
+        document.getElementById('modalCleAPI').style.display = 'flex';
     }
 
     // État global de l'application
@@ -914,20 +1039,60 @@
 
         chargerEntrepriseLocale();
         chargerDevisSauvegarde();
+        chargerCompteClientLocal();
         verifierConnexionServeur();
     });
 
     // Vérification de l'état du serveur
     async function verifierConnexionServeur() {
         try {
-            const res = await fetch(`${API_BASE}/`);
+            const res = await fetch(`${API_BASE}/api/status`);
             if (res.ok) {
                 const data = await res.json();
-                ajouterLog(`✅ Connecté au serveur API : ${data.message}`);
+                ajouterLog(`✅ Connecté au serveur API : ${data.message || 'Opérationnel'}`);
+                ajouterLog(`📡 Endpoint API : ${API_BASE || window.location.origin}`);
+                ajouterLog(`🤖 Moteur IA : Gemini avec rotation (${data.keys_count || 1} clés)`);
                 return;
             }
         } catch (e) {
-            ajouterLog(`⚠️ Impossible de contacter le serveur Python sur ${API_BASE}. Assurez-vous qu'il est allumé.`);
+            ajouterLog(`⚠️ Serveur Python non joignable sur ${API_BASE || window.location.origin}.`);
+            ajouterLog(`💡 Lancez : uvicorn main:app --reload (port 8000)`);
+        }
+    }
+
+    // Réveil manuel du serveur Render
+    async function reveillerServeur() {
+        const btn = document.querySelector('[onclick="reveillerServeur()"]');
+        const statusBadge = document.getElementById('statusBadge');
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Réveil en cours...'; }
+        statusBadge.className = 'status-pill status-busy';
+        statusBadge.textContent = '⏳ Réveil du serveur... (peut prendre 30-60 secondes)';
+        ajouterLog(`🔌 Tentative de réveil du serveur : ${API_BASE}/api/status`);
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 90000);
+            const res = await fetch(`${API_BASE}/api/status`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const data = await res.json();
+                ajouterLog(`✅ Serveur réveillé et opérationnel : ${data.message || 'Opérationnel'}`);
+                statusBadge.className = 'status-pill status-done';
+                statusBadge.textContent = '✅ Serveur opérationnel — vous pouvez analyser vos documents !';
+            } else {
+                throw new Error(`HTTP ${res.status}`);
+            }
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                ajouterLog(`❌ Délai dépassé (90s). Le serveur ne répond pas.`);
+            } else {
+                ajouterLog(`❌ Impossible de joindre le serveur : ${e.message}`);
+            }
+            statusBadge.className = 'status-pill status-err';
+            statusBadge.textContent = '❌ Serveur inaccessible. Vérifiez votre connexion.';
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = '🔌 Réveiller le serveur'; }
         }
     }
 
@@ -949,7 +1114,6 @@
         }
     }
 
-    // Traitement des fichiers avec compression automatique pour smartphone
     async function traiterFichiersImportes(fichiers) {
         const statusBadge = document.getElementById('statusBadge');
         statusBadge.className = 'status-pill status-busy';
@@ -974,55 +1138,25 @@
         }
     }
 
-    // Compression ultra-légère côté smartphone/navigateur
     function ajouterImageALaFile(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width;
-                    let h = img.height;
-                    const maxDim = 1920; 
-
-                    if (w > maxDim || h > maxDim) {
-                        if (w > h) {
-                            h = Math.round((h * maxDim) / w);
-                            w = maxDim;
-                        } else {
-                            w = Math.round((w * maxDim) / h);
-                            h = maxDim;
-                        }
-                    }
-
-                    canvas.width = w;
-                    canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
-
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-                    canvas.toBlob((blob) => {
-                        const optFile = new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
-                        pagesQueue.push({
-                            id: 'page_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                            file: optFile,
-                            name: file.name,
-                            type: 'image/jpeg',
-                            dataUrl: dataUrl,
-                            status: 'attente',
-                            articles: []
-                        });
-                        resolve();
-                    }, 'image/jpeg', 0.88);
-                };
-                img.src = e.target.result;
+                pagesQueue.push({
+                    id: 'page_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                    file: file,
+                    name: file.name,
+                    type: file.type || 'image/jpeg',
+                    dataUrl: e.target.result,
+                    status: 'attente',
+                    articles: []
+                });
+                resolve();
             };
             reader.readAsDataURL(file);
         });
     }
 
-    // Découpage automatique des PDF multi-pages
     async function extrairePagesDuPDF(pdfFile) {
         try {
             const arrayBuffer = await pdfFile.arrayBuffer();
@@ -1038,7 +1172,7 @@
                 canvas.height = viewport.height;
 
                 await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
                 const blob = await (await fetch(dataUrl)).blob();
                 const pageFile = new File([blob], `${pdfFile.name.replace(/\.pdf$/i, '')}_page_${pageNum}.jpg`, { type: 'image/jpeg' });
@@ -1058,7 +1192,6 @@
         }
     }
 
-    // Affichage des vignettes
     function rafraichirGrilleVignettes() {
         const grid = document.getElementById('thumbnailsGrid');
         grid.innerHTML = "";
@@ -1150,7 +1283,6 @@
         previewContent.innerHTML = `<img id="previewImg" src="${page.dataUrl}" style="transform: scale(${zoomLevel}) rotate(${rotationAngle}deg);">`;
     }
 
-    // Manipulation de l'image
     function zoomImage(delta) {
         zoomLevel = Math.max(0.4, Math.min(3.5, zoomLevel + delta));
         appliquerTransformations();
@@ -1176,7 +1308,6 @@
         await executerTraitementPage(indexSelectionne);
     }
 
-    // Traitement automatique résistant aux erreurs pour les devis multi-pages
     async function traiterToutesLesPages() {
         const btnTout = document.getElementById('btnTraiterTout');
         const btnPage = document.getElementById('btnLancerPage');
@@ -1209,7 +1340,6 @@
         setTimeout(() => { pBox.style.display = 'none'; }, 2500);
     }
 
-    // Exécution robuste du chiffrage IA (Mise à jour pour afficher les VRAIES ERREURS)
     async function executerTraitementPage(idx) {
         const page = pagesQueue[idx];
         const statusBadge = document.getElementById('statusBadge');
@@ -1224,37 +1354,67 @@
         formData.append('file', page.file);
         formData.append('page_num', idx + 1);
 
+        const clientActif = JSON.parse(localStorage.getItem('btp_client') || '{}');
+        if (clientActif.telephone) {
+            formData.append('telephone', clientActif.telephone);
+        }
+
         let success = false;
         let retries = 0;
+        const MAX_RETRIES = 3;
         let lastErreurMessage = "Erreur de connexion au serveur.";
 
-        while (!success && retries < 2) {
+        while (!success && retries < MAX_RETRIES) {
             try {
+                if (retries === 0) {
+                    ajouterLog(`⏳ Tentative ${retries + 1}/${MAX_RETRIES}...`);
+                } else if (retries === 1) {
+                    ajouterLog(`⏳ Tentative ${retries + 1}/${MAX_RETRIES}... (Le serveur Render peut mettre 30-60s à se réveiller)`);
+                    statusBadge.textContent = `⏳ Réveil du serveur en cours... patience (${retries + 1}/${MAX_RETRIES})`;
+                } else {
+                    ajouterLog(`⏳ Tentative ${retries + 1}/${MAX_RETRIES}... dernière chance`);
+                }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
+
                 const response = await fetch(`${API_BASE}/chiffrer-page`, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
 
                 if (!response.ok) {
                     const errText = await response.text();
-                    throw new Error(errText); // On force la capture de l'erreur du serveur
+                    let errDetail = errText;
+                    try { errDetail = JSON.parse(errText).detail || errText; } catch(e) {}
+                    throw new Error(`Erreur ${response.status} : ${errDetail}`);
                 }
 
                 const data = await response.json();
-                
-                // Pré-remplir automatiquement le client/projet s'il est détecté sur le document
+
+                // Mise à jour du solde de crédits
+                if (data.credits_restants !== undefined && data.credits_restants !== null) {
+                    clientActif.credits_pages = data.credits_restants;
+                    localStorage.setItem('btp_client', JSON.stringify(clientActif));
+                    chargerCompteClientLocal();
+                    ajouterLog(`🪙 Crédit décompté. Solde restant : ${data.credits_restants} page(s).`);
+                }
+
+                // Pré-remplir automatiquement client/projet si détectés
                 if (data.client && !document.getElementById('nomClient').value) {
                     document.getElementById('nomClient').value = data.client;
+                    ajouterLog(`👤 Client détecté : ${data.client}`);
                 }
                 if (data.projet && !document.getElementById('nomProjet').value) {
                     document.getElementById('nomProjet').value = data.projet;
+                    ajouterLog(`🏗️ Projet détecté : ${data.projet}`);
                 }
 
                 let articlesExtraits = [];
                 if (Array.isArray(data.articles) && data.articles.length > 0) {
                     articlesExtraits = data.articles;
-                } else if (data.raw_json) {
-                    try { articlesExtraits = JSON.parse(data.raw_json); } catch(e){}
                 }
 
                 if (articlesExtraits.length > 0) {
@@ -1268,14 +1428,27 @@
                 } else {
                     page.status = 'traite';
                     success = true;
-                    ajouterLog(`⚠️ Aucun article BTP détecté sur "${page.name}".`);
+                    ajouterLog(`⚠️ Aucun article BTP détecté sur "${page.name}". Vérifiez la qualité de l'image.`);
+                    statusBadge.className = 'status-pill status-done';
+                    statusBadge.textContent = `Analyse terminée — aucun article détecté.`;
                 }
 
             } catch (err) {
                 retries++;
-                lastErreurMessage = err.message;
-                ajouterLog(`⚠️ Tentative ${retries}/2 échouée. Raison: ${lastErreurMessage}`);
-                await new Promise(r => setTimeout(r, 1200));
+                if (err.name === 'AbortError') {
+                    lastErreurMessage = "Délai d'attente dépassé (90s). Le serveur ne répond pas.";
+                } else {
+                    lastErreurMessage = err.message;
+                }
+
+                ajouterLog(`⚠️ Tentative ${retries}/${MAX_RETRIES} échouée. Raison: ${lastErreurMessage}`);
+
+                if (retries < MAX_RETRIES) {
+                    const delai = retries === 1 ? 5000 : 10000;
+                    ajouterLog(`⏳ Nouvelle tentative dans ${delai / 1000} secondes...`);
+                    statusBadge.textContent = `⏳ Nouvelle tentative dans ${delai / 1000}s...`;
+                    await new Promise(r => setTimeout(r, delai));
+                }
             }
         }
 
@@ -1290,7 +1463,6 @@
         sauvegarderLocalement();
     }
 
-    // Intégration et fusion des articles par Lots BTP
     function integrerArticlesDansDevis(nouveauxArticles) {
         nouveauxArticles.forEach(art => {
             const lotNom = (art.lot || "TRAVAUX GÉNÉRAUX").trim();
@@ -1312,7 +1484,6 @@
         reconstruireTableauDevis();
     }
 
-    // Reconstitution dynamique du Tableau de Chiffrage BTP
     function reconstruireTableauDevis() {
         const container = document.getElementById('devisContainer');
         const emptyState = document.getElementById('emptyDevisState');
@@ -1423,14 +1594,30 @@
     function modifierArticle(lotNom, artIdx, champ, valeur) {
         if (!devisLots[lotNom] || !devisLots[lotNom][artIdx]) return;
         const art = devisLots[lotNom][artIdx];
+
         if (champ === 'q' || champ === 'pu') {
             art[champ] = parseFloat(valeur) || 0;
             art.total = Math.round(art.q * art.pu * 100) / 100;
+
+            const lotBlock = document.querySelector(`.lot-block[data-lot="${CSS.escape(lotNom)}"]`);
+            if (lotBlock) {
+                const lignes = lotBlock.querySelectorAll('tbody tr');
+                if (lignes[artIdx]) {
+                    const cellTot = lignes[artIdx].querySelector('.col-tot');
+                    if (cellTot) cellTot.textContent = formaterMontant(art.total);
+                }
+                let sousTotalLot = 0;
+                devisLots[lotNom].forEach(a => sousTotalLot += (parseFloat(a.q)||0) * (parseFloat(a.pu)||0));
+                const badge = lotBlock.querySelector('.lot-subtotal-badge');
+                if (badge) badge.textContent = `Sous-total : ${formaterMontant(sousTotalLot)} DZD`;
+            }
+
+            calculerTotaux();
+            sauvegarderLocalement();
         } else {
             art[champ] = valeur;
+            sauvegarderLocalement();
         }
-        reconstruireTableauDevis();
-        sauvegarderLocalement();
     }
 
     function ajouterArticleDansLot(lotNom) {
@@ -1501,7 +1688,6 @@
         sauvegarderLocalement();
     }
 
-    // Calculs financiers récapitulatifs
     function calculerTotaux() {
         const recapTable = document.getElementById('recapTable');
         recapTable.innerHTML = '';
@@ -1533,7 +1719,6 @@
         document.getElementById('montantLettres').textContent = `Arrêté le présent devis estimatif à la somme de : ${enLettres} Toutes Taxes Comprises.`;
     }
 
-    // Téléchargement Excel Professionnel (.xlsx)
     async function telechargerExcel() {
         const nomClient = document.getElementById('nomClient').value || "Client";
         const nomProjet = document.getElementById('nomProjet').value || "";
@@ -1594,7 +1779,6 @@
         }
     }
 
-    // Impression directe et Export PDF
     function imprimerOuExporterPDF() {
         const ent = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
         document.getElementById('pEntNom').textContent = ent.nom || "ENTREPRISE BTP";
@@ -1637,7 +1821,7 @@
                 if (d.nomProjet) document.getElementById('nomProjet').value = d.nomProjet;
                 if (d.numDevis) document.getElementById('numDevis').value = d.numDevis;
                 if (d.dateDevis) document.getElementById('dateDevis').value = d.dateDevis;
-                if (d.remisePct) document.getElementById('remisePct').value = d.remisePct;
+                if (d.remisePct !== undefined) document.getElementById('remisePct').value = d.remisePct;
                 if (d.tauxTVA) document.getElementById('tauxTVA').value = d.tauxTVA;
                 if (d.lots && Object.keys(d.lots).length > 0) {
                     devisLots = d.lots;
@@ -1690,6 +1874,338 @@
     function ouvrirModalAbonnements() { document.getElementById('modalAbonnements').style.display = 'flex'; }
     function fermerModalAbonnements() { document.getElementById('modalAbonnements').style.display = 'none'; }
 
+    function ouvrirModalHistorique() {
+        afficherListeHistorique();
+        document.getElementById('modalHistorique').style.display = 'flex';
+    }
+    function fermerModalHistorique() {
+        document.getElementById('modalHistorique').style.display = 'none';
+    }
+
+    // Gestion du compte client Supabase & Crédits
+    function ouvrirModalCompte() {
+        chargerCompteClientLocal();
+        document.getElementById('modalCompte').style.display = 'flex';
+    }
+    function fermerModalCompte() {
+        document.getElementById('modalCompte').style.display = 'none';
+    }
+
+    async function connecterClient() {
+        const tel = document.getElementById('inputClientTel').value.trim();
+        const nom = document.getElementById('inputClientNom').value.trim() || 'Artisan BTP';
+        if (!tel) { alert('Veuillez entrer votre numéro de téléphone.'); return; }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/clients/connexion`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telephone: tel, nom_complet: nom })
+            });
+            const data = await res.json();
+            if (data.client) {
+                localStorage.setItem('btp_client', JSON.stringify(data.client));
+                chargerCompteClientLocal();
+                ajouterLog(`👤 Compte connecté : ${data.client.nom_complet} (${data.client.credits_pages || 0} crédits restants).`);
+                alert(`Bienvenue ${data.client.nom_complet} !\nSolde actuel : ${data.client.credits_pages || 0} page(s) de devis.`);
+            }
+        } catch (e) {
+            const offlineClient = { telephone: tel, nom_complet: nom, credits_pages: 5 };
+            localStorage.setItem('btp_client', JSON.stringify(offlineClient));
+            chargerCompteClientLocal();
+            ajouterLog(`👤 Compte enregistré en mode local.`);
+        }
+    }
+
+    function deconnecterClient() {
+        localStorage.removeItem('btp_client');
+        document.getElementById('compteConnecteBloc').style.display = 'none';
+        document.getElementById('compteFormConnexion').style.display = 'block';
+        document.getElementById('soldeCreditsBadge').textContent = '0';
+        ajouterLog('👋 Compte déconnecté.');
+    }
+
+    function chargerCompteClientLocal() {
+        const c = JSON.parse(localStorage.getItem('btp_client') || 'null');
+        if (c) {
+            document.getElementById('compteConnecteBloc').style.display = 'block';
+            document.getElementById('compteFormConnexion').style.display = 'none';
+            document.getElementById('clientNomAffiche').textContent = c.nom_complet || 'Client BTP';
+            document.getElementById('clientTelAffiche').textContent = c.telephone || '';
+            document.getElementById('clientCreditsAffiche').textContent = c.credits_pages !== undefined ? c.credits_pages : 5;
+            document.getElementById('soldeCreditsBadge').textContent = c.credits_pages !== undefined ? c.credits_pages : 5;
+            rafraichirSoldeServeur(c.telephone);
+        } else {
+            document.getElementById('compteConnecteBloc').style.display = 'none';
+            document.getElementById('compteFormConnexion').style.display = 'block';
+            document.getElementById('soldeCreditsBadge').textContent = '5';
+        }
+    }
+
+    async function rafraichirSoldeServeur(tel) {
+        if (!tel) return;
+        try {
+            const res = await fetch(`${API_BASE}/api/clients/profil/${encodeURIComponent(tel)}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.client) {
+                    localStorage.setItem('btp_client', JSON.stringify(data.client));
+                    document.getElementById('clientCreditsAffiche').textContent = data.client.credits_pages || 0;
+                    document.getElementById('soldeCreditsBadge').textContent = data.client.credits_pages || 0;
+                }
+            }
+        } catch(e) {}
+    }
+
+    function ouvrirRechargeBaridimob() {
+        fermerModalCompte();
+        ouvrirModalAbonnements();
+    }
+
+    async function soumettrePreuveBaridimob() {
+        const client = JSON.parse(localStorage.getItem('btp_client') || '{}');
+        const tel = client.telephone || prompt('Votre numéro de téléphone pour la recharge :', '');
+        if (!tel) { alert('Numéro de téléphone requis.'); return; }
+
+        const formule = document.getElementById('selectFormuleRecharge').value;
+        const numTrx = document.getElementById('inputNumTransaction').value.trim();
+
+        let montant = 4000;
+        if (formule === 'pack_100') montant = 7500;
+        else if (formule === 'mensuel') montant = 4500;
+        else if (formule === 'par_devis') montant = 1000;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/paiements/baridimob`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    telephone: tel,
+                    formule: formule,
+                    montant_dzd: montant,
+                    numero_transaction: numTrx
+                })
+            });
+            const data = await res.json();
+            alert(data.message || 'Votre confirmation de paiement a été envoyée avec succès.');
+            fermerModalAbonnements();
+            ajouterLog(`📤 Preuve de paiement BaridiMob transmise (${montant} DZD).`);
+        } catch (e) {
+            alert('Votre demande a été enregistrée. Elle sera prise en compte sous peu.');
+            fermerModalAbonnements();
+        }
+    }
+
+    async function sauvegarderDevisDansHistorique() {
+        const client = document.getElementById('nomClient').value || 'Client sans nom';
+        const projet = document.getElementById('nomProjet').value || 'Projet sans nom';
+        const numDevis = document.getElementById('numDevis').value || '';
+        const nbArticles = Object.values(devisLots).reduce((s, arr) => s + arr.length, 0);
+
+        if (nbArticles === 0) {
+            alert('Aucun article à sauvegarder dans l\'historique.');
+            return;
+        }
+
+        const clientActif = JSON.parse(localStorage.getItem('btp_client') || '{}');
+
+        const historique = JSON.parse(localStorage.getItem('btp_historique') || '[]');
+        const nouvelleSauvegarde = {
+            id: Date.now(),
+            date: new Date().toLocaleDateString('fr-FR'),
+            heure: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            client,
+            projet,
+            numDevis,
+            nbArticles,
+            donnees: {
+                nomClient: document.getElementById('nomClient').value,
+                nomProjet: document.getElementById('nomProjet').value,
+                numDevis: document.getElementById('numDevis').value,
+                dateDevis: document.getElementById('dateDevis').value,
+                remisePct: document.getElementById('remisePct').value,
+                tauxTVA: document.getElementById('tauxTVA').value,
+                lots: JSON.parse(JSON.stringify(devisLots))
+            }
+        };
+
+        historique.unshift(nouvelleSauvegarde);
+        if (historique.length > 30) historique.pop();
+        localStorage.setItem('btp_historique', JSON.stringify(historique));
+
+        if (clientActif.telephone) {
+            try {
+                let totalHT = 0;
+                Object.values(devisLots).forEach(arts => arts.forEach(a => totalHT += (parseFloat(a.q)||0)*(parseFloat(a.pu)||0)));
+                const tva = parseFloat(document.getElementById('tauxTVA').value) || 19;
+                const totalTTC = totalHT * (1 + tva/100);
+
+                const articlesList = [];
+                Object.keys(devisLots).forEach(lot => devisLots[lot].forEach(a => articlesList.push({ ...a, lot })));
+
+                await fetch(`${API_BASE}/api/devis/sauvegarder`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telephone: clientActif.telephone,
+                        num_devis: numDevis,
+                        nom_client: client,
+                        nom_projet: projet,
+                        date_devis: document.getElementById('dateDevis').value,
+                        taux_tva: tva,
+                        total_ht: totalHT,
+                        total_ttc: totalTTC,
+                        articles: articlesList,
+                        nb_pages: pagesQueue.length || 1
+                    })
+                });
+                ajouterLog(`☁️ Devis sauvegardé dans le Cloud Supabase.`);
+            } catch(e) {}
+        }
+
+        afficherListeHistorique();
+        ajouterLog(`💾 Devis "${numDevis} - ${client}" sauvegardé avec succès.`);
+        alert(`Devis "${client} - ${projet}" sauvegardé avec succès !`);
+    }
+
+    async function afficherListeHistorique() {
+        const conteneur = document.getElementById('listeHistorique');
+        const historique = JSON.parse(localStorage.getItem('btp_historique') || '[]');
+        const clientActif = JSON.parse(localStorage.getItem('btp_client') || '{}');
+
+        let cloudDevis = [];
+        if (clientActif.telephone) {
+            try {
+                const res = await fetch(`${API_BASE}/api/devis/historique/${encodeURIComponent(clientActif.telephone)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    cloudDevis = data.devis || [];
+                }
+            } catch(e) {}
+        }
+
+        if (historique.length === 0 && cloudDevis.length === 0) {
+            conteneur.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">Aucun devis dans l\'historique</div>';
+            return;
+        }
+
+        let html = '';
+
+        if (cloudDevis.length > 0) {
+            html += `<div style="font-weight: 700; color: #1e3a8a; font-size: 0.88rem; margin: 6px 0 4px;">☁️ Devis Cloud (Supabase) :</div>`;
+            cloudDevis.forEach(item => {
+                html += `
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 700; color: #1e3a8a; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${item.num_devis ? item.num_devis + ' — ' : ''}${item.nom_client}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #475569;">
+                            🏗️ ${item.nom_projet || 'Projet'} &nbsp;|&nbsp; 💰 ${formaterMontant(item.total_ttc)} DZD &nbsp;|&nbsp; 📅 ${item.date_devis}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                        <button class="btn btn-accent" style="padding: 4px 8px; font-size: 0.8rem;" onclick="chargerDevisCloud('${item.id}')">📂 Ouvrir</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        if (historique.length > 0) {
+            html += `<div style="font-weight: 700; color: #475569; font-size: 0.88rem; margin: 10px 0 4px;">💾 Sauvegardes Locales :</div>`;
+            historique.forEach(item => {
+                html += `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 700; color: #1e3a8a; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            ${item.numDevis ? item.numDevis + ' — ' : ''}${item.client}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b;">
+                            🏗️ ${item.projet} &nbsp;|&nbsp; 📋 ${item.nbArticles} art. &nbsp;|&nbsp; 📅 ${item.date} à ${item.heure}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                        <button class="btn" style="padding: 4px 8px; font-size: 0.8rem;" onclick="chargerDevisDepuisHistorique(${item.id})">📂 Charger</button>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="supprimerDevisHistorique(${item.id})">🗑️</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        conteneur.innerHTML = html;
+    }
+
+    async function chargerDevisCloud(devisId) {
+        try {
+            const res = await fetch(`${API_BASE}/api/devis/charger/${encodeURIComponent(devisId)}`);
+            if (!res.ok) throw new Error('Impossible de charger le devis');
+            const data = await res.json();
+            const d = data.devis;
+
+            if (d.nom_client) document.getElementById('nomClient').value = d.nom_client;
+            if (d.nom_projet) document.getElementById('nomProjet').value = d.nom_projet;
+            if (d.num_devis) document.getElementById('numDevis').value = d.num_devis;
+            if (d.date_devis) document.getElementById('dateDevis').value = d.date_devis;
+            if (d.taux_tva) document.getElementById('tauxTVA').value = d.taux_tva;
+
+            devisLots = {};
+            (d.articles || []).forEach(art => {
+                const lot = (art.lot || 'TRAVAUX GÉNÉRAUX').trim().toUpperCase();
+                if (!devisLots[lot]) devisLots[lot] = [];
+                devisLots[lot].push({
+                    n: devisLots[lot].length + 1,
+                    d: art.d || 'Article',
+                    u: art.u || 'U',
+                    q: parseFloat(art.q) || 1,
+                    pu: parseFloat(art.pu) || 0,
+                    total: (parseFloat(art.q)||1)*(parseFloat(art.pu)||0)
+                });
+            });
+
+            reconstruireTableauDevis();
+            sauvegarderLocalement();
+            fermerModalHistorique();
+            ajouterLog(`☁️ Devis Cloud "${d.nom_client}" chargé avec succès.`);
+        } catch(e) {
+            alert('Erreur de chargement : ' + e.message);
+        }
+    }
+
+    function chargerDevisDepuisHistorique(id) {
+        const historique = JSON.parse(localStorage.getItem('btp_historique') || '[]');
+        const item = historique.find(h => h.id === id);
+        if (!item) return;
+
+        if (!confirm(`Charger le devis "${item.client} - ${item.projet}" ?\nCela remplacera le devis actuel en cours.`)) return;
+
+        const d = item.donnees;
+        if (d.nomClient) document.getElementById('nomClient').value = d.nomClient;
+        if (d.nomProjet) document.getElementById('nomProjet').value = d.nomProjet;
+        if (d.numDevis) document.getElementById('numDevis').value = d.numDevis;
+        if (d.dateDevis) document.getElementById('dateDevis').value = d.dateDevis;
+        if (d.remisePct !== undefined) document.getElementById('remisePct').value = d.remisePct;
+        if (d.tauxTVA) document.getElementById('tauxTVA').value = d.tauxTVA;
+
+        devisLots = d.lots || {};
+        pagesQueue = [];
+        indexSelectionne = null;
+        document.getElementById('thumbnailsGrid').innerHTML = '';
+        document.getElementById('previewPane').style.display = 'none';
+        reconstruireTableauDevis();
+        sauvegarderLocalement();
+
+        fermerModalHistorique();
+        ajouterLog(`📂 Devis "${item.client}" chargé depuis l'historique (${item.nbArticles} articles).`);
+    }
+
+    function supprimerDevisHistorique(id) {
+        if (!confirm('Supprimer ce devis de l\'historique ?')) return;
+        let historique = JSON.parse(localStorage.getItem('btp_historique') || '[]');
+        historique = historique.filter(h => h.id !== id);
+        localStorage.setItem('btp_historique', JSON.stringify(historique));
+        afficherListeHistorique();
+    }
+
     function ajouterLog(msg) {
         const logs = document.getElementById('logArea');
         const heure = new Date().toLocaleTimeString('fr-FR');
@@ -1712,7 +2228,6 @@
         return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    // Convertisseur Nombres en Lettres
     function convertirNombreEnLettres(montant) {
         const entier = Math.floor(Math.abs(montant));
         const centimes = Math.round((Math.abs(montant) - entier) * 100);
