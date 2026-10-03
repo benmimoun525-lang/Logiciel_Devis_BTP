@@ -3,6 +3,7 @@ import io
 import re
 import json
 import time
+import asyncio
 from dotenv import load_dotenv
 
 # Chargement automatique des variables d'environnement (.env)
@@ -11,7 +12,16 @@ load_dotenv()
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body
 from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-import google.generativeai as genai
+
+# SDK Gemini moderne (google-genai) avec repli vers legacy (google.generativeai)
+try:
+    from google import genai
+    from google.genai import types as genai_types
+    HAS_NEW_GENAI = True
+except ImportError:
+    HAS_NEW_GENAI = False
+
+import google.generativeai as legacy_genai
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
@@ -40,9 +50,12 @@ app.add_middleware(
 # --- Gestion du pool de clés API Gemini (Rotation intelligente) ---
 current_key_index = 0
 
-def get_api_keys_pool():
-    """Récupère l'ensemble des clés Gemini définies (GEMINI_KEY, GEMINI_KEY_1, GEMINI_API_KEY...) sans doublon."""
+def get_api_keys_pool(client_key: str = None):
+    """Récupère l'ensemble des clés Gemini disponibles, en priorisant la clé fournie par le client si présente."""
     keys = []
+    if client_key and isinstance(client_key, str) and client_key.strip():
+        keys.append(client_key.strip())
+
     for k, v in os.environ.items():
         k_upper = k.upper()
         if k_upper.startswith("GEMINI_KEY") or k_upper.startswith("GEMINI_API_KEY"):
@@ -51,14 +64,13 @@ def get_api_keys_pool():
                 keys.append(val)
     return keys
 
-# Modèles Gemini par ordre de priorité pour le BTP
+# Modèles Gemini par ordre d'efficacité pour le BTP (Testés en production)
 MODELS_PRIORITY = [
-    "gemini-3.8-flash",
-    "gemini-3.5-flash",
-    "gemini-3.5-flash-lite",
-    "gemini-3.1-flash-lite",
-    "gemini-flash-latest",
-    "gemini-2.0-flash"
+    "gemini-3.5-flash",       # Modèle de référence : Ultra rapide (2-4s), haute fidélité métreur BTP
+    "gemini-3.5-flash-lite",  # Très rapide (1s), ultra économique, quota distinct
+    "gemini-3.1-flash-lite",  # Backup haute disponibilité
+    "gemini-3.8-flash",       # Modèle supérieur
+    "gemini-3-flash-preview", # Fallback
 ]
 
 # --- Connexion Supabase résiliente ---
@@ -541,24 +553,55 @@ def api_status():
         "message": f"Serveur opérationnel avec {len(keys)} clé(s) Gemini."
     }
 
+def call_gemini_sync(api_key: str, model_name: str, contents_parts: list) -> str:
+    """Appelle l'API Gemini de façon synchrone en utilisant en priorité le nouveau SDK google-genai."""
+    if HAS_NEW_GENAI:
+        client = genai.Client(api_key=api_key)
+        parts = []
+        for item in contents_parts:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict) and "data" in item:
+                parts.append(genai_types.Part.from_bytes(data=item["data"], mime_type=item.get("mime_type", "image/jpeg")))
+        
+        response = client.models.generate_content(
+            model=model_name,
+            contents=parts,
+            config=genai_types.GenerateContentConfig(
+                temperature=0.1,
+                max_output_tokens=8192
+            )
+        )
+        return response.text or "{}"
+
+    # Repli sur le SDK historique google.generativeai
+    legacy_genai.configure(api_key=api_key)
+    mod = legacy_genai.GenerativeModel(model_name)
+    response = mod.generate_content(
+        contents_parts,
+        generation_config={"max_output_tokens": 8192, "temperature": 0.1}
+    )
+    return response.text or "{}"
+
 @app.post("/chiffrer-page")
 async def chiffrer_page(
     file: UploadFile = File(None),
     texte_descriptif: str = Form(None),
     page_num: int = Form(1),
-    telephone: str = Form(None)
+    telephone: str = Form(None),
+    gemini_key: str = Form(None)
 ):
     global current_key_index
 
-    keys_pool = get_api_keys_pool()
+    keys_pool = get_api_keys_pool(client_key=gemini_key)
     if not keys_pool:
         raise HTTPException(
             status_code=500,
-            detail="Aucune clé Gemini configurée. Veuillez ajouter GEMINI_KEY ou GEMINI_KEY_1 dans le fichier .env."
+            detail="Aucune clé Gemini configurée. Veuillez ajouter votre clé Gemini dans l'interface ou dans les paramètres du serveur."
         )
 
     contents_list = [SYSTEM_PROMPT]
-    if texte_descriptif and texte_descriptif.strip():
+    if texte_descriptif and isinstance(texte_descriptif, str) and texte_descriptif.strip():
         contents_list.append(f"\n--- NOTES DU CLIENT ---\n{texte_descriptif.strip()}")
 
     if file:
@@ -573,18 +616,12 @@ async def chiffrer_page(
     for attempt in range(total_keys):
         key_idx = (current_key_index + attempt) % total_keys
         api_key = keys_pool[key_idx]
-        genai.configure(api_key=api_key)
-        key_failed_quota = False
 
         for model_name in MODELS_PRIORITY:
             try:
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(
-                    contents_list,
-                    generation_config={"max_output_tokens": 8192, "temperature": 0.1}
-                )
-
-                parsed = clean_and_parse_json(response.text or "{}")
+                # Exécution asynchrone non-bloquante pour ne jamais geler le serveur
+                raw_text = await asyncio.to_thread(call_gemini_sync, api_key, model_name, contents_list)
+                parsed = clean_and_parse_json(raw_text or "{}")
                 articles = parsed.get("articles", []) if isinstance(parsed, dict) else (parsed if isinstance(parsed, list) else [])
 
                 articles_propres = []
@@ -617,7 +654,7 @@ async def chiffrer_page(
                 # Décompte automatique du crédit page dans Supabase
                 credits_restants = None
                 sb = get_supabase_client()
-                if sb and telephone:
+                if sb and telephone and isinstance(telephone, str):
                     try:
                         tel_clean = re.sub(r'[^0-9+]', '', telephone)
                         c_res = sb.table("clients").select("id, credits_pages").eq("telephone", tel_clean).execute()
@@ -642,24 +679,13 @@ async def chiffrer_page(
                 }
 
             except Exception as inner_e:
-                err_str = str(inner_e).lower()
                 last_error = str(inner_e)
-                if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str:
-                    key_failed_quota = True
-                    break
-                elif "503" in err_str or "unavailable" in err_str or "overloaded" in err_str:
-                    time.sleep(1)
-                    continue
-                else:
-                    continue
-
-        if key_failed_quota:
-            time.sleep(1)
-            continue
+                # Basculer immédiatement sur le modèle suivant de la liste sans bloquer
+                continue
 
     raise HTTPException(
         status_code=429,
-        detail=f"Toutes les clés ou modèles Gemini sont temporairement saturés. Détail : {last_error}"
+        detail=f"Toutes les clés et modèles Gemini sont temporairement indisponibles. Détail : {last_error}"
     )
 
 @app.post("/exporter-excel")
