@@ -88,20 +88,32 @@ def get_supabase_client():
     return None
 
 # ============================================================
-# PROMPT EXPERT MÉTREUR BTP ALGÉRIE
+# PROMPT EXPERT MÉTREUR BTP, HYDRAULIQUE & TRAVAUX PUBLICS ALGÉRIE
 # ============================================================
 SYSTEM_PROMPT = """
-Tu es un expert métreur-vérificateur senior spécialisé dans le bâtiment et les travaux publics (BTP) en Algérie.
-Ton rôle est d'analyser cette page de devis, bordereau des prix unitaires (BPU) ou devis quantitatif estimatif (DQE) issu d'une photo WhatsApp, d'un scan de chantier ou d'un document PDF.
+Tu es un expert métreur-vérificateur senior spécialisé dans le Bâtiment (BTP), l'Hydraulique et les Travaux Publics (VRD) en Algérie.
+Ton rôle est d'analyser ce document (page de devis, bordereau des prix unitaires BPU, devis quantitatif estimatif DQE issu d'une photo WhatsApp, d'un scan ou d'un fichier PDF mono ou multi-pages).
 
 OBJECTIFS :
-1. Détecter et regrouper les travaux par LOTS BTP explicites en majuscules (ex: "LOT 01: TERRASSEMENTS", "LOT 02: GROS-OEUVRE", "LOT 03: MAÇONNERIE", "LOT 04: ÉTANCHÉITÉ", "LOT 05: REVÊTEMENTS", "LOT 06: MENUISERIE", "LOT 07: PLOMBERIE SANITAIRE", "LOT 08: ÉLECTRICITÉ", "LOT 09: PEINTURE", etc.).
+1. Détecter et regrouper les travaux par LOTS BTP/VRD/HYDRAULIQUE explicites en majuscules (ex: "LOT 01: TERRASSEMENTS", "LOT 02: GROS-OEUVRE & BÉTON ARMÉ", "LOT 03: MAÇONNERIE", "LOT 04: ÉTANCHÉITÉ", "LOT 05: REVÊTEMENTS", "LOT 06: HYDRAULIQUE & ASSAINISSEMENT", "LOT 07: VOIRIE & TRAVAUX PUBLICS", etc.).
 2. Si un prix unitaire ou une quantité est inscrit(e) sur le document, le recopier fidèlement.
-3. Si le bordereau est vierge (sans prix), estimer un Prix Unitaire H.T. réaliste en Dinars Algériens (DZD) selon les tarifs récents du marché algérien.
+3. Si le bordereau est vierge (sans prix), estimer un Prix Unitaire H.T. réaliste en Dinars Algériens (DZD) selon le barème de référence algérien :
+   - Fouilles en rigole/tranchée : 900 à 1400 DZD/m3, fouille pleine masse : 500 à 800 DZD/m3
+   - Béton armé pour semelles/longrines : 32000 à 38000 DZD/m3, poteaux/poutres en élévation : 36000 à 42000 DZD/m3
+   - Plancher corps creux 16+4 : 3800 à 4500 DZD/m2, dallage BA 12cm : 2200 à 2600 DZD/m2
+   - Maçonnerie 12T+8T : 2600 à 3200 DZD/m2, simple 12T : 1400 à 1800 DZD/m2, parpaings 20cm : 1600 à 2000 DZD/m2
+   - Enduit ciment int : 800 à 1100 DZD/m2, ext étanche : 1100 à 1500 DZD/m2, plâtre : 700 à 900 DZD/m2
+   - Étanchéité multicouche 36S : 2000 à 2500 DZD/m2, paxalu : 2200 à 2800 DZD/m2
+   - Dalle de sol : 2800 à 3600 DZD/m2, grès cérame 60x60 : 4200 à 5500 DZD/m2, faïence : 2800 à 3500 DZD/m2
+   - Conduites PEHD AEP : DN63 1000-1400 DZD/ml, DN90 1500-2000 DZD/ml, DN110 2200-2800 DZD/ml
+   - Tuyaux PVC Assainissement : DN200 2400-3000 DZD/ml, DN250 3200-4000 DZD/ml, DN315 4800-5800 DZD/ml
+   - Regards visite BA 100x100 : 28000 à 36000 DZD/U, tampon fonte D400 : 22000 à 28000 DZD/U
+   - Décapage chaussée : 150 à 220 DZD/m2, couche de tuf : 2200 à 2800 DZD/m3, GNT 0/40 : 3000 à 3800 DZD/m3
+   - Enrobé à chaud BB 0/10 (6cm) : 1900 à 2400 DZD/m2, bordures T2 : 1400 à 1800 DZD/ml, pavés autobloquants : 2000 à 2600 DZD/m2
 4. Numéroter les articles (1, 2, 3...) séquentiellement par lot.
 5. Standardiser les unités : m3, m2, ml, kg, tonne, U, ens, f, j.
 
-FORMAT DE RÉPONSE STRICT (JSON PUR, AUCUN MARKDOWN, AUCUN COMMENTAIRE) :
+FORMAT DE RÉPONSE STRICT (JSON PUR, AUCUN MARKDOWN, AUCUN TEXTE AUTOUR) :
 {
   "client": "Nom du maître d'ouvrage ou client si présent, sinon ''",
   "projet": "Intitulé du projet ou chantier si présent, sinon ''",
@@ -109,10 +121,10 @@ FORMAT DE RÉPONSE STRICT (JSON PUR, AUCUN MARKDOWN, AUCUN COMMENTAIRE) :
     {
       "lot": "LOT 01: GROS-OEUVRE",
       "n": 1,
-      "d": "Béton armé pour semelles filantes dosé à 350 kg/m3 y compris coffrage et ferraillage",
+      "d": "Béton armé pour semelles dosé à 350 kg/m3",
       "u": "m3",
       "q": 25.5,
-      "pu": 18500.0
+      "pu": 34000.0
     }
   ]
 }
@@ -542,6 +554,13 @@ def serve_sw():
         return FileResponse(sw_path, media_type="application/javascript")
     raise HTTPException(status_code=404, detail="sw.js non trouvé")
 
+@app.get("/bpu_algerie.json")
+def serve_bpu_json():
+    bpu_path = os.path.join(os.path.dirname(__file__), "bpu_algerie.json")
+    if os.path.exists(bpu_path):
+        return FileResponse(bpu_path, media_type="application/json")
+    raise HTTPException(status_code=404, detail="bpu_algerie.json non trouvé")
+
 @app.get("/status")
 @app.get("/api/status")
 def api_status():
@@ -552,6 +571,28 @@ def api_status():
         "models_priority": MODELS_PRIORITY,
         "message": f"Serveur opérationnel avec {len(keys)} clé(s) Gemini."
     }
+
+@app.get("/api/bpu")
+def get_bpu(categorie: str = None, q: str = None):
+    """Retourne les articles de la base de données des prix unitaires récents (BTP, Hydraulique, VRD)."""
+    bpu_path = os.path.join(os.path.dirname(__file__), "bpu_algerie.json")
+    if not os.path.exists(bpu_path):
+        return []
+    with open(bpu_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if categorie and categorie.strip() and categorie.strip().upper() != "TOUS":
+        cat_lower = categorie.strip().lower()
+        data = [item for item in data if item.get("categorie", "").lower() == cat_lower]
+    if q and q.strip():
+        query = q.strip().lower()
+        data = [
+            item for item in data 
+            if query in item.get("designation", "").lower() 
+            or query in item.get("lot", "").lower() 
+            or query in item.get("description", "").lower()
+            or query in item.get("code", "").lower()
+        ]
+    return data
 
 def call_gemini_sync(api_key: str, model_name: str, contents_parts: list) -> str:
     """Appelle l'API Gemini de façon synchrone en utilisant en priorité le nouveau SDK google-genai."""

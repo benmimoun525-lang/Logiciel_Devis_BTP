@@ -572,6 +572,96 @@
         .plan-price { font-weight: 800; font-size: 1.15rem; color: var(--accent); margin: 4px 0; }
         .plan-desc { font-size: 0.85rem; color: var(--gray-600); }
 
+        /* Styles BPU & Provenance Multi-pages */
+        .bpu-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .bpu-tab-btn {
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--gray-300);
+            background: white;
+            font-size: 0.88rem;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        .bpu-tab-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+        .bpu-tab-btn:hover:not(.active) {
+            background: var(--gray-100);
+        }
+        .bpu-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .bpu-table th {
+            background: #f1f5f9;
+            padding: 10px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid var(--gray-200);
+            z-index: 2;
+        }
+        .bpu-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--gray-200);
+            vertical-align: middle;
+        }
+        .bpu-table tr:hover {
+            background: #f8fafc;
+        }
+        .badge-bpu-cat {
+            display: inline-block;
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-cat-btp { background: #dbeafe; color: #1e40af; }
+        .badge-cat-hydraulique { background: #cffafe; color: #0e7490; }
+        .badge-cat-travauxpublics { background: #fef3c7; color: #b45309; }
+        .badge-source {
+            font-size: 0.72rem;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            display: inline-block;
+            margin-right: 4px;
+            border: 1px solid #c7d2fe;
+        }
+        .btn-prix-marche {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            color: #92400e;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            transition: 0.2s;
+        }
+        .btn-prix-marche:hover {
+            background: #fde68a;
+            color: #78350f;
+        }
+
         /* STYLES IMPRESSION / PDF PRO */
         @media print {
             body { background: white; padding: 0; color: black; font-size: 10pt; }
@@ -618,6 +708,7 @@
             <p>Traitement instantané des photos WhatsApp & PDF multi-pages en devis par lots aux normes algériennes.</p>
         </div>
         <div class="header-actions">
+            <button class="btn-header" style="background: #d97706; font-weight: 600;" onclick="ouvrirModalBPU()">💰 Base des Prix (BPU)</button>
             <button class="btn-header" id="btnCompteClient" onclick="ouvrirModalCompte()">👤 Mon Compte (<span id="soldeCreditsBadge">5</span> p.)</button>
             <button class="btn-header" onclick="ouvrirModalEntreprise()">🏢 Profil Entreprise</button>
             <button class="btn-header" onclick="ouvrirModalHistorique()">📚 Historique</button>
@@ -715,12 +806,18 @@
 
             <div id="previewContent" class="preview-content"></div>
 
-            <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <button id="btnLancerPage" class="btn" onclick="traiterPageSelectionnee()">
                     ⚡ Traiter cette page sélectionnée
                 </button>
                 <button id="btnTraiterTout" class="btn btn-accent" onclick="traiterToutesLesPages()">
-                    🚀 Tout traiter automatiquement (<span id="pagesRestantesBadge">0</span> restantes)
+                    🚀 Tout traiter (Page par page) (<span id="pagesRestantesBadge">0</span> restantes)
+                </button>
+                <button id="btnAnalyserToutDirect" class="btn" style="display:none; background:#047857; color:white; font-weight:600;" onclick="analyserDocumentCompletDirect()">
+                    📑 Analyser tout le PDF en 1 clic direct
+                </button>
+                <button class="btn btn-outline" style="padding: 8px 12px; color: #dc2626;" onclick="viderFileAttente()" title="Vider toutes les pages de la file d'attente">
+                    🗑️ Vider la file
                 </button>
             </div>
         </div>
@@ -751,8 +848,14 @@
         <div class="card-title">
             <span>📊 3. Tableau de Chiffrage par Lots (Articles extraits : <span id="compteurArticles">0</span>)</span>
             <div class="no-print btn-group">
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem; color: #d97706; font-weight: 600;" onclick="ouvrirModalBPU()">
+                    💰 Base des Prix (BPU)
+                </button>
                 <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="ajouterNouveauLot()">
                     + Ajouter un Lot BTP
+                </button>
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem; color: #dc2626;" onclick="nouveauDevis()">
+                    🗑️ Nouveau Devis
                 </button>
             </div>
         </div>
@@ -1032,6 +1135,968 @@
     </div>
 </div>
 
+<!-- Modal Base des Prix Unitaires Référentiels BTP / Hydraulique / VRD -->
+<div id="modalBPU" class="modal-overlay" style="display:none;">
+    <div class="modal" style="max-width: 920px; width: 95%;">
+        <div class="modal-header">
+            <div class="modal-title">💰 Base des Prix Unitaires (BPU) BTP • Hydraulique • VRD</div>
+            <button class="close-modal" onclick="fermerModalBPU()">&times;</button>
+        </div>
+        <p style="font-size: 0.88rem; color: #64748b; margin-top: -6px; margin-bottom: 12px;">
+            Barème de prix unitaires actualisé du marché algérien en Dinars (DZD). Cliquez sur <b>"➕ Insérer"</b> pour intégrer directement un article dans votre devis.
+        </p>
+
+        <!-- Barre de recherche et destination -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: center;">
+            <div style="flex: 1; min-width: 250px;">
+                <input type="text" id="rechercheBPU" class="form-control" placeholder="🔍 Rechercher un ouvrage (ex: béton, fouille, PEHD, enrobé, parpaing...)" oninput="filtrerTableauBPU()">
+            </div>
+            <div id="selectLotCibleContainer" style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.85rem; color: #475569; font-weight: 600;">Lot de destination :</span>
+                <select id="selectLotCibleBPU" class="form-control" style="width: auto; padding: 6px 10px;">
+                    <option value="">(Lot d'origine de l'ouvrage)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Onglets des Secteurs -->
+        <div class="bpu-tabs">
+            <button class="bpu-tab-btn active" onclick="changerCategorieBPU('TOUS', this)">🏗️ Tous les secteurs (<span id="bpuCountTous">74</span>)</button>
+            <button class="bpu-tab-btn" onclick="changerCategorieBPU('BTP', this)">🏢 BTP / Bâtiment (<span id="bpuCountBTP">44</span>)</button>
+            <button class="bpu-tab-btn" onclick="changerCategorieBPU('HYDRAULIQUE', this)">💧 Hydraulique & AEP (<span id="bpuCountHyd">16</span>)</button>
+            <button class="bpu-tab-btn" onclick="changerCategorieBPU('TRAVAUX PUBLICS', this)">🛣️ Travaux Publics / VRD (<span id="bpuCountTP">14</span>)</button>
+        </div>
+
+        <!-- Tableau des résultats BPU -->
+        <div style="max-height: 440px; overflow-y: auto; border: 1px solid var(--gray-300); border-radius: 8px;">
+            <table class="bpu-table" id="tableBPU">
+                <thead>
+                    <tr>
+                        <th style="width: 65px;">Code</th>
+                        <th style="width: 105px;">Secteur</th>
+                        <th>Désignation des Travaux & Norme</th>
+                        <th style="width: 60px; text-align: center;">Unité</th>
+                        <th style="width: 155px; text-align: right;">Prix Moyen Référentiel</th>
+                        <th style="width: 110px; text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyBPU">
+                    <!-- Généré par JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 0.82rem; color: #64748b;">
+                💡 Les prix unitaires correspondent aux moyennes H.T. constatées sur les chantiers et marchés algériens.
+            </div>
+            <button class="btn btn-outline" onclick="fermerModalBPU()">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<script id="bpuDataJson" type="application/json">
+[
+  {
+    "id": "btp_001",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.01",
+    "designation": "Fouille en pleine masse en terrain ordinaire par engin mécanique",
+    "unite": "m3",
+    "prix_min": 450,
+    "prix_moyen": 600,
+    "prix_max": 800,
+    "description": "Fouille mécanique évacuée à la décharge publique ou mise en dépôt"
+  },
+  {
+    "id": "btp_002",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.02",
+    "designation": "Fouille en tranchée ou en rigole pour fondations continues",
+    "unite": "m3",
+    "prix_min": 900,
+    "prix_moyen": 1200,
+    "prix_max": 1600,
+    "description": "Fouille mécanique ou manuelle pour semelles filantes et longrines"
+  },
+  {
+    "id": "btp_003",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.03",
+    "designation": "Fouille en puits pour semelles isolées",
+    "unite": "m3",
+    "prix_min": 1200,
+    "prix_moyen": 1600,
+    "prix_max": 2200,
+    "description": "Exécution de fouilles pour massifs et semelles isolées"
+  },
+  {
+    "id": "btp_004",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.04",
+    "designation": "Remblaiement des fouilles avec terres sélectionnées et compactage",
+    "unite": "m3",
+    "prix_min": 600,
+    "prix_moyen": 900,
+    "prix_max": 1300,
+    "description": "Compactage par couches successives de 20 cm avec arrosage"
+  },
+  {
+    "id": "btp_005",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.05",
+    "designation": "Remblai en tuf d'apport compacté sous dallage",
+    "unite": "m3",
+    "prix_min": 1600,
+    "prix_moyen": 2200,
+    "prix_max": 2800,
+    "description": "Fourniture, régalage et compactage de tuf à 95% OPM"
+  },
+  {
+    "id": "btp_006",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.06",
+    "designation": "Évacuation des terres excédentaires aux décharges publiques",
+    "unite": "m3",
+    "prix_min": 350,
+    "prix_moyen": 500,
+    "prix_max": 700,
+    "description": "Chargement et transport par camions bennes jusqu'à la décharge"
+  },
+
+  {
+    "id": "btp_010",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.01",
+    "designation": "Béton de propreté dosé à 150 kg/m3 de ciment (ép. 10 cm)",
+    "unite": "m3",
+    "prix_min": 8500,
+    "prix_moyen": 10500,
+    "prix_max": 12500,
+    "description": "Coulé en fond de fouille sous semelles et longrines"
+  },
+  {
+    "id": "btp_011",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.02",
+    "designation": "Gros béton de calage dosé à 250 kg/m3",
+    "unite": "m3",
+    "prix_min": 11000,
+    "prix_moyen": 13500,
+    "prix_max": 16000,
+    "description": "Pour rattrapage de niveau de fondation et calage"
+  },
+  {
+    "id": "btp_012",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.03",
+    "designation": "Béton armé pour semelles de fondation dosé à 350 kg/m3 (inclus coffrage & acier)",
+    "unite": "m3",
+    "prix_min": 28000,
+    "prix_moyen": 34000,
+    "prix_max": 42000,
+    "description": "Fourniture, coffrage soigné, ferraillage HA et coulage"
+  },
+  {
+    "id": "btp_013",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.04",
+    "designation": "Béton armé pour longrines et amorces poteaux dosé à 350 kg/m3",
+    "unite": "m3",
+    "prix_min": 30000,
+    "prix_moyen": 36000,
+    "prix_max": 44000,
+    "description": "Comprend coffrage métallique ou bois, armatures et vibration"
+  },
+  {
+    "id": "btp_014",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.05",
+    "designation": "Béton armé en élévation pour poteaux dosé à 350 kg/m3",
+    "unite": "m3",
+    "prix_min": 32000,
+    "prix_moyen": 39000,
+    "prix_max": 48000,
+    "description": "Coulage poteaux rectangulaires ou circulaires avec étayage"
+  },
+  {
+    "id": "btp_015",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.06",
+    "designation": "Béton armé pour poutres et chaînages dosé à 350 kg/m3",
+    "unite": "m3",
+    "prix_min": 31000,
+    "prix_moyen": 38000,
+    "prix_max": 46000,
+    "description": "Coffrage suspendu, aciers à haute adhérence et coulage"
+  },
+  {
+    "id": "btp_016",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.07",
+    "designation": "Plancher en corps creux 16+4 cm (hourdis béton ou terre cuite)",
+    "unite": "m2",
+    "prix_min": 3200,
+    "prix_moyen": 4200,
+    "prix_max": 5200,
+    "description": "Poutrelles préfabriquées ou coulées, hourdis, treillis soudé et dalle de compression 4cm"
+  },
+  {
+    "id": "btp_017",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.08",
+    "designation": "Plancher en corps creux 20+5 cm pour charges lourdes",
+    "unite": "m2",
+    "prix_min": 3800,
+    "prix_moyen": 4900,
+    "prix_max": 6000,
+    "description": "Hourdis 20cm avec dalle de compression 5cm dosée à 350 kg/m3"
+  },
+  {
+    "id": "btp_018",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.09",
+    "designation": "Dallage en béton armé au sol ép. 12 cm avec treillis soudé",
+    "unite": "m2",
+    "prix_min": 1800,
+    "prix_moyen": 2400,
+    "prix_max": 3100,
+    "description": "Film polyane, treillis soudé anti-fissuration et lissage de surface"
+  },
+  {
+    "id": "btp_019",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.10",
+    "designation": "Béton armé pour voile périphérique dosé à 350 kg/m3",
+    "unite": "m3",
+    "prix_min": 34000,
+    "prix_moyen": 42000,
+    "prix_max": 50000,
+    "description": "Coffrage double face étanche, armatures quadrillées et coulage"
+  },
+  {
+    "id": "btp_020",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & BÉTON ARMÉ",
+    "code": "02.11",
+    "designation": "Béton armé pour escaliers (paillasse et marches)",
+    "unite": "m3",
+    "prix_min": 36000,
+    "prix_moyen": 45000,
+    "prix_max": 55000,
+    "description": "Coffrage découpé des marches et contremarches, armatures et coulage"
+  },
+
+  {
+    "id": "btp_025",
+    "categorie": "BTP",
+    "lot": "LOT 03: MAÇONNERIE & CLOISONS",
+    "code": "03.01",
+    "designation": "Maçonnerie double paroi en briques creuses (12T + 8T avec lame d'air)",
+    "unite": "m2",
+    "prix_min": 2200,
+    "prix_moyen": 2900,
+    "prix_max": 3600,
+    "description": "Mur extérieur 25 cm avec lame d'air de 5 cm au mortier de ciment"
+  },
+  {
+    "id": "btp_026",
+    "categorie": "BTP",
+    "lot": "LOT 03: MAÇONNERIE & CLOISONS",
+    "code": "03.02",
+    "designation": "Maçonnerie simple paroi en briques 12 trous (ép. 15 cm)",
+    "unite": "m2",
+    "prix_min": 1200,
+    "prix_moyen": 1600,
+    "prix_max": 2000,
+    "description": "Pour cloisons de distribution et séparations"
+  },
+  {
+    "id": "btp_027",
+    "categorie": "BTP",
+    "lot": "LOT 03: MAÇONNERIE & CLOISONS",
+    "code": "03.03",
+    "designation": "Maçonnerie de cloisonnette en briques 8 trous (ép. 10 cm)",
+    "unite": "m2",
+    "prix_min": 950,
+    "prix_moyen": 1300,
+    "prix_max": 1650,
+    "description": "Pour cloisons intérieures légères et gaines techniques"
+  },
+  {
+    "id": "btp_028",
+    "categorie": "BTP",
+    "lot": "LOT 03: MAÇONNERIE & CLOISONS",
+    "code": "03.04",
+    "designation": "Maçonnerie en parpaings de ciment creux ép. 20 cm",
+    "unite": "m2",
+    "prix_min": 1400,
+    "prix_moyen": 1850,
+    "prix_max": 2400,
+    "description": "Murs de clôture et sous-sol en agglomérés de ciment"
+  },
+  {
+    "id": "btp_029",
+    "categorie": "BTP",
+    "lot": "LOT 03: MAÇONNERIE & CLOISONS",
+    "code": "03.05",
+    "designation": "Maçonnerie en parpaings de ciment creux ép. 15 cm",
+    "unite": "m2",
+    "prix_min": 1150,
+    "prix_moyen": 1550,
+    "prix_max": 1950,
+    "description": "Pour séparations de locaux et cours anglaises"
+  },
+
+  {
+    "id": "btp_035",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.01",
+    "designation": "Enduit au mortier de ciment sous plafonds en 2 couches",
+    "unite": "m2",
+    "prix_min": 750,
+    "prix_moyen": 1050,
+    "prix_max": 1400,
+    "description": "Couche d'accrochage gobetis et couche de finition dressée"
+  },
+  {
+    "id": "btp_036",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.02",
+    "designation": "Enduit intérieur au mortier bâtard sur murs verticaux",
+    "unite": "m2",
+    "prix_min": 650,
+    "prix_moyen": 900,
+    "prix_max": 1200,
+    "description": "Gobetis, corps d'enduit et couche de finition talochée soignée"
+  },
+  {
+    "id": "btp_037",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.03",
+    "designation": "Enduit extérieur étanche au mortier de ciment dosé à 350 kg/m3",
+    "unite": "m2",
+    "prix_min": 850,
+    "prix_moyen": 1250,
+    "prix_max": 1700,
+    "description": "Trois couches avec hydrofuge de masse et finition grattée ou talochée"
+  },
+  {
+    "id": "btp_038",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.04",
+    "designation": "Enduit au plâtre lissé sur murs et plafonds",
+    "unite": "m2",
+    "prix_min": 550,
+    "prix_moyen": 780,
+    "prix_max": 1100,
+    "description": "Plâtre de construction lissé prêt à peindre"
+  },
+  {
+    "id": "btp_039",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.05",
+    "designation": "Faux plafond en plaques de plâtre BA13 hydrofuge ou standard",
+    "unite": "m2",
+    "prix_min": 1800,
+    "prix_moyen": 2500,
+    "prix_max": 3300,
+    "description": "Ossature métallique galvanisée, suspentes, bandes à joint et enduit"
+  },
+
+  {
+    "id": "btp_045",
+    "categorie": "BTP",
+    "lot": "LOT 05: ÉTANCHÉITÉ & ISOLATION",
+    "code": "05.01",
+    "designation": "Forme de pente en béton maigre ép. moyenne 7 cm",
+    "unite": "m2",
+    "prix_min": 900,
+    "prix_moyen": 1300,
+    "prix_max": 1700,
+    "description": "Réalisation de pentes min 1.5% vers les gargouilles d'évacuation"
+  },
+  {
+    "id": "btp_046",
+    "categorie": "BTP",
+    "lot": "LOT 05: ÉTANCHÉITÉ & ISOLATION",
+    "code": "05.02",
+    "designation": "Étanchéité multicouche type 36S avec feutre bitumé et asphalte coulé",
+    "unite": "m2",
+    "prix_min": 1600,
+    "prix_moyen": 2200,
+    "prix_max": 2800,
+    "description": "Imprégnation à froid (EAC), 2 feutres 36S croisés et bitume d'application"
+  },
+  {
+    "id": "btp_047",
+    "categorie": "BTP",
+    "lot": "LOT 05: ÉTANCHÉITÉ & ISOLATION",
+    "code": "05.03",
+    "designation": "Étanchéité monocouche autoprotégée par feuille d'aluminium (Paxalu)",
+    "unite": "m2",
+    "prix_min": 1800,
+    "prix_moyen": 2400,
+    "prix_max": 3100,
+    "description": "Membrane SBS ou APP 4mm soudée à la flamme sur primaire"
+  },
+  {
+    "id": "btp_048",
+    "categorie": "BTP",
+    "lot": "LOT 05: ÉTANCHÉITÉ & ISOLATION",
+    "code": "05.04",
+    "designation": "Protection d'étanchéité par gravillon roulé lavé 15/25 ép. 5 cm",
+    "unite": "m2",
+    "prix_min": 500,
+    "prix_moyen": 750,
+    "prix_max": 1000,
+    "description": "Pour toiture terrasse inaccessible avec filtre géotextile"
+  },
+  {
+    "id": "btp_049",
+    "categorie": "BTP",
+    "lot": "LOT 05: ÉTANCHÉITÉ & ISOLATION",
+    "code": "05.05",
+    "designation": "Isolation thermique en panneaux de polystyrène extrudé ép. 4 cm",
+    "unite": "m2",
+    "prix_min": 950,
+    "prix_moyen": 1400,
+    "prix_max": 1900,
+    "description": "Pose sous étanchéité ou en toiture inversée"
+  },
+
+  {
+    "id": "btp_055",
+    "categorie": "BTP",
+    "lot": "LOT 06: REVÊTEMENTS SOLS & MURS",
+    "code": "06.01",
+    "designation": "Revêtement de sol en dalle de sol céramique 40x40 ou 50x50 cm",
+    "unite": "m2",
+    "prix_min": 2400,
+    "prix_moyen": 3200,
+    "prix_max": 4200,
+    "description": "Pose sur chape au mortier de ciment dosé à 250 kg/m3 et jointoiement coulis blanc"
+  },
+  {
+    "id": "btp_056",
+    "categorie": "BTP",
+    "lot": "LOT 06: REVÊTEMENTS SOLS & MURS",
+    "code": "06.02",
+    "designation": "Revêtement de sol en grès cérame émaillé grand format 60x60 ou 60x120 cm",
+    "unite": "m2",
+    "prix_min": 3500,
+    "prix_moyen": 4800,
+    "prix_max": 6500,
+    "description": "Pose soignée au mortier colle avec croisillons nivelants et joints étanches"
+  },
+  {
+    "id": "btp_057",
+    "categorie": "BTP",
+    "lot": "LOT 06: REVÊTEMENTS SOLS & MURS",
+    "code": "06.03",
+    "designation": "Revêtement mural en faïence pour cuisines et sanitaires",
+    "unite": "m2",
+    "prix_min": 2200,
+    "prix_moyen": 3000,
+    "prix_max": 4000,
+    "description": "Fourniture, pose au ciment colle et jointoiement hydrofuge"
+  },
+  {
+    "id": "btp_058",
+    "categorie": "BTP",
+    "lot": "LOT 06: REVÊTEMENTS SOLS & MURS",
+    "code": "06.04",
+    "designation": "Plinthes assorties en céramique ou grès cérame",
+    "unite": "ml",
+    "prix_min": 450,
+    "prix_moyen": 650,
+    "prix_max": 900,
+    "description": "Fourniture et pose de plinthes h=8cm au mortier colle"
+  },
+  {
+    "id": "btp_059",
+    "categorie": "BTP",
+    "lot": "LOT 06: REVÊTEMENTS SOLS & MURS",
+    "code": "06.05",
+    "designation": "Habillage marches et contremarches d'escalier en marbre national (Filfila / Chemtou)",
+    "unite": "ml",
+    "prix_min": 3500,
+    "prix_moyen": 4800,
+    "prix_max": 6500,
+    "description": "Marche ép. 3 cm chanfreinée, contremarche ép. 2 cm posée au ciment blanc"
+  },
+
+  {
+    "id": "btp_065",
+    "categorie": "BTP",
+    "lot": "LOT 07: MENUISERIE BOIS, ALU & PVC",
+    "code": "07.01",
+    "designation": "Porte isoplane en bois alvéolaire avec chambranles et quincaillerie",
+    "unite": "U",
+    "prix_min": 14000,
+    "prix_moyen": 19000,
+    "prix_max": 25000,
+    "description": "Dimensions 84x217 ou 74x217 cm avec serrure et béquille inox"
+  },
+  {
+    "id": "btp_066",
+    "categorie": "BTP",
+    "lot": "LOT 07: MENUISERIE BOIS, ALU & PVC",
+    "code": "07.02",
+    "designation": "Fenêtre en aluminium blanc 2 vantaux coulissants (120x120 cm)",
+    "unite": "m2",
+    "prix_min": 16000,
+    "prix_moyen": 22000,
+    "prix_max": 29000,
+    "description": "Profilés aluminium thermolaqué, vitrage clair 6mm et joint néoprène"
+  },
+  {
+    "id": "btp_067",
+    "categorie": "BTP",
+    "lot": "LOT 07: MENUISERIE BOIS, ALU & PVC",
+    "code": "07.03",
+    "designation": "Porte-fenêtre en aluminium avec volet roulant intégré",
+    "unite": "m2",
+    "prix_min": 24000,
+    "prix_moyen": 32000,
+    "prix_max": 42000,
+    "description": "Coulissant 2 vantaux avec tablier volet alu isolé et manivelle/moteur"
+  },
+  {
+    "id": "btp_068",
+    "categorie": "BTP",
+    "lot": "LOT 07: MENUISERIE BOIS, ALU & PVC",
+    "code": "07.04",
+    "designation": "Porte d'entrée blindée métallique avec serrure multipoints",
+    "unite": "U",
+    "prix_min": 35000,
+    "prix_moyen": 48000,
+    "prix_max": 65000,
+    "description": "Porte palière sécurisée avec pré-cadre, microviseur et cylindre européen"
+  },
+
+  {
+    "id": "btp_075",
+    "categorie": "BTP",
+    "lot": "LOT 08: PEINTURE & VITRERIE",
+    "code": "08.01",
+    "designation": "Peinture vinylique à l'eau en 2 couches sur murs et plafonds",
+    "unite": "m2",
+    "prix_min": 280,
+    "prix_moyen": 420,
+    "prix_max": 580,
+    "description": "Ponçage, couche d'impression fixatrice et 2 couches de peinture vinyle mate"
+  },
+  {
+    "id": "btp_076",
+    "categorie": "BTP",
+    "lot": "LOT 08: PEINTURE & VITRERIE",
+    "code": "08.02",
+    "designation": "Peinture laquée satinée ou brillante pour pièces d'eau",
+    "unite": "m2",
+    "prix_min": 450,
+    "prix_moyen": 680,
+    "prix_max": 950,
+    "description": "Enduisage repassé, ponçage fin et 2 couches de laque glycérophtalique"
+  },
+  {
+    "id": "btp_077",
+    "categorie": "BTP",
+    "lot": "LOT 08: PEINTURE & VITRERIE",
+    "code": "08.03",
+    "designation": "Peinture extérieure monocouche imperméabilisante (Pliolite ou siloxane)",
+    "unite": "m2",
+    "prix_min": 600,
+    "prix_moyen": 850,
+    "prix_max": 1200,
+    "description": "Revêtement plastique épais (RPE) résistant aux intempéries et UV"
+  },
+
+  {
+    "id": "hyd_001",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.01",
+    "designation": "Fouille en tranchée pour canalisation d'eau potable et assainissement",
+    "unite": "m3",
+    "prix_min": 700,
+    "prix_moyen": 1000,
+    "prix_max": 1400,
+    "description": "Fouille mécanique en terrain meuble à mi-dur avec dressement du fond"
+  },
+  {
+    "id": "hyd_002",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.02",
+    "designation": "Lit de pose en sable propre ép. 10 cm sous conduite",
+    "unite": "m3",
+    "prix_min": 2200,
+    "prix_moyen": 3000,
+    "prix_max": 3800,
+    "description": "Fourniture, régalage et damage de sable pour assise de tuyaux"
+  },
+  {
+    "id": "hyd_003",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.03",
+    "designation": "Fourniture et pose de tuyau PEHD haute densité DN 63 mm PN16",
+    "unite": "ml",
+    "prix_min": 750,
+    "prix_moyen": 1100,
+    "prix_max": 1500,
+    "description": "Pour réseau d'adduction et distribution AEP avec raccords électrosoudables"
+  },
+  {
+    "id": "hyd_004",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.04",
+    "designation": "Fourniture et pose de tuyau PEHD DN 90 mm PN16",
+    "unite": "ml",
+    "prix_min": 1200,
+    "prix_moyen": 1700,
+    "prix_max": 2300,
+    "description": "Soudure bout à bout ou manchons électrosoudables, essais inclus"
+  },
+  {
+    "id": "hyd_005",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.05",
+    "designation": "Fourniture et pose de tuyau PEHD DN 110 mm PN16",
+    "unite": "ml",
+    "prix_min": 1700,
+    "prix_moyen": 2400,
+    "prix_max": 3200,
+    "description": "Conduite principale d'eau potable avec bande avertisseuse bleue"
+  },
+  {
+    "id": "hyd_006",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.06",
+    "designation": "Fourniture et pose de tuyau PEHD DN 160 mm PN16",
+    "unite": "ml",
+    "prix_min": 2800,
+    "prix_moyen": 3900,
+    "prix_max": 5200,
+    "description": "Pour transport d'eau potable sous pression avec pièces spéciales"
+  },
+  {
+    "id": "hyd_007",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.07",
+    "designation": "Fourniture et pose de tuyau PVC Assainissement assainissement série I DN 200 mm",
+    "unite": "ml",
+    "prix_min": 1900,
+    "prix_moyen": 2600,
+    "prix_max": 3400,
+    "description": "Tuyau lisse à joint élastomère étanche pour réseau d'eaux usées"
+  },
+  {
+    "id": "hyd_008",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.08",
+    "designation": "Fourniture et pose de tuyau PVC Assainissement série I DN 250 mm",
+    "unite": "ml",
+    "prix_min": 2600,
+    "prix_moyen": 3600,
+    "prix_max": 4700,
+    "description": "Canalisation d'assainissement avec pente minimale 0.5%"
+  },
+  {
+    "id": "hyd_009",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.09",
+    "designation": "Fourniture et pose de tuyau PVC Assainissement série I DN 315 mm",
+    "unite": "ml",
+    "prix_min": 3800,
+    "prix_moyen": 5200,
+    "prix_max": 6800,
+    "description": "Collecteur d'assainissement gravitaire principal"
+  },
+  {
+    "id": "hyd_010",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.10",
+    "designation": "Fourniture et pose de tuyau PVC Assainissement série I DN 400 mm",
+    "unite": "ml",
+    "prix_min": 5800,
+    "prix_moyen": 7800,
+    "prix_max": 9900,
+    "description": "Collecteur gros diamètre pour réseaux unitaires ou pluviaux"
+  },
+  {
+    "id": "hyd_011",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.11",
+    "designation": "Fourniture et pose de tuyau en béton armé centrifugé DN 500 mm",
+    "unite": "ml",
+    "prix_min": 7500,
+    "prix_moyen": 10500,
+    "prix_max": 14000,
+    "description": "Buse en béton armé classe 135A avec bague d'étanchéité"
+  },
+  {
+    "id": "hyd_012",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.12",
+    "designation": "Regard de visite en béton armé coulé sur place 100x100 cm (h jusqu'à 2.00m)",
+    "unite": "U",
+    "prix_min": 24000,
+    "prix_moyen": 32000,
+    "prix_max": 42000,
+    "description": "Radier, cunette semi-circulaire, parois ép. 15cm, enduit étanche et échelons"
+  },
+  {
+    "id": "hyd_013",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.13",
+    "designation": "Fourniture et pose de tampon en fonte ductile rond classe D400 (40 tonnes)",
+    "unite": "U",
+    "prix_min": 18000,
+    "prix_moyen": 25000,
+    "prix_max": 33000,
+    "description": "Cadre et tampon verrouillable pour voirie lourde avec joint anti-bruit"
+  },
+  {
+    "id": "hyd_014",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.14",
+    "designation": "Regard borgne ou boîte de branchement particulier 50x50 cm",
+    "unite": "U",
+    "prix_min": 8500,
+    "prix_moyen": 12000,
+    "prix_max": 16000,
+    "description": "Pour raccordement individuel au réseau public avec couvercle béton"
+  },
+  {
+    "id": "hyd_015",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.15",
+    "designation": "Vanne à opercule à brides DN 100 PN16 avec volant de commande",
+    "unite": "U",
+    "prix_min": 22000,
+    "prix_moyen": 30000,
+    "prix_max": 40000,
+    "description": "Robinet vanne en fonte ductile pour sectionnement de réseau AEP"
+  },
+  {
+    "id": "hyd_016",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.16",
+    "designation": "Épreuve hydrostatique et désinfection de réseau d'eau potable",
+    "unite": "ml",
+    "prix_min": 150,
+    "prix_moyen": 250,
+    "prix_max": 400,
+    "description": "Mise en pression d'épreuve 1.5 fois la pression de service et rinçage javellisé"
+  },
+
+  {
+    "id": "tp_001",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.01",
+    "designation": "Décapage de terre végétale sur emprise de chaussée (ép. 20 à 30 cm)",
+    "unite": "m2",
+    "prix_min": 120,
+    "prix_moyen": 180,
+    "prix_max": 260,
+    "description": "Au bulldozer ou à la niveleuse avec mise en cordon ou mise en dépôt"
+  },
+  {
+    "id": "tp_002",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.02",
+    "designation": "Couche de fondation en tout-venant de tuf sélectionné compacté (ép. 20 cm)",
+    "unite": "m3",
+    "prix_min": 1800,
+    "prix_moyen": 2400,
+    "prix_max": 3100,
+    "description": "Fourniture, régalage à la niveleuse et compactage à 98% de l'OPM"
+  },
+  {
+    "id": "tp_003",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.03",
+    "designation": "Couche de fondation en grave non traitée GNT 0/40 concassée (ép. 15 cm)",
+    "unite": "m3",
+    "prix_min": 2500,
+    "prix_moyen": 3300,
+    "prix_max": 4200,
+    "description": "Grave de concassage dur régaleuse et compactée"
+  },
+  {
+    "id": "tp_004",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.04",
+    "designation": "Couche de base en grave concassée 0/20 (GNT 0/20) ép. 12 cm",
+    "unite": "m3",
+    "prix_min": 2800,
+    "prix_moyen": 3700,
+    "prix_max": 4600,
+    "description": "Matériaux nobles pour assise de chaussée avec contrôle de compacité"
+  },
+  {
+    "id": "tp_005",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.05",
+    "designation": "Couche d'imprégnation au bitume fluidifié 0/1 à raison de 1.2 kg/m2",
+    "unite": "m2",
+    "prix_min": 180,
+    "prix_moyen": 260,
+    "prix_max": 360,
+    "description": "Répandage mécanique sous pression avec sablage de protection"
+  },
+  {
+    "id": "tp_006",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.06",
+    "designation": "Couche d'accrochage à l'émulsion de bitume à 65% (0.5 kg/m2)",
+    "unite": "m2",
+    "prix_min": 120,
+    "prix_moyen": 170,
+    "prix_max": 240,
+    "description": "Application juste avant la pose de l'enrobé à chaud"
+  },
+  {
+    "id": "tp_007",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.07",
+    "designation": "Revêtement de chaussée en Béton Bitumineux à chaud (BB 0/10 ou BB 0/14) ép. 6 cm",
+    "unite": "m2",
+    "prix_min": 1500,
+    "prix_moyen": 2100,
+    "prix_max": 2800,
+    "description": "Fourniture, transport par camions calorifugés, mise en œuvre au finisseur et compactage"
+  },
+  {
+    "id": "tp_008",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.08",
+    "designation": "Fourniture et pose de bordures de trottoir en béton préfabriqué type T2",
+    "unite": "ml",
+    "prix_min": 1100,
+    "prix_moyen": 1500,
+    "prix_max": 1950,
+    "description": "Pose sur semelle béton dosé à 250 kg/m3 avec solin arrière et joints fins"
+  },
+  {
+    "id": "tp_009",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.09",
+    "designation": "Fourniture et pose de bordures d'îlot ou trottoir type T3 ou A2",
+    "unite": "ml",
+    "prix_min": 1300,
+    "prix_moyen": 1750,
+    "prix_max": 2300,
+    "description": "Bordures hautes pour protection de trottoirs et terre-pleins centraux"
+  },
+  {
+    "id": "tp_010",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.10",
+    "designation": "Fourniture et pose de caniveaux préfabriqués type CS2 ou CC1",
+    "unite": "ml",
+    "prix_min": 1400,
+    "prix_moyen": 1900,
+    "prix_max": 2500,
+    "description": "Caniveau double pente pour fil d'eau le long des bordures"
+  },
+  {
+    "id": "tp_011",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.11",
+    "designation": "Revêtement de trottoir en pavés autobloquants en béton ép. 6 cm",
+    "unite": "m2",
+    "prix_min": 1600,
+    "prix_moyen": 2200,
+    "prix_max": 2900,
+    "description": "Pose sur lit de sable de concassage 3 cm et balayage de sable fin dans les joints"
+  },
+  {
+    "id": "tp_012",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.12",
+    "designation": "Béton pour trottoir balayé ou bouchardé ép. 10 cm avec treillis",
+    "unite": "m2",
+    "prix_min": 1400,
+    "prix_moyen": 1950,
+    "prix_max": 2600,
+    "description": "Coulage béton dosé à 300 kg/m3 avec joints de dilatation tous les 2 m"
+  },
+  {
+    "id": "tp_013",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.13",
+    "designation": "Avaloir à grille pour eaux pluviales avec siphon raccordé au réseau",
+    "unite": "U",
+    "prix_min": 16000,
+    "prix_moyen": 22000,
+    "prix_max": 29000,
+    "description": "Regard sous caniveau avec panier dégrilleur et grille fonte C250"
+  },
+  {
+    "id": "tp_014",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.14",
+    "designation": "Signalisation horizontale par bandes blanches rétro-réfléchissantes (largeur 15 cm)",
+    "unite": "ml",
+    "prix_min": 120,
+    "prix_moyen": 180,
+    "prix_max": 250,
+    "description": "Peinture routière spéciale avec microbilles de verre pour visibilité nocturne"
+  }
+]
+</script>
+
 <script>
     // Configuration intelligente de l'URL API
     const API_BASE = (window.location.origin.includes('http') && !window.location.origin.startsWith('file:')) 
@@ -1060,12 +2125,21 @@
     // État global de l'application
     let pagesQueue = [];          // { id, file, name, type, dataUrl, pageNum, status: 'attente'|'cours'|'traite'|'erreur', articles: [] }
     let indexSelectionne = null;
-    let devisLots = {};           // { "Nom du Lot": [ { n, d, u, q, pu, total } ] }
+    let devisLots = {};           // { "Nom du Lot": [ { n, d, u, q, pu, total, source } ] }
     let zoomLevel = 1.0;
     let rotationAngle = 0;
+    let dernierPdfComplet = null; // Fichier PDF complet pour analyse directe en 1 clic
+    let bpuCatalogue = [];        // Catalogue BPU (BTP, Hydraulique, VRD)
+    let categorieBPUActive = 'TOUS';
+    let lotCibleActifPourBPU = null;
 
     // Initialisation au chargement
     window.addEventListener('DOMContentLoaded', () => {
+        // Configuration du worker PDF.js pour traitement multi-pages infaillible
+        if (window.pdfjsLib && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
         const today = new Date();
         document.getElementById('dateDevis').value = today.toLocaleDateString('fr-FR');
         if (!document.getElementById('numDevis').value) {
@@ -1075,6 +2149,7 @@
         chargerEntrepriseLocale();
         chargerDevisSauvegarde();
         chargerCompteClientLocal();
+        chargerBPU();
         verifierConnexionServeur();
     });
 
@@ -1150,9 +2225,28 @@
     }
 
     async function traiterFichiersImportes(fichiers) {
+        // Si un devis contient déjà des articles, proposer le choix : nouveau devis ou ajout à la suite
+        const totalArticlesExistants = Object.values(devisLots).reduce((acc, l) => acc + l.length, 0);
+        if (totalArticlesExistants > 0) {
+            const reinit = confirm(
+                `⚠️ Un devis actif contient actuellement ${totalArticlesExistants} article(s).\n\n` +
+                `• Cliquez sur [OK] pour EFFACER le devis précédent et créer un NOUVEAU devis vierge.\n` +
+                `• Cliquez sur [Annuler] pour CONSERVER les articles existants et AJOUTER les nouvelles pages à la suite.`
+            );
+            if (reinit) {
+                devisLots = {};
+                pagesQueue = [];
+                indexSelectionne = null;
+                dernierPdfComplet = null;
+                document.getElementById('nomClient').value = "";
+                document.getElementById('nomProjet').value = "";
+                reconstruireTableauDevis();
+            }
+        }
+
         const statusBadge = document.getElementById('statusBadge');
         statusBadge.className = 'status-pill status-busy';
-        statusBadge.textContent = "Préparation et optimisation des pages...";
+        statusBadge.textContent = "Préparation et découpage des documents...";
 
         for (const file of fichiers) {
             if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
@@ -1254,9 +2348,13 @@
 
     async function extrairePagesDuPDF(pdfFile) {
         try {
+            if (window.pdfjsLib && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+            dernierPdfComplet = pdfFile;
             const arrayBuffer = await pdfFile.arrayBuffer();
             const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            ajouterLog(`PDF détecté : "${pdfFile.name}" contient ${pdfDoc.numPages} page(s). Découpage en cours...`);
+            ajouterLog(`📄 PDF détecté : "${pdfFile.name}" (${pdfDoc.numPages} page(s)). Découpage haute résolution...`);
 
             for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
                 const page = await pdfDoc.getPage(pageNum);
@@ -1267,9 +2365,10 @@
                 canvas.height = viewport.height;
 
                 await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
 
-                const blob = await (await fetch(dataUrl)).blob();
+                // Découpage propre et rapide sans surcharger la mémoire
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.90));
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
                 const pageFile = new File([blob], `${pdfFile.name.replace(/\.pdf$/i, '')}_page_${pageNum}.jpg`, { type: 'image/jpeg' });
 
                 pagesQueue.push({
@@ -1279,11 +2378,21 @@
                     type: 'image/jpeg',
                     dataUrl: dataUrl,
                     status: 'attente',
+                    pageNum: pageNum,
                     articles: []
                 });
             }
+
+            // Si le document PDF comprend plus d'une page, activer le bouton d'analyse globale directe
+            if (pdfDoc.numPages > 1) {
+                const btnDirect = document.getElementById('btnAnalyserToutDirect');
+                if (btnDirect) {
+                    btnDirect.style.display = 'inline-flex';
+                    btnDirect.textContent = `📑 Analyser tout le PDF en 1 clic direct (${pdfDoc.numPages} pages)`;
+                }
+            }
         } catch (err) {
-            ajouterLog(`Erreur lecture PDF "${pdfFile.name}": ${err.message}`);
+            ajouterLog(`❌ Erreur découpage PDF "${pdfFile.name}": ${err.message}`);
         }
     }
 
@@ -1412,6 +2521,7 @@
     async function traiterToutesLesPages() {
         const btnTout = document.getElementById('btnTraiterTout');
         const btnPage = document.getElementById('btnLancerPage');
+        const btnDirect = document.getElementById('btnAnalyserToutDirect');
         const pBox = document.getElementById('progressBox');
         const pBar = document.getElementById('progressBar');
         const pLbl = document.getElementById('progressLabel');
@@ -1425,21 +2535,150 @@
 
         btnTout.disabled = true;
         btnPage.disabled = true;
+        if (btnDirect) btnDirect.disabled = true;
         pBox.style.display = 'block';
 
         let traitees = 0;
-        for (const item of pagesNonTraitees) {
+        for (let i = 0; i < pagesNonTraitees.length; i++) {
+            const item = pagesNonTraitees[i];
             selectionnerPage(item.idx);
+            ajouterLog(`▶️ [Page ${i + 1}/${pagesNonTraitees.length}] Lancement de l'analyse : "${item.p.name}"...`);
+
             await executerTraitementPage(item.idx);
             traitees++;
             const pct = Math.round((traitees / pagesNonTraitees.length) * 100);
             pBar.style.width = pct + '%';
             pLbl.textContent = `${traitees} / ${pagesNonTraitees.length} (${pct}%)`;
+
+            // Si d'autres pages suivent, observer une pause de 3s pour éviter les limitations de débit Gemini API (429)
+            if (i < pagesNonTraitees.length - 1) {
+                const statusBadge = document.getElementById('statusBadge');
+                ajouterLog(`⏳ Pause de sécurité de 3s avant la page suivante pour préserver les quotas de l'API Gemini...`);
+                for (let sec = 3; sec > 0; sec--) {
+                    statusBadge.textContent = `⏳ Pause anti-saturation API : page suivante dans ${sec}s...`;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
         }
 
         btnTout.disabled = false;
         btnPage.disabled = false;
+        if (btnDirect) btnDirect.disabled = false;
         setTimeout(() => { pBox.style.display = 'none'; }, 2500);
+    }
+
+    async function analyserDocumentCompletDirect() {
+        if (!dernierPdfComplet) {
+            alert("Aucun fichier PDF complet disponible.");
+            return;
+        }
+
+        if (!confirm(`📑 Analyser tout le PDF "${dernierPdfComplet.name}" en 1 clic direct ?\n\nLe moteur IA Gemini va lire l'intégralité du document en une seule fois et extraire tous les lots et articles.`)) {
+            return;
+        }
+
+        const statusBadge = document.getElementById('statusBadge');
+        const pBox = document.getElementById('progressBox');
+        const pBar = document.getElementById('progressBar');
+        const pLbl = document.getElementById('progressLabel');
+        const btnDirect = document.getElementById('btnAnalyserToutDirect');
+
+        if (btnDirect) btnDirect.disabled = true;
+        statusBadge.className = 'status-pill status-busy';
+        statusBadge.textContent = `Analyse globale de "${dernierPdfComplet.name}" par Gemini...`;
+        pBox.style.display = 'block';
+        pBar.style.width = '40%';
+        pLbl.textContent = 'Envoi du document PDF complet...';
+
+        ajouterLog(`🚀 Envoi direct du PDF complet "${dernierPdfComplet.name}" (${Math.round(dernierPdfComplet.size / 1024)} Ko) au moteur Gemini...`);
+
+        const formData = new FormData();
+        formData.append('file', dernierPdfComplet);
+        formData.append('page_num', 1);
+
+        if (GEMINI_API_KEY && GEMINI_API_KEY.trim()) {
+            formData.append('gemini_key', GEMINI_API_KEY.trim());
+        }
+
+        const clientActif = JSON.parse(localStorage.getItem('btp_client') || '{}');
+        if (clientActif.telephone) {
+            formData.append('telephone', clientActif.telephone);
+        }
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 150000); // 150s
+
+            const response = await fetch(`${API_BASE}/chiffrer-page`, {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const errText = await response.text();
+                let errDetail = errText;
+                try { errDetail = JSON.parse(errText).detail || errText; } catch(e) {}
+                throw new Error(`Erreur ${response.status} : ${errDetail}`);
+            }
+
+            const data = await response.json();
+            pBar.style.width = '100%';
+            pLbl.textContent = '100%';
+
+            if (data.credits_restants !== undefined && data.credits_restants !== null) {
+                clientActif.credits_pages = data.credits_restants;
+                localStorage.setItem('btp_client', JSON.stringify(clientActif));
+                chargerCompteClientLocal();
+            }
+
+            if (data.client && !document.getElementById('nomClient').value) {
+                document.getElementById('nomClient').value = data.client;
+            }
+            if (data.projet && !document.getElementById('nomProjet').value) {
+                document.getElementById('nomProjet').value = data.projet;
+            }
+
+            let articles = Array.isArray(data.articles) ? data.articles : [];
+            if (articles.length > 0) {
+                integrerArticlesDansDevis(articles, "PDF Global");
+                pagesQueue.forEach(p => { p.status = 'traite'; });
+                rafraichirGrilleVignettes();
+                ajouterLog(`🎉 Succès total ! ${articles.length} article(s) extraits de l'ensemble du PDF.`);
+                statusBadge.className = 'status-pill status-done';
+                statusBadge.textContent = `PDF complet traité avec succès ! (${articles.length} articles)`;
+            } else {
+                ajouterLog(`⚠️ Aucun article BTP détecté dans le document PDF.`);
+                statusBadge.className = 'status-pill status-done';
+                statusBadge.textContent = `Analyse terminée — aucun article détecté.`;
+            }
+        } catch (err) {
+            ajouterLog(`❌ Échec analyse complète PDF : ${err.message}`);
+            statusBadge.className = 'status-pill status-err';
+            statusBadge.textContent = `Échec de l'analyse : ${err.message}`;
+        } finally {
+            if (btnDirect) btnDirect.disabled = false;
+            setTimeout(() => { pBox.style.display = 'none'; }, 2500);
+            sauvegarderLocalement();
+        }
+    }
+
+    function viderFileAttente() {
+        if (pagesQueue.length === 0) return;
+        if (!confirm("Voulez-vous vider toutes les pages et documents de la file d'attente ?")) return;
+        pagesQueue = [];
+        indexSelectionne = null;
+        dernierPdfComplet = null;
+        const btnDirect = document.getElementById('btnAnalyserToutDirect');
+        if (btnDirect) btnDirect.style.display = 'none';
+        document.getElementById('thumbnailsGrid').innerHTML = "";
+        document.getElementById('previewPane').style.display = "none";
+        document.getElementById('badgeFichiers').textContent = "0 page(s)";
+        document.getElementById('pagesRestantesBadge').textContent = "0";
+        document.getElementById('statusBadge').className = 'status-pill status-idle';
+        document.getElementById('statusBadge').textContent = "File d'attente vidée.";
+        ajouterLog("🗑️ File des pages importées réinitialisée.");
     }
 
     async function executerTraitementPage(idx) {
@@ -1529,7 +2768,7 @@
                 }
 
                 if (articlesExtraits.length > 0) {
-                    integrerArticlesDansDevis(articlesExtraits);
+                    integrerArticlesDansDevis(articlesExtraits, page.name);
                     page.status = 'traite';
                     page.articles = articlesExtraits;
                     success = true;
@@ -1574,7 +2813,7 @@
         sauvegarderLocalement();
     }
 
-    function integrerArticlesDansDevis(nouveauxArticles) {
+    function integrerArticlesDansDevis(nouveauxArticles, sourcePageNom = "") {
         nouveauxArticles.forEach(art => {
             const lotNom = (art.lot || "TRAVAUX GÉNÉRAUX").trim();
             if (!devisLots[lotNom]) {
@@ -1588,7 +2827,8 @@
                 u: art.u || "m2",
                 q: q,
                 pu: pu,
-                total: Math.round(q * pu * 100) / 100
+                total: Math.round(q * pu * 100) / 100,
+                source: art.source || sourcePageNom || ""
             });
         });
 
@@ -1658,11 +2898,20 @@
 
             articles.forEach((art, artIdx) => {
                 const totalLigne = (parseFloat(art.q) || 0) * (parseFloat(art.pu) || 0);
+                let tagPage = '';
+                if (art.source) {
+                    const matchP = art.source.match(/P\.\d+/i);
+                    const labelSrc = matchP ? matchP[0].toUpperCase() : (art.source.includes('BPU') ? 'BPU' : 'Doc');
+                    tagPage = `<span class="badge-source" title="Extrait depuis : ${escapeHtml(art.source)}">${escapeHtml(labelSrc)}</span>`;
+                }
                 html += `
                     <tr>
                         <td class="col-num" style="font-weight: 600;">${art.n || (artIdx + 1)}</td>
                         <td class="col-des">
-                            <input type="text" value="${escapeHtml(art.d)}" oninput="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'd', this.value)">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                ${tagPage}
+                                <input type="text" value="${escapeHtml(art.d)}" oninput="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'd', this.value)" style="flex: 1;">
+                            </div>
                         </td>
                         <td class="col-uni">
                             <select onchange="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'u', this.value)">
@@ -1675,7 +2924,10 @@
                             <input type="number" step="any" style="text-align: right;" value="${art.q}" oninput="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'q', this.value)">
                         </td>
                         <td class="col-pu">
-                            <input type="number" step="any" style="text-align: right;" value="${art.pu}" oninput="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'pu', this.value)">
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <input type="number" step="any" style="text-align: right;" value="${art.pu}" oninput="modifierArticle('${escapeHtml(lotNom)}', ${artIdx}, 'pu', this.value)">
+                                <button class="btn-prix-marche no-print" title="Comparer ou appliquer le prix BPU Référentiel Algérie" onclick="suggererPrixMarche('${escapeHtml(lotNom)}', ${artIdx})">💡</button>
+                            </div>
                         </td>
                         <td class="col-tot">${formaterMontant(totalLigne)}</td>
                         <td class="col-act no-print">
@@ -1692,9 +2944,14 @@
                 </div>
 
                 <div class="lot-footer no-print">
-                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.82rem;" onclick="ajouterArticleDansLot('${escapeHtml(lotNom)}')">
-                        + Ajouter un article dans ce lot
-                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.82rem;" onclick="ajouterArticleDansLot('${escapeHtml(lotNom)}')">
+                            + Ajouter un article
+                        </button>
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.82rem; color: #1e3a8a; font-weight: 600;" onclick="ouvrirModalBPU('${escapeHtml(lotNom)}')">
+                            💰 BPU Référentiel
+                        </button>
+                    </div>
                     <span style="font-size: 0.85rem; color: #475569;">${articles.length} article(s)</span>
                 </div>
             </div>
@@ -1994,6 +3251,223 @@
     }
     function fermerModalHistorique() {
         document.getElementById('modalHistorique').style.display = 'none';
+    }
+
+    // ============================================================
+    // GESTION DU BORDEREAU DES PRIX UNITAIRES (BPU) RÉFÉRENTIEL
+    // ============================================================
+    async function chargerBPU() {
+        // 1. Chargement instantané depuis la source JSON intégrée si présente
+        const embeddedEl = document.getElementById('bpuDataJson');
+        if (embeddedEl && embeddedEl.textContent.trim()) {
+            try {
+                bpuCatalogue = JSON.parse(embeddedEl.textContent);
+                actualiserCompteursBPU();
+            } catch(e) {}
+        }
+
+        // 2. Récupération asynchrone des derniers prix depuis l'API Python
+        try {
+            const res = await fetch(`${API_BASE}/api/bpu`);
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    bpuCatalogue = data;
+                    localStorage.setItem('btp_bpu_cache', JSON.stringify(bpuCatalogue));
+                    actualiserCompteursBPU();
+                    return;
+                }
+            }
+        } catch(e) {}
+
+        // 3. Fallback cache localStorage si hors ligne
+        if (bpuCatalogue.length === 0) {
+            const cache = localStorage.getItem('btp_bpu_cache');
+            if (cache) {
+                try {
+                    bpuCatalogue = JSON.parse(cache);
+                    actualiserCompteursBPU();
+                } catch(e) {}
+            }
+        }
+    }
+
+    function actualiserCompteursBPU() {
+        const tous = bpuCatalogue.length;
+        const btp = bpuCatalogue.filter(x => x.categorie === 'BTP').length;
+        const hyd = bpuCatalogue.filter(x => x.categorie === 'HYDRAULIQUE').length;
+        const tp = bpuCatalogue.filter(x => x.categorie === 'TRAVAUX PUBLICS').length;
+
+        const elTous = document.getElementById('bpuCountTous');
+        const elBtp = document.getElementById('bpuCountBTP');
+        const elHyd = document.getElementById('bpuCountHyd');
+        const elTp = document.getElementById('bpuCountTP');
+
+        if (elTous) elTous.textContent = tous;
+        if (elBtp) elBtp.textContent = btp;
+        if (elHyd) elHyd.textContent = hyd;
+        if (elTp) elTp.textContent = tp;
+    }
+
+    function ouvrirModalBPU(lotCible = null) {
+        lotCibleActifPourBPU = lotCible;
+
+        const selLot = document.getElementById('selectLotCibleBPU');
+        const containerSel = document.getElementById('selectLotCibleContainer');
+        if (selLot && containerSel) {
+            selLot.innerHTML = '<option value="">(Détecter selon l\'article)</option>';
+            Object.keys(devisLots).forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = k;
+                if (lotCible && lotCible === k) opt.selected = true;
+                selLot.appendChild(opt);
+            });
+        }
+
+        const inputRech = document.getElementById('rechercheBPU');
+        if (inputRech) inputRech.value = '';
+        filtrerTableauBPU();
+        document.getElementById('modalBPU').style.display = 'flex';
+    }
+
+    function fermerModalBPU() {
+        document.getElementById('modalBPU').style.display = 'none';
+    }
+
+    function changerCategorieBPU(cat, btn) {
+        categorieBPUActive = cat;
+        document.querySelectorAll('.bpu-tab-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        filtrerTableauBPU();
+    }
+
+    function filtrerTableauBPU() {
+        const tbody = document.getElementById('tbodyBPU');
+        if (!tbody) return;
+
+        const query = (document.getElementById('rechercheBPU').value || '').trim().toLowerCase();
+        let items = bpuCatalogue;
+
+        if (categorieBPUActive !== 'TOUS') {
+            items = items.filter(x => (x.categorie || '').toUpperCase() === categorieBPUActive);
+        }
+
+        if (query) {
+            items = items.filter(x => 
+                (x.designation || '').toLowerCase().includes(query) ||
+                (x.description || '').toLowerCase().includes(query) ||
+                (x.lot || '').toLowerCase().includes(query) ||
+                (x.code || '').toLowerCase().includes(query)
+            );
+        }
+
+        if (items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 25px; color:#94a3b8;">Aucun article trouvé pour cette recherche dans le BPU.</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        items.forEach(item => {
+            const catBadgeClass = item.categorie === 'BTP' ? 'badge-cat-btp' : item.categorie === 'HYDRAULIQUE' ? 'badge-cat-hydraulique' : 'badge-cat-travauxpublics';
+            const catNomCourt = item.categorie === 'BTP' ? 'Bâtiment' : item.categorie === 'HYDRAULIQUE' ? 'Hydraulique' : 'VRD / TP';
+            html += `
+                <tr>
+                    <td style="font-weight:700; color:#475569;">${escapeHtml(item.code || '')}</td>
+                    <td><span class="badge-bpu-cat ${catBadgeClass}">${catNomCourt}</span></td>
+                    <td>
+                        <div style="font-weight:600; color:#1e293b;">${escapeHtml(item.designation)}</div>
+                        <div style="font-size:0.78rem; color:#64748b;">${escapeHtml(item.description || item.lot || '')}</div>
+                    </td>
+                    <td style="text-align:center; font-weight:700; color:#1e3a8a;">${escapeHtml(item.unite)}</td>
+                    <td style="text-align:right;">
+                        <span style="font-weight:800; color:#16a34a; font-size:0.95rem;">${formaterMontant(item.prix_moyen)} DZD</span>
+                        <div style="font-size:0.75rem; color:#64748b;">(${formaterMontant(item.prix_min)} à ${formaterMontant(item.prix_max)})</div>
+                    </td>
+                    <td style="text-align:center;">
+                        <button class="btn btn-primary" style="padding: 5px 12px; font-size: 0.82rem;" onclick="insererArticleBPU('${item.id}')">
+                            ➕ Insérer
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function insererArticleBPU(itemId) {
+        const item = bpuCatalogue.find(x => x.id === itemId);
+        if (!item) return;
+
+        const selLot = document.getElementById('selectLotCibleBPU');
+        let destLot = (selLot && selLot.value) ? selLot.value : (lotCibleActifPourBPU || item.lot || "TRAVAUX GÉNÉRAUX");
+
+        if (!devisLots[destLot]) {
+            devisLots[destLot] = [];
+        }
+
+        devisLots[destLot].push({
+            n: devisLots[destLot].length + 1,
+            d: item.designation,
+            u: item.unite,
+            q: 1,
+            pu: item.prix_moyen,
+            total: item.prix_moyen,
+            source: "BPU"
+        });
+
+        reconstruireTableauDevis();
+        sauvegarderLocalement();
+        ajouterLog(`✅ Article inséré : "${item.designation}" (${formaterMontant(item.prix_moyen)} DZD) dans ${destLot}.`);
+    }
+
+    function suggererPrixMarche(lotNom, artIdx) {
+        if (!devisLots[lotNom] || !devisLots[lotNom][artIdx]) return;
+        const art = devisLots[lotNom][artIdx];
+        const desig = (art.d || "").toLowerCase();
+
+        // Chercher une correspondance exacte ou forte
+        let match = bpuCatalogue.find(item => {
+            const itemDesig = item.designation.toLowerCase();
+            return desig.includes(itemDesig) || itemDesig.includes(desig);
+        });
+
+        // Recherche par mots-clés pondérés
+        if (!match) {
+            const words = desig.split(/[\s,;:.'"-]+/).filter(w => w.length > 3);
+            let bestScore = 0;
+            bpuCatalogue.forEach(item => {
+                const target = (item.designation + " " + (item.description || "")).toLowerCase();
+                let score = 0;
+                words.forEach(w => { if (target.includes(w)) score++; });
+                if (score > bestScore) {
+                    bestScore = score;
+                    match = item;
+                }
+            });
+            if (bestScore === 0) match = null;
+        }
+
+        if (match) {
+            const msg = `💡 Prix référentiel BPU Algérie trouvé pour :\n"${art.d}"\n\n` +
+                        `• Ouvrage BPU : ${match.designation}\n` +
+                        `• Unité recommandée : ${match.unite}\n` +
+                        `• Prix moyen du marché : ${formaterMontant(match.prix_moyen)} DZD\n` +
+                        `• Fourchette constatée : ${formaterMontant(match.prix_min)} à ${formaterMontant(match.prix_max)} DZD\n\n` +
+                        `Voulez-vous appliquer ce prix moyen (${formaterMontant(match.prix_moyen)} DZD) à votre devis ?`;
+            if (confirm(msg)) {
+                art.pu = match.prix_moyen;
+                if (match.unite && (!art.u || art.u === 'U')) art.u = match.unite;
+                art.total = Math.round((parseFloat(art.q) || 1) * art.pu * 100) / 100;
+                reconstruireTableauDevis();
+                sauvegarderLocalement();
+                ajouterLog(`💡 Prix de "${art.d}" ajusté à ${formaterMontant(art.pu)} DZD selon le BPU Algérie.`);
+            }
+        } else {
+            if (confirm(`Aucun prix exact automatique trouvé pour "${art.d}".\n\nSouhaitez-vous ouvrir le catalogue BPU pour choisir un prix manuellement ?`)) {
+                ouvrirModalBPU(lotNom);
+            }
+        }
     }
 
     // Gestion du compte client Supabase & Crédits
