@@ -807,16 +807,16 @@
             <div id="previewContent" class="preview-content"></div>
 
             <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <button id="btnLancerPage" class="btn" onclick="traiterPageSelectionnee()">
+                <button type="button" id="btnLancerPage" class="btn" onclick="traiterPageSelectionnee()">
                     ⚡ Traiter cette page sélectionnée
                 </button>
-                <button id="btnTraiterTout" class="btn btn-accent" onclick="traiterToutesLesPages()">
+                <button type="button" id="btnTraiterTout" class="btn btn-accent" onclick="traiterToutesLesPages()">
                     🚀 Tout traiter (Page par page) (<span id="pagesRestantesBadge">0</span> restantes)
                 </button>
-                <button id="btnAnalyserToutDirect" class="btn" style="display:none; background:#047857; color:white; font-weight:600;" onclick="analyserDocumentCompletDirect()">
+                <button type="button" id="btnAnalyserToutDirect" class="btn" style="display:none; background:#047857; color:white; font-weight:600;" onclick="analyserDocumentCompletDirect()">
                     📑 Analyser tout le PDF en 1 clic direct
                 </button>
-                <button class="btn btn-outline" style="padding: 8px 12px; color: #dc2626;" onclick="viderFileAttente()" title="Vider toutes les pages de la file d'attente">
+                <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: #dc2626;" onclick="viderFileAttente()" title="Vider toutes les pages de la file d'attente">
                     🗑️ Vider la file
                 </button>
             </div>
@@ -2568,12 +2568,13 @@
     }
 
     async function analyserDocumentCompletDirect() {
-        if (!dernierPdfComplet) {
-            alert("Aucun fichier PDF complet disponible.");
+        if (pagesQueue.length === 0 && !dernierPdfComplet) {
+            alert("Aucun fichier PDF disponible. Veuillez sélectionner un document.");
             return;
         }
 
-        if (!confirm(`📑 Analyser tout le PDF "${dernierPdfComplet.name}" en 1 clic direct ?\n\nLe moteur IA Gemini va lire l'intégralité du document en une seule fois et extraire tous les lots et articles.`)) {
+        const nbPages = pagesQueue.length || 1;
+        if (!confirm(`📑 Analyser tout le document (${nbPages} page(s)) en 1 clic direct ?\n\nL'IA Gemini va analyser toutes les pages simultanément pour extraire l'ensemble des lots et articles.`)) {
             return;
         }
 
@@ -2582,18 +2583,33 @@
         const pBar = document.getElementById('progressBar');
         const pLbl = document.getElementById('progressLabel');
         const btnDirect = document.getElementById('btnAnalyserToutDirect');
+        const btnTout = document.getElementById('btnTraiterTout');
 
         if (btnDirect) btnDirect.disabled = true;
-        statusBadge.className = 'status-pill status-busy';
-        statusBadge.textContent = `Analyse globale de "${dernierPdfComplet.name}" par Gemini...`;
-        pBox.style.display = 'block';
-        pBar.style.width = '40%';
-        pLbl.textContent = 'Envoi du document PDF complet...';
+        if (btnTout) btnTout.disabled = true;
 
-        ajouterLog(`🚀 Envoi direct du PDF complet "${dernierPdfComplet.name}" (${Math.round(dernierPdfComplet.size / 1024)} Ko) au moteur Gemini...`);
+        statusBadge.className = 'status-pill status-busy';
+        statusBadge.textContent = `Préparation et optimisation des pages...`;
+        pBox.style.display = 'block';
+        pBar.style.width = '25%';
+        pLbl.textContent = 'Préparation...';
 
         const formData = new FormData();
-        formData.append('file', dernierPdfComplet);
+
+        // Envoi des pages découpées et optimisées en mémoire (très léger, évite le transfert d'un gros fichier brut)
+        if (pagesQueue.length > 0) {
+            ajouterLog(`📦 Compression et optimisation de ${pagesQueue.length} page(s) pour un téléversement rapide...`);
+            for (let i = 0; i < pagesQueue.length; i++) {
+                const p = pagesQueue[i];
+                p.status = 'cours';
+                const optFichier = await optimiserImagePourIA(p.file, p.rotation || 0);
+                formData.append('files', optFichier);
+            }
+            rafraichirGrilleVignettes();
+        } else if (dernierPdfComplet) {
+            formData.append('file', dernierPdfComplet);
+        }
+
         formData.append('page_num', 1);
 
         if (GEMINI_API_KEY && GEMINI_API_KEY.trim()) {
@@ -2605,63 +2621,112 @@
             formData.append('telephone', clientActif.telephone);
         }
 
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 150000); // 150s
+        statusBadge.textContent = `Analyse globale IA en cours (${nbPages} pages)...`;
+        pBar.style.width = '55%';
+        pLbl.textContent = 'Analyse Gemini en cours...';
+        ajouterLog(`🚀 Envoi groupé vers ${API_BASE}/chiffrer-page ...`);
 
-            const response = await fetch(`${API_BASE}/chiffrer-page`, {
-                method: 'POST',
-                body: formData,
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
+        let success = false;
+        let lastErreur = "";
 
-            if (!response.ok) {
-                const errText = await response.text();
-                let errDetail = errText;
-                try { errDetail = JSON.parse(errText).detail || errText; } catch(e) {}
-                throw new Error(`Erreur ${response.status} : ${errDetail}`);
+        for (let tentative = 1; tentative <= 2 && !success; tentative++) {
+            let controller = null;
+            let timeoutId = null;
+
+            try {
+                if (tentative > 1) {
+                    ajouterLog(`⏳ Tentative ${tentative}/2 : nouvelle tentative...`);
+                    statusBadge.textContent = `⏳ Réveil du serveur / 2ème essai...`;
+                    await new Promise(r => setTimeout(r, 3000));
+                }
+
+                controller = new AbortController();
+                timeoutId = setTimeout(() => {
+                    try { controller.abort(); } catch(e) {}
+                }, 120000);
+
+                const response = await fetch(`${API_BASE}/chiffrer-page`, {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    let errDetail = errText;
+                    try { errDetail = JSON.parse(errText).detail || errText; } catch(e) {}
+                    throw new Error(`Erreur ${response.status} : ${errDetail}`);
+                }
+
+                const data = await response.json();
+                pBar.style.width = '100%';
+                pLbl.textContent = '100%';
+
+                if (data.credits_restants !== undefined && data.credits_restants !== null) {
+                    clientActif.credits_pages = data.credits_restants;
+                    localStorage.setItem('btp_client', JSON.stringify(clientActif));
+                    chargerCompteClientLocal();
+                }
+
+                if (data.client && !document.getElementById('nomClient').value) {
+                    document.getElementById('nomClient').value = data.client;
+                }
+                if (data.projet && !document.getElementById('nomProjet').value) {
+                    document.getElementById('nomProjet').value = data.projet;
+                }
+
+                let articles = Array.isArray(data.articles) ? data.articles : [];
+                if (articles.length > 0) {
+                    integrerArticlesDansDevis(articles, "Tout le Doc");
+                    pagesQueue.forEach(p => { p.status = 'traite'; });
+                    rafraichirGrilleVignettes();
+                    ajouterLog(`🎉 Succès total ! ${articles.length} article(s) extraits sur l'ensemble du document.`);
+                    statusBadge.className = 'status-pill status-done';
+                    statusBadge.textContent = `Document complet traité avec succès ! (${articles.length} articles)`;
+                    success = true;
+                } else {
+                    pagesQueue.forEach(p => { p.status = 'traite'; });
+                    rafraichirGrilleVignettes();
+                    ajouterLog(`⚠️ Aucun article BTP détecté.`);
+                    statusBadge.className = 'status-pill status-done';
+                    statusBadge.textContent = `Analyse terminée — aucun article détecté.`;
+                    success = true;
+                }
+
+            } catch (err) {
+                if (timeoutId) clearTimeout(timeoutId);
+                const isAbort = (err.name === 'AbortError') || (err.message && err.message.toLowerCase().includes('abort'));
+                if (isAbort) {
+                    lastErreur = "Délai d'attente dépassé (le serveur ou l'IA a mis plus de 120s à répondre).";
+                } else {
+                    lastErreur = err.message;
+                }
+                ajouterLog(`⚠️ Tentative ${tentative} : ${lastErreur}`);
             }
-
-            const data = await response.json();
-            pBar.style.width = '100%';
-            pLbl.textContent = '100%';
-
-            if (data.credits_restants !== undefined && data.credits_restants !== null) {
-                clientActif.credits_pages = data.credits_restants;
-                localStorage.setItem('btp_client', JSON.stringify(clientActif));
-                chargerCompteClientLocal();
-            }
-
-            if (data.client && !document.getElementById('nomClient').value) {
-                document.getElementById('nomClient').value = data.client;
-            }
-            if (data.projet && !document.getElementById('nomProjet').value) {
-                document.getElementById('nomProjet').value = data.projet;
-            }
-
-            let articles = Array.isArray(data.articles) ? data.articles : [];
-            if (articles.length > 0) {
-                integrerArticlesDansDevis(articles, "PDF Global");
-                pagesQueue.forEach(p => { p.status = 'traite'; });
-                rafraichirGrilleVignettes();
-                ajouterLog(`🎉 Succès total ! ${articles.length} article(s) extraits de l'ensemble du PDF.`);
-                statusBadge.className = 'status-pill status-done';
-                statusBadge.textContent = `PDF complet traité avec succès ! (${articles.length} articles)`;
-            } else {
-                ajouterLog(`⚠️ Aucun article BTP détecté dans le document PDF.`);
-                statusBadge.className = 'status-pill status-done';
-                statusBadge.textContent = `Analyse terminée — aucun article détecté.`;
-            }
-        } catch (err) {
-            ajouterLog(`❌ Échec analyse complète PDF : ${err.message}`);
-            statusBadge.className = 'status-pill status-err';
-            statusBadge.textContent = `Échec de l'analyse : ${err.message}`;
-        } finally {
-            if (btnDirect) btnDirect.disabled = false;
-            setTimeout(() => { pBox.style.display = 'none'; }, 2500);
-            sauvegarderLocalement();
         }
+
+        if (!success) {
+            statusBadge.className = 'status-pill status-err';
+            statusBadge.textContent = `Échec de l'analyse globale. Utilisez le bouton "🚀 Tout traiter (Page par page)".`;
+            ajouterLog(`❌ Échec analyse globale : ${lastErreur}`);
+            pagesQueue.forEach(p => { if (p.status === 'cours') p.status = 'attente'; });
+            rafraichirGrilleVignettes();
+
+            const basculer = confirm(
+                `L'analyse en 1 seul bloc a rencontré une interruption (${lastErreur}).\n\n` +
+                `Souhaitez-vous lancer le mode "🚀 Tout traiter (Page par page)" ?\n` +
+                `Ce mode découpe et traite chaque page séparément avec pause de sécurité, ce qui est garanti de réussir sans saturation.`
+            );
+            if (basculer) {
+                traiterToutesLesPages();
+            }
+        }
+
+        if (btnDirect) btnDirect.disabled = false;
+        if (btnTout) btnTout.disabled = false;
+        setTimeout(() => { pBox.style.display = 'none'; }, 2500);
+        sauvegarderLocalement();
     }
 
     function viderFileAttente() {

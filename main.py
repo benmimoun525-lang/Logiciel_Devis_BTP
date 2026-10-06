@@ -4,6 +4,7 @@ import re
 import json
 import time
 import asyncio
+from typing import List, Optional
 from dotenv import load_dotenv
 
 # Chargement automatique des variables d'environnement (.env)
@@ -627,6 +628,7 @@ def call_gemini_sync(api_key: str, model_name: str, contents_parts: list) -> str
 @app.post("/chiffrer-page")
 async def chiffrer_page(
     file: UploadFile = File(None),
+    files: Optional[List[UploadFile]] = File(None),
     texte_descriptif: str = Form(None),
     page_num: int = Form(1),
     telephone: str = Form(None),
@@ -645,11 +647,24 @@ async def chiffrer_page(
     if texte_descriptif and isinstance(texte_descriptif, str) and texte_descriptif.strip():
         contents_list.append(f"\n--- NOTES DU CLIENT ---\n{texte_descriptif.strip()}")
 
-    if file:
-        file_bytes = await file.read()
-        if file_bytes:
-            content_type = file.content_type or "image/jpeg"
-            contents_list.append({"mime_type": content_type, "data": file_bytes})
+    # Collecte de tous les fichiers envoyés (page unique ou ensemble de pages découpées/images)
+    fichiers_a_traiter = []
+    if files:
+        if isinstance(files, list):
+            fichiers_a_traiter.extend(files)
+        else:
+            fichiers_a_traiter.append(files)
+    if file and file not in fichiers_a_traiter:
+        fichiers_a_traiter.append(file)
+
+    for f_item in fichiers_a_traiter:
+        if f_item:
+            file_bytes = await f_item.read()
+            if file_bytes:
+                content_type = f_item.content_type or "image/jpeg"
+                if f_item.filename and f_item.filename.lower().endswith(".pdf"):
+                    content_type = "application/pdf"
+                contents_list.append({"mime_type": content_type, "data": file_bytes})
 
     total_keys = len(keys_pool)
     last_error = ""
