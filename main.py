@@ -284,6 +284,8 @@ def create_excel_multilots(payload: dict) -> io.BytesIO:
     nom_projet = (payload.get("nom_projet") or f"Chantier {nom_client}").strip()
     num_devis = (payload.get("num_devis") or "DEV-" + time.strftime("%Y%m%d")).strip()
     date_devis = (payload.get("date_devis") or time.strftime("%d/%m/%Y")).strip()
+    email_client = (payload.get("email_client") or "").strip()
+    tel_client = (payload.get("tel_client") or "").strip()
     taux_tva = float(payload.get("taux_tva", 19.0))
     remise_pct = float(payload.get("remise_pct", 0.0))
     articles_bruts = payload.get("articles", [])
@@ -295,7 +297,10 @@ def create_excel_multilots(payload: dict) -> io.BytesIO:
 
     coord_lines = []
     if ent.get("adresse"): coord_lines.append(f"Adresse : {ent.get('adresse')}")
-    if ent.get("tel"): coord_lines.append(f"Tél : {ent.get('tel')}")
+    tel_email = []
+    if ent.get("tel"): tel_email.append(f"Tél : {ent.get('tel')}")
+    if ent.get("email"): tel_email.append(f"Email : {ent.get('email')}")
+    if tel_email: coord_lines.append(" | ".join(tel_email))
     if ent.get("nif") or ent.get("rc"): coord_lines.append(f"NIF : {ent.get('nif', '')}  |  RC : {ent.get('rc', '')}")
     if not coord_lines: coord_lines = ["Entreprise Générale de Bâtiment et Travaux Publics"]
 
@@ -325,6 +330,15 @@ def create_excel_multilots(payload: dict) -> io.BytesIO:
     ws["D4"].font = font_sub_ent
     ws["D4"].alignment = Alignment(horizontal="right")
 
+    coord_client_list = []
+    if email_client: coord_client_list.append(f"Email : {email_client}")
+    if tel_client: coord_client_list.append(f"Tél : {tel_client}")
+    if coord_client_list:
+        ws.merge_cells("D5:F5")
+        ws["D5"] = " | ".join(coord_client_list)
+        ws["D5"].font = font_sub_ent
+        ws["D5"].alignment = Alignment(horizontal="right")
+
     ws.column_dimensions["A"].width = 7
     ws.column_dimensions["B"].width = 56
     ws.column_dimensions["C"].width = 9
@@ -337,7 +351,7 @@ def create_excel_multilots(payload: dict) -> io.BytesIO:
         l_nom = (art.get("lot") or "TRAVAUX GÉNÉRAUX").strip().upper()
         lots_dict.setdefault(l_nom, []).append(art)
 
-    current_row = 6
+    current_row = 7 if coord_client_list else 6
     lots_subtotals_refs = []
 
     for lot_nom, liste_art in lots_dict.items():

@@ -856,6 +856,21 @@
                 </div>
             </div>
         </div>
+        <div class="form-grid-3" style="margin-bottom: 0;">
+            <div class="form-group">
+                <label>📧 Email du Client / Entreprise :</label>
+                <input type="email" id="emailClient" class="form-control" placeholder="Ex: contact@entreprise-client.dz" oninput="sauvegarderLocalement()">
+            </div>
+            <div class="form-group">
+                <label>📱 Téléphone / WhatsApp du Client :</label>
+                <input type="tel" id="telClient" class="form-control" placeholder="Ex: 0550 12 34 56" oninput="sauvegarderLocalement()">
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+                <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; padding-top: 8px;">
+                    💡 L'email et le numéro permettent de transmettre directement le fichier Excel (.xlsx) par WhatsApp ou Email en 1 clic.
+                </span>
+            </div>
+        </div>
     </div>
 
     <!-- Étape 2 : Chargement des Documents -->
@@ -1071,7 +1086,10 @@
         <!-- Boutons d'exportation -->
         <div class="no-print" style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
             <button id="btnShareWhatsApp" class="btn" style="background: #25D366; color: white; display: none; font-weight: 600;" onclick="partagerParWhatsApp()">
-                📲 Partager par WhatsApp
+                📲 Partager Excel via WhatsApp
+            </button>
+            <button id="btnSendEmail" class="btn" style="background: #0284c7; color: white; display: none; font-weight: 600;" onclick="envoyerDevisParEmail()">
+                📧 Envoyer par Email
             </button>
             <button id="btnExportExcel" class="btn btn-success" style="display: none;" onclick="telechargerExcel()">
                 📥 Télécharger Excel (.xlsx)
@@ -1096,9 +1114,15 @@
             <label>Nom ou Raison Sociale :</label>
             <input type="text" id="entNom" class="form-control" placeholder="Ex: SARL BATIMENT ET TRAVAUX EL BAHI">
         </div>
-        <div class="form-group" style="margin-bottom: 12px;">
-            <label>Numéro de Téléphone :</label>
-            <input type="text" id="entTel" class="form-control" placeholder="Ex: 0550 12 34 56 / 023 45 67 89">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div class="form-group">
+                <label>Numéro de Téléphone :</label>
+                <input type="text" id="entTel" class="form-control" placeholder="Ex: 0550 12 34 56 / 023 45 67 89">
+            </div>
+            <div class="form-group">
+                <label>Email Professionnel :</label>
+                <input type="email" id="entEmail" class="form-control" placeholder="Ex: contact@entreprise-btp.dz">
+            </div>
         </div>
         <div class="form-group" style="margin-bottom: 12px;">
             <label>Adresse du Siège :</label>
@@ -3107,6 +3131,7 @@
         const btnExcel = document.getElementById('btnExportExcel');
         const btnPrint = document.getElementById('btnPrintPDF');
         const btnWhatsApp = document.getElementById('btnShareWhatsApp');
+        const btnSendEmail = document.getElementById('btnSendEmail');
 
         const lotsKeys = Object.keys(devisLots);
         let totalArticles = 0;
@@ -3119,6 +3144,7 @@
             btnExcel.style.display = 'none';
             btnPrint.style.display = 'none';
             if (btnWhatsApp) btnWhatsApp.style.display = 'none';
+            if (btnSendEmail) btnSendEmail.style.display = 'none';
             return;
         }
 
@@ -3127,6 +3153,7 @@
         btnExcel.style.display = 'inline-flex';
         btnPrint.style.display = 'inline-flex';
         if (btnWhatsApp) btnWhatsApp.style.display = 'inline-flex';
+        if (btnSendEmail) btnSendEmail.style.display = 'inline-flex';
 
         let html = '';
 
@@ -3363,11 +3390,11 @@
         document.getElementById('montantLettres').textContent = `Arrêté le présent devis estimatif à la somme de : ${enLettres} Toutes Taxes Comprises.`;
     }
 
-    async function telechargerExcel() {
-        const nomClient = document.getElementById('nomClient').value || "Client";
-        const nomProjet = document.getElementById('nomProjet').value || "";
-        const numDevis = document.getElementById('numDevis').value || "DEV-01";
-        const dateDevis = document.getElementById('dateDevis').value || "";
+    async function genererBlobExcelDevis() {
+        const nomClient = (document.getElementById('nomClient').value || "Client").trim();
+        const nomProjet = (document.getElementById('nomProjet').value || "").trim();
+        const numDevis = (document.getElementById('numDevis').value || "DEV-01").trim();
+        const dateDevis = (document.getElementById('dateDevis').value || "").trim();
         const tauxTVA = parseFloat(document.getElementById('tauxTVA').value) || 19;
         const remisePct = parseFloat(document.getElementById('remisePct').value) || 0;
 
@@ -3386,38 +3413,51 @@
         });
 
         if (articlesAExporter.length === 0) {
-            alert("Aucun article à exporter dans le fichier Excel.");
-            return;
+            throw new Error("Aucun article à exporter. Votre devis est vide.");
         }
 
+        const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
+        const response = await fetch(`${API_BASE}/exporter-excel`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nom_client: nomClient,
+                nom_projet: nomProjet,
+                num_devis: numDevis,
+                date_devis: dateDevis,
+                email_client: (document.getElementById('emailClient')?.value || '').trim(),
+                tel_client: (document.getElementById('telClient')?.value || '').trim(),
+                taux_tva: tauxTVA,
+                remise_pct: remisePct,
+                entreprise: entreprise,
+                articles: articlesAExporter
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Erreur serveur lors de la création du fichier Excel.");
+        }
+
+        const blob = await response.blob();
+        const nomPropreClient = nomClient.replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_');
+        const nomPropreDevis = numDevis.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const nomFichier = `Devis_BTP_${nomPropreClient}_${nomPropreDevis}.xlsx`;
+
+        return { blob, nomFichier, nomClient, nomProjet, numDevis, dateDevis };
+    }
+
+    async function telechargerExcel() {
         try {
-            const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
-            const response = await fetch(`${API_BASE}/exporter-excel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nom_client: nomClient,
-                    nom_projet: nomProjet,
-                    num_devis: numDevis,
-                    date_devis: dateDevis,
-                    taux_tva: tauxTVA,
-                    remise_pct: remisePct,
-                    entreprise: entreprise,
-                    articles: articlesAExporter
-                })
-            });
-
-            if (!response.ok) throw new Error("Erreur serveur lors de la création du fichier Excel.");
-
-            const blob = await response.blob();
+            ajouterLog("⏳ Génération du classeur Excel en cours...");
+            const { blob, nomFichier } = await genererBlobExcelDevis();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `Devis_BTP_${nomClient.replace(/\s+/g, '_')}_${numDevis}.xlsx`;
+            a.download = nomFichier;
             document.body.appendChild(a);
             a.click();
             a.remove();
-            ajouterLog(`📥 Fichier Excel professionnel téléchargé avec succès !`);
+            ajouterLog(`📥 Fichier Excel "${nomFichier}" téléchargé avec succès !`);
         } catch (e) {
             alert("Erreur de téléchargement : " + e.message);
         }
@@ -3444,6 +3484,8 @@
             nomProjet: document.getElementById('nomProjet').value,
             numDevis: document.getElementById('numDevis').value,
             dateDevis: document.getElementById('dateDevis').value,
+            emailClient: document.getElementById('emailClient')?.value || "",
+            telClient: document.getElementById('telClient')?.value || "",
             remisePct: document.getElementById('remisePct').value,
             tauxTVA: document.getElementById('tauxTVA').value,
             lots: devisLots
@@ -3465,6 +3507,8 @@
                 if (d.nomProjet) document.getElementById('nomProjet').value = d.nomProjet;
                 if (d.numDevis) document.getElementById('numDevis').value = d.numDevis;
                 if (d.dateDevis) document.getElementById('dateDevis').value = d.dateDevis;
+                if (d.emailClient && document.getElementById('emailClient')) document.getElementById('emailClient').value = d.emailClient;
+                if (d.telClient && document.getElementById('telClient')) document.getElementById('telClient').value = d.telClient;
                 if (d.remisePct !== undefined) document.getElementById('remisePct').value = d.remisePct;
                 if (d.tauxTVA) document.getElementById('tauxTVA').value = d.tauxTVA;
                 if (d.lots && Object.keys(d.lots).length > 0) {
@@ -3485,6 +3529,8 @@
         indexSelectionne = null;
         document.getElementById('nomClient').value = "";
         document.getElementById('nomProjet').value = "";
+        if (document.getElementById('emailClient')) document.getElementById('emailClient').value = "";
+        if (document.getElementById('telClient')) document.getElementById('telClient').value = "";
         const today = new Date();
         document.getElementById('numDevis').value = "DEV-" + today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
         document.getElementById('thumbnailsGrid').innerHTML = "";
@@ -3498,6 +3544,7 @@
         const ent = {
             nom: document.getElementById('entNom').value,
             tel: document.getElementById('entTel').value,
+            email: document.getElementById('entEmail')?.value || "",
             adresse: document.getElementById('entAdr').value,
             nif: document.getElementById('entNif').value,
             rc: document.getElementById('entRc').value
@@ -3510,6 +3557,7 @@
         const ent = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
         if (ent.nom) document.getElementById('entNom').value = ent.nom;
         if (ent.tel) document.getElementById('entTel').value = ent.tel;
+        if (ent.email && document.getElementById('entEmail')) document.getElementById('entEmail').value = ent.email;
         if (ent.adresse) document.getElementById('entAdr').value = ent.adresse;
         if (ent.nif) document.getElementById('entNif').value = ent.nif;
         if (ent.rc) document.getElementById('entRc').value = ent.rc;
@@ -4306,33 +4354,169 @@
     }
 
     // ============================================================
-    // PARTAGE DIRECT DU DEVIS SUR WHATSAPP
+    // PARTAGE DU DEVIS EN FICHIER EXCEL (.XLSX) VIA WHATSAPP & EMAIL
     // ============================================================
-    function partagerParWhatsApp() {
-        const nomClient = document.getElementById('nomClient').value || 'Client';
-        const numDevis = document.getElementById('numDevis').value || 'DEV';
-        const dateDevis = document.getElementById('dateDevis').value || '';
-        const totTTC = document.getElementById('totTTC').textContent;
-        const totHT = document.getElementById('totHT').textContent;
-        const totTVA = document.getElementById('totTVA').textContent;
-        const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
-        const nomEnt = entreprise.nom || 'Entreprise BTP Algérie';
+    async function partagerParWhatsApp() {
+        const btn = document.getElementById('btnShareWhatsApp');
+        const texteOriginal = btn ? btn.innerHTML : "📲 Partager Excel via WhatsApp";
 
-        let msg = `*DEVIS ESTIMATIF BTP*\n`;
-        msg += `---------------------------------\n`;
-        msg += `🏢 *Entreprise :* ${nomEnt}\n`;
-        msg += `👤 *Client :* ${nomClient}\n`;
-        msg += `📄 *Devis N° :* ${numDevis}\n`;
-        msg += `📅 *Date :* ${dateDevis}\n`;
-        msg += `---------------------------------\n`;
-        msg += `💰 *Total H.T :* ${totHT}\n`;
-        msg += `🏷️ *T.V.A :* ${totTVA}\n`;
-        msg += `✅ *TOTAL T.T.C :* ${totTTC}\n`;
-        msg += `---------------------------------\n`;
-        msg += `_Établi et chiffré par l'IA Devis BTP Algérie._`;
+        try {
+            if (btn) btn.innerHTML = "⏳ Génération Excel...";
+            ajouterLog("📦 Préparation du fichier Excel (.xlsx) pour envoi WhatsApp...");
 
-        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-        window.open(url, '_blank');
+            const { blob, nomFichier, nomClient, nomProjet, numDevis, dateDevis } = await genererBlobExcelDevis();
+
+            const totTTC = document.getElementById('totTTC').textContent;
+            const totHT = document.getElementById('totHT').textContent;
+            const totTVA = document.getElementById('totTVA').textContent;
+            const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
+            const nomEnt = entreprise.nom || 'Entreprise BTP Algérie';
+            const telClient = (document.getElementById('telClient')?.value || '').replace(/[^0-9+]/g, '');
+
+            let msg = `*DEVIS ESTIMATIF BTP (Fichier Excel .xlsx joint)*\n`;
+            msg += `---------------------------------\n`;
+            msg += `🏢 *Entreprise :* ${nomEnt}\n`;
+            msg += `👤 *Client :* ${nomClient}\n`;
+            msg += `🏗️ *Projet :* ${nomProjet || 'Chantier BTP'}\n`;
+            msg += `📄 *Devis N° :* ${numDevis}\n`;
+            msg += `📅 *Date :* ${dateDevis}\n`;
+            msg += `---------------------------------\n`;
+            msg += `💰 *Total H.T :* ${totHT}\n`;
+            msg += `🏷️ *T.V.A :* ${totTVA}\n`;
+            msg += `✅ *TOTAL T.T.C :* ${totTTC}\n`;
+            msg += `---------------------------------\n`;
+            msg += `📎 *Veuillez trouver ci-joint le bordereau des prix unitaires et quantitatif sous format Excel (.xlsx).*`;
+
+            const excelFile = new File([blob], nomFichier, {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            });
+
+            // 1. Sur Smartphone Android / iPhone ou navigateurs supportant le partage direct de fichiers
+            if (navigator.canShare && navigator.canShare({ files: [excelFile] })) {
+                ajouterLog("📲 Envoi du fichier Excel directement vers WhatsApp via le partage système...");
+                await navigator.share({
+                    files: [excelFile],
+                    title: `Devis BTP - ${numDevis}`,
+                    text: msg
+                });
+                ajouterLog("✅ Fichier Excel partagé sur WhatsApp avec succès !");
+            } else {
+                // 2. Sur PC ou navigateur sans Web Share direct : Télécharger automatiquement le fichier .xlsx
+                // et ouvrir WhatsApp avec le texte de synthèse prêt
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nomFichier;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                ajouterLog(`📥 Fichier Excel "${nomFichier}" téléchargé sur votre terminal.`);
+                alert(
+                    `📁 Le fichier Excel officiel "${nomFichier}" a été généré et téléchargé sur votre appareil.\n\n` +
+                    `WhatsApp va s'ouvrir. Il vous suffit de glisser ou joindre ce fichier Excel téléchargé dans votre conversation avec le client !`
+                );
+
+                let waUrl = `https://wa.me/${telClient ? telClient : ''}?text=${encodeURIComponent(msg)}`;
+                window.open(waUrl, '_blank');
+            }
+        } catch (e) {
+            if (e.name !== 'AbortError') {
+                alert("Erreur lors du partage WhatsApp : " + e.message);
+                ajouterLog(`⚠️ Erreur partage WhatsApp : ${e.message}`);
+            }
+        } finally {
+            if (btn) btn.innerHTML = texteOriginal;
+        }
+    }
+
+    async function envoyerDevisParEmail() {
+        const btn = document.getElementById('btnSendEmail');
+        const texteOriginal = btn ? btn.innerHTML : "📧 Envoyer par Email";
+
+        let emailClient = document.getElementById('emailClient')?.value.trim();
+        if (!emailClient) {
+            emailClient = prompt("Veuillez saisir l'adresse e-mail du client / entreprise pour l'envoi :", "");
+            if (!emailClient) return;
+            if (document.getElementById('emailClient')) document.getElementById('emailClient').value = emailClient;
+            sauvegarderLocalement();
+        }
+
+        try {
+            if (btn) btn.innerHTML = "⏳ Préparation Email...";
+            ajouterLog(`📧 Préparation du devis pour envoi par email à : ${emailClient}...`);
+
+            const { blob, nomFichier, nomClient, nomProjet, numDevis, dateDevis } = await genererBlobExcelDevis();
+
+            const totTTC = document.getElementById('totTTC').textContent;
+            const totHT = document.getElementById('totHT').textContent;
+            const totTVA = document.getElementById('totTVA').textContent;
+            const montantLettres = document.getElementById('montantLettres').textContent;
+            const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
+            const nomEnt = entreprise.nom || 'Entreprise BTP Algérie';
+
+            const subject = `[Devis BTP] ${numDevis} - ${nomProjet || nomClient}`;
+            let body = `Bonjour ${nomClient},\n\n`;
+            body += `Veuillez trouver ci-joint notre offre de prix et devis estimatif détaillé pour vos travaux :\n`;
+            body += `• Projet : ${nomProjet || 'Chantier BTP'}\n`;
+            body += `• Devis N° : ${numDevis} du ${dateDevis}\n\n`;
+            body += `RÉCAPITULATIF FINANCIER :\n`;
+            body += `-------------------------------------------\n`;
+            body += `• Total Général H.T : ${totHT}\n`;
+            body += `• Montant T.V.A : ${totTVA}\n`;
+            body += `• TOTAL GÉNÉRAL T.T.C : ${totTTC}\n`;
+            body += `-------------------------------------------\n`;
+            body += `${montantLettres}\n\n`;
+            body += `Le bordereau complet et quantitatif est consigné dans le classeur Excel joint : ${nomFichier}\n\n`;
+            body += `Nous restons à votre entière disposition pour tout complément d'information ou visite de chantier.\n\n`;
+            body += `Salutations distinguées,\n`;
+            body += `${nomEnt}\n`;
+            if (entreprise.tel) body += `Tél : ${entreprise.tel}\n`;
+            if (entreprise.email) body += `Email : ${entreprise.email}\n`;
+            if (entreprise.adresse) body += `Adresse : ${entreprise.adresse}\n`;
+
+            const excelFile = new File([blob], nomFichier, {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            });
+
+            // 1. Partage natif via Web Share (permet de choisir Gmail / Outlook avec le fichier déjà attaché)
+            if (navigator.canShare && navigator.canShare({ files: [excelFile] })) {
+                try {
+                    await navigator.share({
+                        files: [excelFile],
+                        title: subject,
+                        text: body
+                    });
+                    ajouterLog(`✅ Email transmis avec succès avec la pièce jointe Excel !`);
+                    return;
+                } catch(shareErr) {
+                    if (shareErr.name === 'AbortError') return;
+                }
+            }
+
+            // 2. Repli standard : Télécharger le fichier Excel et ouvrir l'application mail via mailto:
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nomFichier;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            alert(
+                `📁 Le fichier Excel officiel "${nomFichier}" a été téléchargé sur votre appareil.\n\n` +
+                `Votre application de messagerie va s'ouvrir avec le message pré-rempli pour : ${emailClient}.\n` +
+                `Il vous suffira d'y joindre ce fichier Excel téléchargé !`
+            );
+
+            const mailtoUrl = `mailto:${encodeURIComponent(emailClient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoUrl;
+            ajouterLog(`📧 Application email ouverte pour : ${emailClient}`);
+        } catch (e) {
+            alert("Erreur lors de la préparation de l'email : " + e.message);
+        } finally {
+            if (btn) btn.innerHTML = texteOriginal;
+        }
     }
 
     // ============================================================
