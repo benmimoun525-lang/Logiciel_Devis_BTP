@@ -95,12 +95,17 @@ SYSTEM_PROMPT = """
 Tu es un expert métreur-vérificateur senior spécialisé dans le Bâtiment (BTP), l'Hydraulique et les Travaux Publics (VRD) en Algérie.
 Ton rôle est d'analyser ce document (page de devis, bordereau des prix unitaires BPU, devis quantitatif estimatif DQE issu d'une photo WhatsApp, d'un scan ou d'un fichier PDF mono ou multi-pages).
 
-OBJECTIFS :
+RÈGLE CARDINALE DE FIDÉLITÉ 1:1 AU BORDEREAU CLIENT :
+1. CONFORMITÉ STRICTE LIGNE PAR LIGNE : Le bordereau final doit être la réplique exacte du document source.
+2. INTERDICTION FORMELLE DE FUSIONNER OU DÉDUPLIQUER : Même si un article porte la même désignation ou se répète plusieurs fois dans le document (dans un même lot ou entre des sous-lots différents), TU DOIS IMPÉRATIVEMENT TRANSCRIRE CHAQUE LIGNE COMME UNE ENTRÉE DISTINCTE avec son numéro d'ordre séquentiel et sa quantité propre. Ne jamais regrouper ou éliminer de lignes.
+3. RESPECT DE L'ORDRE DU BORDEREAU : Conserver fidèlement la séquence et la pagination du document client. Le client doit pouvoir réutiliser directement ce bordereau chiffré sans aucune divergence.
+
+OBJECTIFS MÉTREUR :
 1. Détecter et regrouper les travaux par LOTS BTP/VRD/HYDRAULIQUE explicites en majuscules (ex: "LOT 01: TERRASSEMENTS", "LOT 02: GROS-OEUVRE & BÉTON ARMÉ", "LOT 03: MAÇONNERIE", "LOT 04: ÉTANCHÉITÉ", "LOT 05: REVÊTEMENTS", "LOT 06: HYDRAULIQUE & ASSAINISSEMENT", "LOT 07: VOIRIE & TRAVAUX PUBLICS", etc.).
-2. Si un prix unitaire ou une quantité est inscrit(e) sur le document, le recopier fidèlement.
-3. Si le bordereau est vierge (sans prix), estimer un Prix Unitaire H.T. réaliste en Dinars Algériens (DZD) selon le barème de référence algérien :
+2. Si un prix unitaire ou une quantité est inscrit(e) sur le document, le recopier scrupuleusement.
+3. Si le bordereau est vierge (sans prix), chiffrer chaque article selon le barème de référence algérien (DZD) :
    - Fouilles en rigole/tranchée : 900 à 1400 DZD/m3, fouille pleine masse : 500 à 800 DZD/m3
-   - Béton armé pour semelles/longrines : 32000 à 38000 DZD/m3, poteaux/poutres en élévation : 36000 à 42000 DZD/m3
+   - Béton armé pour semelles/longrines : 30000 à 38000 DZD/m3, poteaux/poutres en élévation : 34000 à 42000 DZD/m3
    - Plancher corps creux 16+4 : 3800 à 4500 DZD/m2, dallage BA 12cm : 2200 à 2600 DZD/m2
    - Maçonnerie 12T+8T : 2600 à 3200 DZD/m2, simple 12T : 1400 à 1800 DZD/m2, parpaings 20cm : 1600 à 2000 DZD/m2
    - Enduit ciment int : 800 à 1100 DZD/m2, ext étanche : 1100 à 1500 DZD/m2, plâtre : 700 à 900 DZD/m2
@@ -632,7 +637,9 @@ async def chiffrer_page(
     texte_descriptif: str = Form(None),
     page_num: int = Form(1),
     telephone: str = Form(None),
-    gemini_key: str = Form(None)
+    gemini_key: str = Form(None),
+    strategie_prix: str = Form("moins_disant"),
+    region: str = Form("centre")
 ):
     global current_key_index
 
@@ -643,7 +650,33 @@ async def chiffrer_page(
             detail="Aucune clé Gemini configurée. Veuillez ajouter votre clé Gemini dans l'interface ou dans les paramètres du serveur."
         )
 
-    contents_list = [SYSTEM_PROMPT]
+    # Directives contextuelles selon la stratégie commerciale et la région
+    instructions_strategie = ""
+    if strategie_prix == "moins_disant":
+        instructions_strategie += (
+            "\n--- STRATÉGIE TARIFAIRE : MOINS-DISANT (APPEL D'OFFRES / SOUMISSION COMPÉTITIVE) ---\n"
+            "Le client souhaite une offre agressive et compétitive pour remporter le marché public ou privé.\n"
+            "Pour chaque article sans prix mentionné, applique le PRIX PLANCHER RÉALISTE (la borne inférieure du barème BPU algérien),\n"
+            "tout en restant dans un cadre économiquement viable pour l'entrepreneur sans être anormalement bas.\n"
+        )
+    elif strategie_prix == "marge":
+        instructions_strategie += (
+            "\n--- STRATÉGIE TARIFAIRE : MARGE SÉCURISÉE (CLIENT PRIVÉ / TRAVAUX COMPLEXES) ---\n"
+            "Applique des prix unitaires situés dans la tranche haute du marché algérien (marge de confort sécurisée).\n"
+        )
+    else:  # prix moyen
+        instructions_strategie += (
+            "\n--- STRATÉGIE TARIFAIRE : PRIX MOYEN DU MARCHÉ (STANDARD ALGÉRIE) ---\n"
+            "Applique les prix unitaires médians constatés sur les chantiers et mercuriales de prix en Algérie.\n"
+        )
+
+    if region == "sud":
+        instructions_strategie += (
+            "\n--- ZONE GÉOGRAPHIQUE : SUD ALGÉRIEN & HAUTS-PLATEAUX ---\n"
+            "Tenir compte de la majoration d'éloignement et du transport des matériaux/agrégats (+8% à +15% sur les bétons et enrobés).\n"
+        )
+
+    contents_list = [SYSTEM_PROMPT + instructions_strategie]
     if texte_descriptif and isinstance(texte_descriptif, str) and texte_descriptif.strip():
         contents_list.append(f"\n--- NOTES DU CLIENT ---\n{texte_descriptif.strip()}")
 
