@@ -1002,8 +1002,37 @@ async def declarer_paiement_baridimob(payload: dict = Body(...)):
     except Exception as e:
         return {"success": False, "detail": str(e)}
 
+ADMIN_PIN = (os.environ.get("ADMIN_PIN") or "7788").strip()
+
+@app.get("/api/admin/stats")
+async def admin_stats(pin: str = None):
+    if pin != ADMIN_PIN:
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
+    sb = get_supabase_client()
+    keys = get_api_keys_pool()
+    stats = {
+        "keys_count": len(keys),
+        "models_priority": MODELS_PRIORITY,
+        "clients_total": 0,
+        "devis_total": 0,
+        "paiements_en_attente": 0
+    }
+    if sb:
+        try:
+            c_res = sb.table("clients").select("id", count="exact").execute()
+            stats["clients_total"] = c_res.count if hasattr(c_res, "count") and c_res.count is not None else len(c_res.data or [])
+            d_res = sb.table("devis").select("id", count="exact").execute()
+            stats["devis_total"] = d_res.count if hasattr(d_res, "count") and d_res.count is not None else len(d_res.data or [])
+            p_res = sb.table("paiements_baridimob").select("id", count="exact").eq("statut", "en_attente").execute()
+            stats["paiements_en_attente"] = p_res.count if hasattr(p_res, "count") and p_res.count is not None else len(p_res.data or [])
+        except Exception:
+            pass
+    return {"success": True, "stats": stats}
+
 @app.get("/api/admin/paiements")
-async def admin_liste_paiements():
+async def admin_liste_paiements(pin: str = None):
+    if pin != ADMIN_PIN:
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
     sb = get_supabase_client()
     if not sb:
         return {"success": True, "paiements": []}
@@ -1015,6 +1044,9 @@ async def admin_liste_paiements():
 
 @app.post("/api/admin/valider-paiement")
 async def admin_valider_paiement(payload: dict = Body(...)):
+    pin = payload.get("pin")
+    if pin != ADMIN_PIN:
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
     paiement_id = payload.get("paiement_id")
     action = payload.get("action", "valider")
     sb = get_supabase_client()
@@ -1032,7 +1064,7 @@ async def admin_valider_paiement(payload: dict = Body(...)):
             
             credits_attribues = 50
             if "100" in formule: credits_attribues = 100
-            elif "devis" in formule: credits_attribues = 10
+            elif "devis" in formule or "par_devis" in formule: credits_attribues = 10
             elif "mensuel" in formule: credits_attribues = 150
             
             c_res = sb.table("clients").select("credits_pages").eq("id", client_id).execute()
@@ -1045,6 +1077,43 @@ async def admin_valider_paiement(payload: dict = Body(...)):
         else:
             sb.table("paiements_baridimob").update({"statut": "rejete"}).eq("id", paiement_id).execute()
             return {"success": True, "message": "Paiement rejeté."}
+    except Exception as e:
+        return {"success": False, "detail": str(e)}
+
+@app.post("/api/admin/crediter-client")
+async def admin_crediter_client(payload: dict = Body(...)):
+    pin = payload.get("pin")
+    if pin != ADMIN_PIN:
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
+    telephone = re.sub(r'[^0-9+]', '', payload.get("telephone", ""))
+    credits_a_ajouter = int(payload.get("credits", 50))
+    formule = payload.get("formule", "pack_credits")
+    
+    if not telephone:
+        raise HTTPException(status_code=400, detail="Numéro de téléphone requis.")
+        
+    sb = get_supabase_client()
+    if not sb:
+        return {"success": False, "detail": "Supabase non connecté"}
+        
+    try:
+        c_res = sb.table("clients").select("id, credits_pages").eq("telephone", telephone).execute()
+        if not c_res.data:
+            # Créer le client s'il n'existe pas encore
+            new_client = {
+                "telephone": telephone,
+                "nom_complet": "Client BTP",
+                "credits_pages": credits_a_ajouter,
+                "type_abonnement": formule
+            }
+            sb.table("clients").insert(new_client).execute()
+            return {"success": True, "message": f"Nouveau client créé avec {credits_a_ajouter} crédits."}
+        else:
+            client_id = c_res.data[0]["id"]
+            actuel = c_res.data[0].get("credits_pages", 0)
+            nouveau = actuel + credits_a_ajouter
+            sb.table("clients").update({"credits_pages": nouveau, "type_abonnement": formule}).eq("id", client_id).execute()
+            return {"success": True, "message": f"{credits_a_ajouter} crédits ajoutés avec succès ! Nouveau solde : {nouveau} pages."}
     except Exception as e:
         return {"success": False, "detail": str(e)}
 

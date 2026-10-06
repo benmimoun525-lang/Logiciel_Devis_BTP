@@ -790,6 +790,7 @@
             <p>Traitement instantané des photos WhatsApp & PDF multi-pages en devis par lots aux normes algériennes.</p>
         </div>
         <div class="header-actions">
+            <button class="btn-header" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()">👑 Titulaire (Admin)</button>
             <button class="btn-header" style="background: #059669; font-weight: 600;" onclick="ouvrirModalConfidentialite()">🔒 Confidentialité & Secret</button>
             <button class="btn-header" style="background: #d97706; font-weight: 600;" onclick="ouvrirModalBPU()">💰 Base des Prix (BPU)</button>
             <button class="btn-header" id="btnCompteClient" onclick="ouvrirModalCompte()">👤 Mon Compte (<span id="soldeCreditsBadge">5</span> p.)</button>
@@ -1312,6 +1313,98 @@
         </div>
 
         <button class="btn btn-outline" style="width: 100%; margin-top: 15px;" onclick="fermerModalHistorique()">Fermer</button>
+    </div>
+</div>
+
+<!-- Modal Espace Titulaire / Administrateur -->
+<div id="modalAdmin" class="modal-overlay" style="display:none;">
+    <div class="modal" style="max-width: 820px; width: 95%;">
+        <div class="modal-header">
+            <div class="modal-title">👑 Espace Titulaire & Administration SaaS</div>
+            <button class="close-modal" onclick="fermerModalAdmin()">&times;</button>
+        </div>
+
+        <!-- Écran PIN si non authentifié -->
+        <div id="adminPinSection" style="text-align: center; padding: 25px 15px;">
+            <div style="font-size: 2.8rem; margin-bottom: 10px;">🔐</div>
+            <h3 style="margin-top: 0; color: #1e3a8a;">Accès Réservé au Titulaire du Logiciel</h3>
+            <p style="font-size: 0.88rem; color: #64748b; max-width: 440px; margin: 0 auto 16px;">
+                Entrez votre code PIN secret d'administration pour valider les paiements BaridiMob, superviser les clés d'IA et créditer les comptes clients.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 8px; max-width: 340px; margin: 0 auto 12px;">
+                <input type="password" id="inputAdminPin" class="form-control" placeholder="Code PIN (ex: 7788)" style="text-align: center; font-size: 1.25rem; font-weight: bold; letter-spacing: 4px;">
+                <button class="btn btn-primary" onclick="deverrouillerAdmin()">Déverrouiller</button>
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8;">Code PIN par défaut : <b>7788</b> (personnalisable sur le serveur Render).</div>
+        </div>
+
+        <!-- Tableau de bord Titulaire (affiché après déverrouillage) -->
+        <div id="adminDashboardSection" style="display: none;">
+            <!-- Cartes KPIs -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px;">
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; text-align: center;">
+                    <div style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">🤖 CLÉS GÉMINI EN SERVICE</div>
+                    <div id="adminKeysCount" style="font-size: 1.4rem; font-weight: 800; color: #1d4ed8;">--</div>
+                    <div style="font-size: 0.72rem; color: #059669;">Rotation active</div>
+                </div>
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; text-align: center;">
+                    <div style="font-size: 0.78rem; color: #166534; font-weight: 600;">👥 CLIENTS INSCRITS</div>
+                    <div id="adminClientsCount" style="font-size: 1.4rem; font-weight: 800; color: #15803d;">--</div>
+                    <div style="font-size: 0.72rem; color: #64748b;">Comptes Supabase</div>
+                </div>
+                <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 12px; text-align: center;">
+                    <div style="font-size: 0.78rem; color: #6b21a8; font-weight: 600;">📑 DEVIS GÉNÉRÉS</div>
+                    <div id="adminDevisCount" style="font-size: 1.4rem; font-weight: 800; color: #7e22ce;">--</div>
+                    <div style="font-size: 0.72rem; color: #64748b;">Total plateforme</div>
+                </div>
+                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; text-align: center;">
+                    <div style="font-size: 0.78rem; color: #92400e; font-weight: 600;">⏳ EN ATTENTE VIREMENT</div>
+                    <div id="adminPaiementsCount" style="font-size: 1.4rem; font-weight: 800; color: #b45309;">--</div>
+                    <div style="font-size: 0.72rem; color: #d97706;">BaridiMob / CCP</div>
+                </div>
+            </div>
+
+            <!-- Liste des virements BaridiMob reçus -->
+            <div style="margin-bottom: 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h4 style="margin: 0; color: #1e3a8a; font-size: 0.95rem;">📲 Virements BaridiMob & CCP à Valider :</h4>
+                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem;" onclick="chargerAdminPaiements()">🔄 Actualiser</button>
+                </div>
+                <div id="adminListePaiements" style="max-height: 220px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; padding: 8px;">
+                    <div style="text-align: center; color: #94a3b8; padding: 10px; font-size: 0.85rem;">Chargement des paiements...</div>
+                </div>
+            </div>
+
+            <!-- Recharge Manuelle Express (Espèces / Main à main) -->
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                <h4 style="margin: 0 0 8px 0; color: #0f172a; font-size: 0.9rem;">⚡ Recharge Express Manuelle (Paiement Espèces / Main à main) :</h4>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <input type="text" id="adminCreditTel" class="form-control" placeholder="Tél Client (ex: 0550123456)" style="flex: 1; min-width: 160px; font-size: 0.88rem;">
+                    <select id="adminCreditFormule" class="form-control" style="width: auto; font-size: 0.88rem;">
+                        <option value="50">+50 pages (Pack 50 - 4 000 DZD)</option>
+                        <option value="100">+100 pages (Pack 100 - 7 500 DZD)</option>
+                        <option value="150">+150 pages (Mensuel - 4 500 DZD)</option>
+                        <option value="10">+10 pages (Devis - 1 000 DZD)</option>
+                    </select>
+                    <button class="btn btn-success" style="padding: 8px 14px; font-size: 0.88rem;" onclick="crediterClientManuel()">
+                        ➕ Créditer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Note sécurité clés et revenus -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px; font-size: 0.82rem; color: #1e40af; margin-bottom: 14px;">
+                🛡️ <b>Sécurité Titulaire :</b> Vos clés API Gemini et vos revenus sont strictement protégés. Les clients n'ont aucun accès à vos paramètres d'administration ni aux clés API.
+            </div>
+
+            <!-- Boutons de contrôle -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+                <button class="btn btn-outline" style="color: #dc2626; border-color: #fca5a5; font-size: 0.82rem;" onclick="deconnecterAdmin()">
+                    🔒 Verrouiller la session
+                </button>
+                <button class="btn btn-outline" onclick="fermerModalAdmin()">Fermer</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -3572,6 +3665,175 @@
     }
     function fermerModalHistorique() {
         document.getElementById('modalHistorique').style.display = 'none';
+    }
+
+    // ============================================================
+    // ESPACE TITULAIRE & ADMINISTRATION SAAS
+    // ============================================================
+    let adminPin = localStorage.getItem('btp_admin_pin') || '';
+
+    function ouvrirModalAdmin() {
+        const modal = document.getElementById('modalAdmin');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        if (adminPin) {
+            document.getElementById('inputAdminPin').value = adminPin;
+            deverrouillerAdmin();
+        } else {
+            document.getElementById('adminPinSection').style.display = 'block';
+            document.getElementById('adminDashboardSection').style.display = 'none';
+        }
+    }
+
+    function fermerModalAdmin() {
+        const modal = document.getElementById('modalAdmin');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async function deverrouillerAdmin() {
+        const pin = (document.getElementById('inputAdminPin').value || '').trim();
+        if (!pin) { alert('Veuillez entrer le code PIN.'); return; }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/stats?pin=${encodeURIComponent(pin)}`);
+            if (!res.ok) {
+                alert('Code PIN Administrateur incorrect.');
+                return;
+            }
+            const data = await res.json();
+            adminPin = pin;
+            localStorage.setItem('btp_admin_pin', pin);
+
+            document.getElementById('adminPinSection').style.display = 'none';
+            document.getElementById('adminDashboardSection').style.display = 'block';
+
+            if (data.stats) {
+                document.getElementById('adminKeysCount').textContent = data.stats.keys_count || 1;
+                document.getElementById('adminClientsCount').textContent = data.stats.clients_total || 0;
+                document.getElementById('adminDevisCount').textContent = data.stats.devis_total || 0;
+                document.getElementById('adminPaiementsCount').textContent = data.stats.paiements_en_attente || 0;
+            }
+
+            chargerAdminPaiements();
+        } catch(e) {
+            alert('Erreur de connexion au serveur admin.');
+        }
+    }
+
+    function deconnecterAdmin() {
+        adminPin = '';
+        localStorage.removeItem('btp_admin_pin');
+        document.getElementById('inputAdminPin').value = '';
+        document.getElementById('adminPinSection').style.display = 'block';
+        document.getElementById('adminDashboardSection').style.display = 'none';
+    }
+
+    async function chargerAdminPaiements() {
+        if (!adminPin) return;
+        const cont = document.getElementById('adminListePaiements');
+        cont.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 10px;">Chargement...</div>';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/paiements?pin=${encodeURIComponent(adminPin)}`);
+            if (!res.ok) { cont.innerHTML = '<div style="color: #ef4444; padding: 10px;">Erreur de chargement.</div>'; return; }
+            const data = await res.json();
+            const paiements = data.paiements || [];
+
+            if (paiements.length === 0) {
+                cont.innerHTML = '<div style="text-align: center; color: #64748b; padding: 10px;">Aucune déclaration de paiement pour le moment.</div>';
+                return;
+            }
+
+            let html = '';
+            paiements.forEach(p => {
+                const dateStr = p.created_at ? new Date(p.created_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '--';
+                const statutBadge = p.statut === 'valide' 
+                    ? '<span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Validé</span>'
+                    : p.statut === 'rejete'
+                    ? '<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">Rejeté</span>'
+                    : '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">En attente</span>';
+
+                html += `
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <div style="font-weight: 700; color: #1e293b; font-size: 0.88rem;">
+                            📞 ${p.telephone_client} &nbsp;|&nbsp; 💰 ${Number(p.montant_dzd).toLocaleString('fr-FR')} DZD &nbsp; ${statutBadge}
+                        </div>
+                        <div style="font-size: 0.78rem; color: #64748b;">
+                            Formule: <b>${p.formule}</b> &nbsp;|&nbsp; Réf/Trx: <code>${p.numero_transaction || 'Aucune'}</code> &nbsp;|&nbsp; Date: ${dateStr}
+                        </div>
+                    </div>
+                    ${p.statut === 'en_attente' ? `
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn btn-success" style="padding: 4px 8px; font-size: 0.78rem;" onclick="traiterPaiementAdmin('${p.id}', 'valider')">
+                            ✅ Valider (+Crédits)
+                        </button>
+                        <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.78rem; color: #ef4444; border-color: #fca5a5;" onclick="traiterPaiementAdmin('${p.id}', 'rejeter')">
+                            ❌ Rejeter
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+                `;
+            });
+            cont.innerHTML = html;
+        } catch(e) {
+            cont.innerHTML = '<div style="color: #ef4444; padding: 10px;">Erreur de connexion.</div>';
+        }
+    }
+
+    async function traiterPaiementAdmin(paiementId, action) {
+        if (!adminPin) return;
+        const confirmMsg = action === 'valider' ? 'Confirmez-vous la réception du virement BaridiMob et l\'ajout des crédits au client ?' : 'Voulez-vous rejeter ce paiement ?';
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/valider-paiement`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: adminPin, paiement_id: paiementId, action })
+            });
+            const data = await res.json();
+            alert(data.message || (action === 'valider' ? 'Paiement validé avec succès !' : 'Paiement rejeté.'));
+            chargerAdminPaiements();
+            const sRes = await fetch(`${API_BASE}/api/admin/stats?pin=${encodeURIComponent(adminPin)}`);
+            if (sRes.ok) {
+                const sData = await sRes.json();
+                if (sData.stats) {
+                    document.getElementById('adminPaiementsCount').textContent = sData.stats.paiements_en_attente || 0;
+                }
+            }
+        } catch(e) {
+            alert('Erreur lors du traitement du paiement.');
+        }
+    }
+
+    async function crediterClientManuel() {
+        if (!adminPin) return;
+        const tel = (document.getElementById('adminCreditTel').value || '').trim();
+        const credits = parseInt(document.getElementById('adminCreditFormule').value, 10) || 50;
+        if (!tel) { alert('Veuillez entrer le numéro de téléphone du client.'); return; }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/crediter-client`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: adminPin, telephone: tel, credits })
+            });
+            const data = await res.json();
+            alert(data.message || `${credits} crédits ajoutés au client ${tel} !`);
+            document.getElementById('adminCreditTel').value = '';
+            // Rafraîchir les stats
+            const sRes = await fetch(`${API_BASE}/api/admin/stats?pin=${encodeURIComponent(adminPin)}`);
+            if (sRes.ok) {
+                const sData = await sRes.json();
+                if (sData.stats) {
+                    document.getElementById('adminClientsCount').textContent = sData.stats.clients_total || 0;
+                }
+            }
+        } catch(e) {
+            alert('Erreur lors du crédit client.');
+        }
     }
 
     // ============================================================
