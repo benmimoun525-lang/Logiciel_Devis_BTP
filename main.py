@@ -560,6 +560,13 @@ def serve_index():
         return FileResponse(index_path, media_type="text/html")
     return {"status": "ok", "message": "Serveur BTP opérationnel."}
 
+@app.get("/didacticiel")
+def serve_didacticiel():
+    didacticiel_path = os.path.join(os.path.dirname(__file__), "video_didacticiel.html")
+    if os.path.exists(didacticiel_path):
+        return FileResponse(didacticiel_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="video_didacticiel.html non trouvé")
+
 @app.get("/manifest.json")
 def serve_manifest():
     manifest_path = os.path.join(os.path.dirname(__file__), "manifest.json")
