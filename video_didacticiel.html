@@ -1,33 +1,45 @@
-<!-- Ce fichier est la version projet du didacticiel vidéo interactif -->
+<!-- Version Projet du Didacticiel Vidéo Promotionnel Haute Conversion -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vidéo Didacticiel - Logiciel Devis BTP Algérie</title>
+    <title>Vidéo Démonstration - Révolution Chiffrage BTP Algérie</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
+            50% { box-shadow: 0 0 45px rgba(239, 68, 68, 0.9); }
+        }
+        .cta-pulse { animation: pulse-glow 2s infinite; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-3 md:p-6 antialiased flex flex-col items-center justify-center">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-2 md:p-6 antialiased flex flex-col items-center justify-center">
 
-    <div class="w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <!-- Bannière d'Urgence & Opportunité -->
+    <div class="w-full max-w-5xl mb-3 bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 p-2.5 rounded-xl text-center text-white text-xs md:text-sm font-black tracking-wide shadow-lg flex items-center justify-center gap-2">
+        <span class="animate-bounce">⚡</span>
+        <span>OFFRE DE LANCEMENT EXCLUSIVE : 5 PAGES DE CHIFFRAGE 100% OFFERTES IMMÉDIATEMENT • TESTEZ SANS ATTENDRE !</span>
+        <span class="animate-bounce">⚡</span>
+    </div>
+
+    <div class="w-full max-w-5xl bg-slate-900 border-2 border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         
         <!-- Header de la Vidéo -->
-        <div class="px-5 py-4 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div class="px-5 py-3.5 bg-slate-900/95 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                    <span class="text-xl">🏗️</span>
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-red-600 via-amber-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-amber-500/30 text-2xl">
+                    🚀
                 </div>
                 <div>
-                    <h1 class="font-bold text-base md:text-lg text-white flex items-center gap-2">
-                        Vidéo Didacticiel : Logiciel Devis BTP Algérie
-                        <span class="text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">HD 1080p</span>
+                    <h1 class="font-extrabold text-base md:text-xl text-white flex items-center gap-2">
+                        La Révolution du Chiffrage BTP en Algérie
+                        <span class="text-[11px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">Spot Vidéo Pro</span>
                     </h1>
-                    <p class="text-xs text-slate-400">Présentation animée des fonctionnalités clés • 6 chapitres • Durée 65s</p>
+                    <p class="text-xs text-slate-300 font-medium">Gagnez vos marchés publics • Devis WhatsApp en 30 secondes • Fichier Excel réel</p>
                 </div>
             </div>
 
@@ -35,10 +47,13 @@
                 <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
                     <span>🏠</span> <span>Retour au Logiciel</span>
                 </a>
-                <button id="btnVoiceToggle" onclick="toggleVoice()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
-                    <span id="voiceIcon">🔊</span> <span id="voiceLabel">Voix-off Active</span>
+                <button id="btnSoundToggle" onclick="toggleSoundFX()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition flex items-center gap-1">
+                    <span id="soundFxIcon">🎵</span> <span id="soundFxLabel">Effets Sonores ON</span>
                 </button>
-                <button id="btnRecordVideo" onclick="enregistrerEtTelechargerVideo()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-bold text-white shadow-md shadow-emerald-600/30 transition flex items-center gap-1.5">
+                <button id="btnVoiceToggle" onclick="toggleVoice()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition flex items-center gap-1">
+                    <span id="voiceIcon">🎙️</span> <span id="voiceLabel">Voix Dynamique ON</span>
+                </button>
+                <button id="btnRecordVideo" onclick="enregistrerEtTelechargerVideo()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-black text-white shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5">
                     <span>📥</span> <span id="recordLabel">Télécharger la Vidéo (.webm)</span>
                 </button>
             </div>
@@ -49,19 +64,22 @@
             <canvas id="videoCanvas" width="960" height="540" class="w-full h-full object-contain cursor-pointer" onclick="togglePlay()"></canvas>
 
             <!-- Grand bouton Play central (si en pause) -->
-            <div id="bigPlayOverlay" onclick="togglePlay()" class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center cursor-pointer transition-all">
-                <div class="w-20 h-20 rounded-full bg-blue-600/90 text-white flex items-center justify-center text-3xl shadow-2xl shadow-blue-500/50 hover:scale-110 transition border-2 border-white/40">
+            <div id="bigPlayOverlay" onclick="togglePlay()" class="absolute inset-0 bg-black/50 backdrop-blur-[3px] flex flex-col items-center justify-center cursor-pointer transition-all">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-red-600 to-amber-500 text-white flex items-center justify-center text-4xl shadow-2xl shadow-red-500/60 hover:scale-110 transition border-4 border-white/50 pl-2 cta-pulse">
                     ▶
                 </div>
-                <div class="mt-4 text-sm font-semibold text-white/90 bg-slate-900/80 px-4 py-1.5 rounded-full border border-white/20">
-                    Cliquer pour Lancer la Démonstration Animée
+                <div class="mt-5 text-sm md:text-base font-black text-white bg-slate-900/90 px-6 py-2.5 rounded-full border-2 border-amber-400 shadow-xl tracking-wide">
+                    ▶ CLIQUEZ ICI POUR DÉCOUVRIR LE DIDACTICIEL COMMERCIAL
+                </div>
+                <div class="mt-2 text-xs text-slate-300 font-semibold">
+                    Son immersif & voix persuasive activés automatiquement
                 </div>
             </div>
 
-            <!-- Sous-titres dynamiques incrustés -->
-            <div class="absolute bottom-16 left-6 right-6 pointer-events-none flex justify-center">
-                <div id="subtitlesBox" class="bg-black/85 text-yellow-300 text-xs md:text-sm font-semibold px-4 py-2 rounded-xl backdrop-blur-md border border-yellow-500/30 text-center max-w-2xl shadow-lg transition-all duration-300">
-                    Chargement du tutoriel...
+            <!-- Sous-titres dynamiques grand format incrustés -->
+            <div class="absolute bottom-14 left-4 right-4 pointer-events-none flex justify-center">
+                <div id="subtitlesBox" class="bg-black/90 text-amber-300 text-xs md:text-sm font-extrabold px-5 py-2.5 rounded-xl backdrop-blur-md border-2 border-amber-400 text-center max-w-3xl shadow-2xl transition-all duration-300 leading-snug tracking-wide">
+                    Chargement du spot vidéo...
                 </div>
             </div>
         </div>
@@ -69,159 +87,208 @@
         <!-- Barre de Contrôle Vidéo (Timeline, Play/Pause, Durée, Volume) -->
         <div class="px-5 py-3 bg-slate-900 border-t border-slate-800 flex flex-col gap-2">
             <!-- Timeline Scrubber -->
-            <div class="relative w-full h-2.5 bg-slate-800 rounded-full cursor-pointer group" id="timelineBar" onclick="seekVideo(event)">
-                <div id="timelineProgress" class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full w-0 relative">
-                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white shadow-md border-2 border-blue-600 scale-0 group-hover:scale-100 transition"></div>
+            <div class="relative w-full h-3 bg-slate-800 rounded-full cursor-pointer group" id="timelineBar" onclick="seekVideo(event)">
+                <div id="timelineProgress" class="h-full bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500 rounded-full w-0 relative">
+                    <div class="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white shadow-lg border-2 border-red-600 scale-0 group-hover:scale-100 transition"></div>
                 </div>
             </div>
 
             <div class="flex items-center justify-between gap-3 text-xs text-slate-400 mt-1">
                 <div class="flex items-center gap-3">
-                    <button onclick="togglePlay()" id="btnPlayPause" class="text-white hover:text-blue-400 text-lg w-7 h-7 flex items-center justify-center transition">
+                    <button onclick="togglePlay()" id="btnPlayPause" class="text-white hover:text-amber-400 text-xl w-8 h-8 flex items-center justify-center transition font-bold">
                         ▶
                     </button>
-                    <button onclick="restartVideo()" class="hover:text-white transition text-sm" title="Recommencer">
+                    <button onclick="restartVideo()" class="hover:text-white transition text-base" title="Recommencer">
                         🔄
                     </button>
-                    <div class="mono font-semibold text-slate-300">
-                        <span id="currentTime">00:00</span> / <span id="totalTime">01:05</span>
+                    <div class="mono font-bold text-slate-200">
+                        <span id="currentTime">00:00</span> / <span id="totalTime">01:10</span>
                     </div>
                 </div>
 
                 <!-- Chapitres rapides cliquables -->
-                <div class="hidden md:flex items-center gap-1.5">
-                    <button onclick="allerAuChapitre(0)" class="chapter-btn px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">1. PWA & Accès</button>
-                    <button onclick="allerAuChapitre(1)" class="chapter-btn px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">2. Scan WhatsApp</button>
-                    <button onclick="allerAuChapitre(2)" class="chapter-btn px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">3. Chiffrage IA 1:1</button>
-                    <button onclick="allerAuChapitre(3)" class="chapter-btn px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">4. Moins-Disant & BPU</button>
-                    <button onclick="allerAuChapitre(4)" class="chapter-btn px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">5. Export Excel</button>
-                    <button onclick="allerAuChapitre(5)" class="chapter-btn px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">6. BaridiMob & Admin</button>
+                <div class="hidden lg:flex items-center gap-1.5 font-bold">
+                    <button onclick="allerAuChapitre(0)" class="chapter-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">1. Fin du Calvaire</button>
+                    <button onclick="allerAuChapitre(1)" class="chapter-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">2. Découpage Flash</button>
+                    <button onclick="allerAuChapitre(2)" class="chapter-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">3. IA 1:1 Infaillible</button>
+                    <button onclick="allerAuChapitre(3)" class="chapter-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">4. Moins-Disant Vainqueur</button>
+                    <button onclick="allerAuChapitre(4)" class="chapter-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">5. Miracle WhatsApp Excel</button>
+                    <button onclick="allerAuChapitre(5)" class="chapter-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">6. BaridiMob & Action</button>
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <span id="badgeChapitre" class="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded text-[11px] font-bold">
+                    <span id="badgeChapitre" class="bg-red-500/20 text-red-400 border border-red-500/40 px-2.5 py-0.5 rounded text-[11px] font-black">
                         Chapitre 1/6
                     </span>
                 </div>
             </div>
         </div>
 
-        <!-- Grille des 6 Chapitres Didacticiels -->
-        <div class="p-4 bg-slate-950 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-            <div onclick="allerAuChapitre(0)" class="cursor-pointer p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/60 transition group">
-                <div class="text-xs font-bold text-blue-400 flex items-center gap-1 mb-1">
-                    <span>📱</span> 01. Accès Mobile
+        <!-- Appel à l'action Majeur sous la vidéo -->
+        <div class="p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <div class="font-extrabold text-sm md:text-base text-white flex items-center gap-2">
+                    🎯 Pourquoi continuer à perdre des heures chaque soir ?
                 </div>
-                <div class="text-[11px] text-slate-400 line-clamp-2">PWA smartphone, 5 pages offertes d'office.</div>
+                <div class="text-xs text-slate-400">
+                    Chiffrez vos bordereaux BTP, VRD et Hydraulique à la vitesse de l'éclair et gagnez vos marchés dès aujourd'hui.
+                </div>
             </div>
 
-            <div onclick="allerAuChapitre(1)" class="cursor-pointer p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/60 transition group">
-                <div class="text-xs font-bold text-emerald-400 flex items-center gap-1 mb-1">
-                    <span>📄</span> 02. Import Multi-Pages
-                </div>
-                <div class="text-[11px] text-slate-400 line-clamp-2">Photos WhatsApp, scans, découpage automatique.</div>
-            </div>
-
-            <div onclick="allerAuChapitre(2)" class="cursor-pointer p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/60 transition group">
-                <div class="text-xs font-bold text-indigo-400 flex items-center gap-1 mb-1">
-                    <span>⚡</span> 03. Chiffrage IA 1:1
-                </div>
-                <div class="text-[11px] text-slate-400 line-clamp-2">Extraction conforme sans fusion de lignes répétées.</div>
-            </div>
-
-            <div onclick="allerAuChapitre(3)" class="cursor-pointer p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/60 transition group">
-                <div class="text-xs font-bold text-amber-400 flex items-center gap-1 mb-1">
-                    <span>⚖️</span> 04. Moins-Disant & BPU
-                </div>
-                <div class="text-[11px] text-slate-400 line-clamp-2">Prix plancher, variateur anti-collision, 74 prix DZD.</div>
-            </div>
-
-            <div onclick="allerAuChapitre(4)" class="cursor-pointer p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/60 transition group">
-                <div class="text-xs font-bold text-green-400 flex items-center gap-1 mb-1">
-                    <span>📤</span> 05. Export WhatsApp
-                </div>
-                <div class="text-[11px] text-slate-400 line-clamp-2">Transmission directe du vrai fichier Excel (.xlsx).</div>
-            </div>
-
-            <div onclick="allerAuChapitre(5)" class="cursor-pointer p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/60 transition group">
-                <div class="text-xs font-bold text-purple-400 flex items-center gap-1 mb-1">
-                    <span>👑</span> 06. BaridiMob & Admin
-                </div>
-                <div class="text-[11px] text-slate-400 line-clamp-2">Validation des virements en 1 clic (PIN 7788).</div>
-            </div>
+            <a href="/" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:from-amber-400 hover:to-red-500 text-white font-black text-sm md:text-base shadow-xl shadow-orange-500/30 flex items-center gap-2 transition transform hover:scale-105 cta-pulse text-decoration-none">
+                <span>⚡</span> <span>COMMENCER MAINTENANT (5 PAGES OFFERTES)</span> <span>➔</span>
+            </a>
         </div>
 
     </div>
 
-    <!-- SCRIPT DU MOTEUR D'ANIMATION ET VIDÉO -->
+    <!-- MOTEUR AUDIO & VIDÉO DIDACTICIEL AVANCÉ -->
     <script>
         const canvas = document.getElementById('videoCanvas');
         const ctx = canvas.getContext('2d');
-        const TOTAL_DURATION = 65; // Durée totale en secondes
+        const TOTAL_DURATION = 70;
 
         let currentTimeSec = 0;
         let isPlaying = false;
         let lastTimestamp = null;
         let voiceEnabled = true;
+        let soundFxEnabled = true;
         let synth = window.speechSynthesis;
         let activeUtterance = null;
         let mediaRecorder = null;
         let recordedChunks = [];
+        let audioCtx = null;
 
-        // Définition des 6 chapitres et scénarios
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (!soundFxEnabled) return;
+            try {
+                const actx = getAudioContext();
+                const now = actx.currentTime;
+
+                if (type === 'whoosh') {
+                    const osc = actx.createOscillator();
+                    const gain = actx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(450, now);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.35);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(actx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'scan') {
+                    const osc = actx.createOscillator();
+                    const gain = actx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.linearRampToValueAtTime(1400, now + 0.2);
+                    osc.frequency.linearRampToValueAtTime(600, now + 0.4);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                    osc.connect(gain);
+                    gain.connect(actx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.45);
+                } else if (type === 'success') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                        const osc = actx.createOscillator();
+                        const gain = actx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                        gain.gain.setValueAtTime(0.2, now + i * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.5);
+                        osc.connect(gain);
+                        gain.connect(actx.destination);
+                        osc.start(now + i * 0.08);
+                        osc.stop(now + i * 0.08 + 0.5);
+                    });
+                } else if (type === 'cash') {
+                    const osc1 = actx.createOscillator();
+                    const osc2 = actx.createOscillator();
+                    const gain = actx.createGain();
+                    osc1.type = 'sine'; osc2.type = 'sine';
+                    osc1.frequency.setValueAtTime(987.77, now);
+                    osc2.frequency.setValueAtTime(1318.51, now + 0.09);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc1.connect(gain); osc2.connect(gain);
+                    gain.connect(actx.destination);
+                    osc1.start(now); osc1.stop(now + 0.15);
+                    osc2.start(now + 0.09); osc2.stop(now + 0.4);
+                }
+            } catch(e) {}
+        }
+
         const CHAPITRES = [
             {
                 start: 0,
                 end: 11,
-                title: "1. Installation PWA & 5 Pages Offertes",
-                badge: "Accès & Compte",
-                color: "#3b82f6",
-                text: "Bienvenue sur le logiciel Chiffrage Devis BTP Algérie. Accessible directement sur smartphone comme une application native sans Play Store. À l'inscription, 5 pages de chiffrage sont offertes pour tester immédiatement la puissance de l'outil.",
+                title: "1. Le Calvaire des Devis Manuels est Terminé !",
+                badge: "Révolution BTP",
+                color: "#ef4444",
+                sfx: "whoosh",
+                text: "Entrepreneurs et métreurs du BTP en Algérie : arrêtez de sacrifier vos nuits à taper des devis à la main sur Excel ! Voici la solution intelligente qui calcule tout à votre place en quelques secondes !",
                 draw: drawScene1
             },
             {
                 start: 11,
                 end: 22,
-                title: "2. Numérisation WhatsApp & Découpage Multi-Pages",
-                badge: "Import & Découpage",
-                color: "#10b981",
-                text: "Photographiez directement un bordereau sur le chantier ou importez un PDF multi-pages reçu sur WhatsApp. Le logiciel découpe instantanément le document en vignettes numérotées prêtes au chiffrage.",
+                title: "2. Une Simple Photo WhatsApp ou PDF Multi-Pages",
+                badge: "Vitesse Pure",
+                color: "#f59e0b",
+                sfx: "scan",
+                text: "Une photo prise sur le chantier ou un fichier PDF WhatsApp de 5 pages ? Le logiciel découpe instantanément votre document en vignettes ordonnées, prêt pour l'analyse sans aucun effort.",
                 draw: drawScene2
             },
             {
                 start: 22,
                 end: 35,
-                title: "3. Chiffrage IA Métreur & Règle Cardinal 1:1",
-                badge: "Extraction IA",
+                title: "3. Analyse IA Métreur : Règle Cardinale 1:1 Strict",
+                badge: "Précision Chirurgicale",
                 color: "#6366f1",
-                text: "Cliquez sur 'Analyser tout le PDF en un clic'. L'IA métreur BTP extrait chaque lot : terrassements, gros-œuvre, étanchéité. Même si un article se répète, chaque ligne est retranscrite fidèlement sans aucune fusion.",
+                sfx: "scan",
+                text: "Un seul clic sur 'Analyser tout le PDF' : l'IA métreur extrait terrassements, gros-œuvre et VRD. Même si un article se répète, chaque ligne est conservée fidèlement sans aucune fusion ni oubli !",
                 draw: drawScene3
             },
             {
                 start: 35,
-                end: 47,
-                title: "4. Stratégie Moins-Disant & Base BPU Algérie",
-                badge: "Prix & Déontologie",
-                color: "#f59e0b",
-                text: "Activez la stratégie 'Moins-Disant' pour remporter vos appels d'offres au prix le plus compétitif. Le variateur anti-collision protège votre offre contre toute entente. Vous pouvez aussi insérer en un clic parmi les 74 prix du BPU algérien.",
+                end: 48,
+                title: "4. Soyez le Moins-Disant & Gagnez vos Marchés !",
+                badge: "Arme Secrète Soumission",
+                color: "#10b981",
+                sfx: "success",
+                text: "Activez la stratégie 'Moins-Disant' pour proposer l'offre la plus compétitive et remporter le marché public ! Le variateur anti-collision protège votre offre de toute concurrence jumelle, avec 74 prix BPU algériens à portée de main !",
                 draw: drawScene4
             },
             {
-                start: 47,
-                end: 57,
-                title: "5. Partage WhatsApp en Vrai Fichier Excel (.xlsx)",
-                badge: "Transmission Immédiate",
-                color: "#22c55e",
-                text: "Exportez instantanément votre devis rempli : un clic sur 'Partager sur WhatsApp' transmet directement le fichier Excel .xlsx réel à votre client. Vous pouvez également imprimer le PDF officiel avec signatures et montants en toutes lettres.",
+                start: 48,
+                end: 59,
+                title: "5. Renvoyez Immédiatement le Vrai Excel sur WhatsApp",
+                badge: "Résultat Magique",
+                color: "#059669",
+                sfx: "success",
+                text: "Le client vous a envoyé un devis sur WhatsApp ? En un clic, renvoyez-lui le vrai fichier Excel .xlsx parfaitement rempli avec formules actives et total en toutes lettres ! Votre crédibilité est décuplée !",
                 draw: drawScene5
             },
             {
-                start: 57,
-                end: 65,
-                title: "6. Espace Titulaire & Paiements BaridiMob (PIN 7788)",
-                badge: "Monétisation Titulaire",
-                color: "#a855f7",
-                text: "Pour le propriétaire du logiciel : encaissez vos revenus directement sur votre compte BaridiMob ou CCP. Depuis l'Espace Titulaire sécurisé par PIN, validez en un seul clic les recharges clients. Votre solution SaaS BTP est prête !",
+                start: 59,
+                end: 70,
+                title: "6. Passez à l'Action : 5 Pages 100% Gratuites !",
+                badge: "Offre Exclusive",
+                color: "#dc2626",
+                sfx: "cash",
+                text: "Ne passez pas à côté de cette opportunité ! 5 pages vous sont offertes tout de suite à l'inscription. Encaissez par BaridiMob, validez en un clic. Cliquez maintenant et testez la puissance du logiciel !",
                 draw: drawScene6
             }
         ];
@@ -232,28 +299,38 @@
             return CHAPITRES.find(c => time >= c.start && time < c.end) || CHAPITRES[CHAPITRES.length - 1];
         }
 
-        // --- Audio Web Synthèse Vocale (Voiceover) ---
         function speakChapterText(chap) {
             if (!voiceEnabled || !synth) return;
             synth.cancel();
             const utter = new SpeechSynthesisUtterance(chap.text);
             utter.lang = 'fr-FR';
-            utter.rate = 1.05;
-            utter.pitch = 1.0;
+            utter.rate = 1.12;
+            utter.pitch = 1.05;
+            
+            const voices = synth.getVoices();
+            const frVoice = voices.find(v => v.lang.includes('fr') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Premium'))) || voices.find(v => v.lang.includes('fr'));
+            if (frVoice) utter.voice = frVoice;
+
             activeUtterance = utter;
             synth.speak(utter);
         }
 
         function toggleVoice() {
             voiceEnabled = !voiceEnabled;
-            document.getElementById('voiceIcon').textContent = voiceEnabled ? "🔊" : "🔇";
-            document.getElementById('voiceLabel').textContent = voiceEnabled ? "Voix-off Active" : "Voix-off Muette";
+            document.getElementById('voiceIcon').textContent = voiceEnabled ? "🎙️" : "🔇";
+            document.getElementById('voiceLabel').textContent = voiceEnabled ? "Voix Dynamique ON" : "Voix Muette";
             if (!voiceEnabled && synth) synth.cancel();
             else if (isPlaying) speakChapterText(getChapter(currentTimeSec));
         }
 
-        // --- Lecture / Pause et Scrubber ---
+        function toggleSoundFX() {
+            soundFxEnabled = !soundFxEnabled;
+            document.getElementById('soundFxIcon').textContent = soundFxEnabled ? "🎵" : "🔇";
+            document.getElementById('soundFxLabel').textContent = soundFxEnabled ? "Effets Sonores ON" : "Effets OFF";
+        }
+
         function togglePlay() {
+            getAudioContext();
             if (isPlaying) {
                 pauseVideo();
             } else {
@@ -266,7 +343,9 @@
             document.getElementById('bigPlayOverlay').style.display = 'none';
             document.getElementById('btnPlayPause').textContent = '⏸';
             lastTimestamp = performance.now();
-            speakChapterText(getChapter(currentTimeSec));
+            const chap = getChapter(currentTimeSec);
+            playSound(chap.sfx);
+            speakChapterText(chap);
             requestAnimationFrame(videoLoop);
         }
 
@@ -284,8 +363,9 @@
 
         function allerAuChapitre(index) {
             if (index >= 0 && index < CHAPITRES.length) {
-                currentTimeSec = CHAPITRES[index].start + 0.1;
+                currentTimeSec = CHAPITRES[index].start + 0.05;
                 currentChapterIndex = index;
+                playSound(CHAPITRES[index].sfx);
                 if (!isPlaying) playVideo();
                 else speakChapterText(CHAPITRES[index]);
             }
@@ -297,11 +377,11 @@
             currentTimeSec = clickPos * TOTAL_DURATION;
             const newChap = getChapter(currentTimeSec);
             currentChapterIndex = CHAPITRES.indexOf(newChap);
+            playSound(newChap.sfx);
             if (isPlaying) speakChapterText(newChap);
             drawFrame();
         }
 
-        // --- Boucle Principale d'Animation ---
         function videoLoop(timestamp) {
             if (!isPlaying) return;
             const dt = (timestamp - lastTimestamp) / 1000;
@@ -316,11 +396,11 @@
                 return;
             }
 
-            // Détection de changement de chapitre
             const activeChap = getChapter(currentTimeSec);
             const newIndex = CHAPITRES.indexOf(activeChap);
             if (newIndex !== currentChapterIndex) {
                 currentChapterIndex = newIndex;
+                playSound(activeChap.sfx);
                 speakChapterText(activeChap);
             }
 
@@ -329,7 +409,6 @@
         }
 
         function drawFrame() {
-            // Mise à jour de l'UI
             const progress = (currentTimeSec / TOTAL_DURATION) * 100;
             document.getElementById('timelineProgress').style.width = progress + '%';
             document.getElementById('currentTime').textContent = formatTime(currentTimeSec);
@@ -338,7 +417,6 @@
             document.getElementById('badgeChapitre').textContent = `Chapitre ${CHAPITRES.indexOf(chap) + 1}/6 : ${chap.badge}`;
             document.getElementById('subtitlesBox').textContent = chap.text;
 
-            // Rendu Canvas pour la scène active
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             chap.draw(currentTimeSec - chap.start, chap.end - chap.start);
         }
@@ -349,494 +427,416 @@
             return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // ============================================================
-        // MOTEUR DE DESSIN CANVAS : LES 6 SCÈNES ANIMÉES
-        // ============================================================
-
         function drawCommonBackground(title, badge, color) {
-            const bgGrad = ctx.createLinearGradient(0, 0, 960, 540);
-            bgGrad.addColorStop(0, '#090d16');
-            bgGrad.addColorStop(1, '#0f172a');
+            const bgGrad = ctx.createRadialGradient(480, 270, 50, 480, 270, 550);
+            bgGrad.addColorStop(0, '#111827');
+            bgGrad.addColorStop(1, '#030712');
             ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, 960, 540);
 
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.04)';
             ctx.lineWidth = 1;
-            for (let x = 0; x < 960; x += 40) {
+            for (let x = 0; x < 960; x += 32) {
                 ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 540); ctx.stroke();
             }
-            for (let y = 0; y < 540; y += 40) {
+            for (let y = 0; y < 540; y += 32) {
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(960, y); ctx.stroke();
             }
 
             ctx.fillStyle = color;
-            ctx.fillRect(40, 30, 6, 32);
+            ctx.fillRect(35, 25, 8, 38);
 
-            ctx.font = 'bold 22px Plus Jakarta Sans, sans-serif';
+            ctx.font = '900 24px Plus Jakarta Sans, sans-serif';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText(title, 55, 54);
+            ctx.fillText(title, 55, 52);
 
-            ctx.font = 'bold 12px Plus Jakarta Sans, sans-serif';
             ctx.fillStyle = color;
-            ctx.fillText(badge.toUpperCase(), 820, 52);
+            ctx.beginPath(); ctx.roundRect(750, 26, 175, 34, 8); ctx.fill();
+            ctx.font = '900 12px Plus Jakarta Sans';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(badge.toUpperCase(), 765, 48);
         }
 
-        // --- SCÈNE 1 : ACCÈS PWA & 5 PAGES OFFERTES ---
         function drawScene1(t, dur) {
-            drawCommonBackground("📱 Installation Mobile PWA & Connexion", "Étape 01", "#3b82f6");
+            drawCommonBackground("❌ AVANT (Heures Perdues) ➔ ✅ AUJOURD'HUI (30s)", "Révolution BTP", "#ef4444");
 
-            const phoneX = 350, phoneY = 90, phoneW = 260, phoneH = 410;
-            drawSmartphone(phoneX, phoneY, phoneW, phoneH);
+            const pX = 60, pY = 95, pW = 390, pH = 345;
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.08)';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.roundRect(pX, pY, pW, pH, 16); ctx.fill(); ctx.stroke();
 
-            const scrX = phoneX + 12, scrY = phoneY + 30, scrW = phoneW - 24, scrH = phoneH - 45;
+            ctx.font = '900 18px Plus Jakarta Sans';
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText("❌ SANS LE LOGICIEL :", pX + 25, pY + 40);
+
+            const defauts = [
+                "😫 Des nuits entières à recopier sur Excel",
+                "📉 Erreurs de calcul de totaux et TVA",
+                "⚠️ Bordereaux papier froissés difficiles à lire",
+                "⏳ Retards et marchés perdus face aux concurrents"
+            ];
+            defauts.forEach((d, idx) => {
+                ctx.font = 'bold 13px Plus Jakarta Sans';
+                ctx.fillStyle = '#fca5a5';
+                ctx.fillText(d, pX + 25, pY + 85 + idx * 48);
+            });
+
+            const dX = 510, dY = 95, dW = 390, dH = 345;
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.12)';
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.roundRect(dX, dY, dW, dH, 16); ctx.fill(); ctx.stroke();
+
+            ctx.font = '900 18px Plus Jakarta Sans';
+            ctx.fillStyle = '#10b981';
+            ctx.fillText("✅ AVEC NOTRE LOGICIEL IA :", dX + 25, pY + 40);
+
+            const avantages = [
+                "⚡ Chiffrage automatique en 30 secondes",
+                "📸 Simple photo WhatsApp ou scan PDF",
+                "🎯 Prix unitaires DZD calculés au plus juste",
+                "🏆 Remportez vos soumissions d'appel d'offres",
+                "🎁 5 PAGES OFFERTES D'OFFICE POUR TESTER"
+            ];
+            avantages.forEach((a, idx) => {
+                ctx.font = 'bold 13px Plus Jakarta Sans';
+                ctx.fillStyle = idx === 4 ? '#fef08a' : '#6ee7b7';
+                ctx.fillText(a, dX + 25, dY + 85 + idx * 45);
+            });
+
+            const pulse = 1 + Math.sin(t * 8) * 0.05;
             ctx.save();
-            ctx.beginPath();
-            ctx.roundRect(scrX, scrY, scrW, scrH, 18);
-            ctx.clip();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(scrX, scrY, scrW, scrH);
-
-            ctx.fillStyle = '#1e3a8a';
-            ctx.fillRect(scrX, scrY, scrW, 55);
-
-            ctx.font = 'bold 13px Plus Jakarta Sans';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText("🏗️ Devis BTP Algérie", scrX + 12, scrY + 28);
-
-            ctx.font = '9px Plus Jakarta Sans';
-            ctx.fillStyle = '#93c5fd';
-            ctx.fillText("Version PWA Smartphone", scrX + 12, scrY + 44);
-
-            ctx.fillStyle = '#2563eb';
-            ctx.beginPath();
-            ctx.roundRect(scrX + 10, scrY + 65, scrW - 20, 55, 8);
-            ctx.fill();
-
-            ctx.font = 'bold 10px Plus Jakarta Sans';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText("📲 Installer l'application", scrX + 20, scrY + 85);
-            ctx.font = '8px Plus Jakarta Sans';
-            ctx.fillStyle = '#dbeafe';
-            ctx.fillText("Ajouter à l'écran d'accueil sans Store", scrX + 20, scrY + 102);
-
-            ctx.fillStyle = '#f8fafc';
-            ctx.strokeStyle = '#cbd5e1';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.roundRect(scrX + 10, scrY + 135, scrW - 20, 110, 10);
-            ctx.fill(); ctx.stroke();
-
-            ctx.font = 'bold 11px Plus Jakarta Sans';
-            ctx.fillStyle = '#0f172a';
-            ctx.fillText("👤 Mon Compte Artisan", scrX + 20, scrY + 158);
-
-            ctx.font = '9px Plus Jakarta Sans';
-            ctx.fillStyle = '#64748b';
-            ctx.fillText("Tél: 0550 12 34 56 (Vérifié)", scrX + 20, scrY + 175);
-
-            ctx.fillStyle = '#fef3c7';
-            ctx.strokeStyle = '#f59e0b';
-            ctx.beginPath();
-            ctx.roundRect(scrX + 20, scrY + 190, scrW - 40, 36, 6);
-            ctx.fill(); ctx.stroke();
-
-            ctx.font = 'bold 12px Plus Jakarta Sans';
-            ctx.fillStyle = '#b45309';
-            ctx.fillText("🎁 5 Pages Offertes !", scrX + 32, scrY + 213);
-
+            ctx.translate(480, 260);
+            ctx.scale(pulse, pulse);
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath(); ctx.arc(0, 0, 36, 0, Math.PI * 2); ctx.fill();
+            ctx.font = '900 18px Plus Jakarta Sans';
+            ctx.fillStyle = '#000000';
+            ctx.fillText("VS", -12, 6);
             ctx.restore();
-
-            drawFloatingBadge(100, 200, "⚡ Aucune installation requise", "Fonctionne sur Chrome & Safari mobile");
-            drawFloatingBadge(660, 220, "🎁 Démarrage 100% Gratuit", "5 crédits injectés automatiquement");
         }
 
-        // --- SCÈNE 2 : IMPORT & DÉCOUPAGE MULTI-PAGES ---
         function drawScene2(t, dur) {
-            drawCommonBackground("📄 Import WhatsApp & Découpage Multi-Pages", "Étape 02", "#10b981");
+            drawCommonBackground("📸 Devis WhatsApp ou PDF ➔ Découpage Éclair", "Vitesse Pure", "#f59e0b");
 
-            const pdfX = 140, pdfY = 120, pdfW = 200, pdfH = 260;
+            const pdfX = 90, pdfY = 110, pdfW = 240, pdfH = 310;
             ctx.fillStyle = '#1e293b';
-            ctx.strokeStyle = '#334155';
+            ctx.strokeStyle = '#475569';
             ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.roundRect(pdfX, pdfY, pdfW, pdfH, 12); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.roundRect(pdfX, pdfY, pdfW, pdfH, 14); ctx.fill(); ctx.stroke();
 
-            ctx.font = 'bold 14px Plus Jakarta Sans';
+            ctx.font = '900 15px Plus Jakarta Sans';
             ctx.fillStyle = '#38bdf8';
-            ctx.fillText("📋 Bordereau DQE.pdf", pdfX + 20, pdfY + 35);
-            ctx.font = '11px Plus Jakarta Sans';
+            ctx.fillText("📄 Devis_WhatsApp.pdf", pdfX + 20, pdfY + 36);
+            ctx.font = 'bold 11px Plus Jakarta Sans';
             ctx.fillStyle = '#94a3b8';
-            ctx.fillText("Appel d'offres : 3 pages", pdfX + 20, pdfY + 55);
+            ctx.fillText("Document de 4 pages reçu d'un client", pdfX + 20, pdfY + 58);
 
-            ctx.fillStyle = '#475569';
-            for (let i = 0; i < 7; i++) {
-                ctx.fillRect(pdfX + 20, pdfY + 75 + i * 22, pdfW - 40, 10);
+            for (let i = 0; i < 8; i++) {
+                ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                ctx.fillRect(pdfX + 20, pdfY + 80 + i * 24, pdfW - 40, 12);
             }
 
-            const laserY = pdfY + 70 + (Math.sin(t * 4) + 1) * 85;
+            const scanY = pdfY + 75 + (Math.sin(t * 6) + 1) * 105;
             ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 4;
             ctx.shadowColor = '#10b981';
-            ctx.shadowBlur = 12;
-            ctx.beginPath(); ctx.moveTo(pdfX, laserY); ctx.lineTo(pdfX + pdfW, laserY); ctx.stroke();
+            ctx.shadowBlur = 18;
+            ctx.beginPath(); ctx.moveTo(pdfX, scanY); ctx.lineTo(pdfX + pdfW, scanY); ctx.stroke();
             ctx.shadowBlur = 0;
 
-            ctx.fillStyle = '#10b981';
-            ctx.font = 'bold 24px Plus Jakarta Sans';
-            ctx.fillText("➔ Découpage Auto", 370, 245);
+            ctx.font = '900 22px Plus Jakarta Sans';
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText("⚡ Découpage", 365, 230);
+            ctx.fillText("Automatique ➔", 365, 260);
 
-            const pages = ["Page 1 (Terrassements)", "Page 2 (Gros-Œuvre)", "Page 3 (VRD)"];
-            pages.forEach((pNom, idx) => {
-                const vx = 620, vy = 110 + idx * 95, vw = 240, vh = 75;
-                const pop = Math.min(1, Math.max(0, (t - idx * 0.5) * 2));
+            const pages = [
+                { nom: "Page 1 : Terrassements", icon: "🚜", col: "#10b981" },
+                { nom: "Page 2 : Béton Armé & Dalles", icon: "🏢", col: "#3b82f6" },
+                { nom: "Page 3 : Maçonnerie & Enduits", icon: "🧱", col: "#f59e0b" },
+                { nom: "Page 4 : VRD & Conduites", icon: "💧", col: "#8b5cf6" }
+            ];
 
-                ctx.save();
-                ctx.translate(vx + vw / 2, vy + vh / 2);
-                ctx.scale(pop, pop);
-                ctx.translate(-(vx + vw / 2), -(vy + vh / 2));
+            pages.forEach((p, idx) => {
+                const py = 100 + idx * 80;
+                const px = 560, pw = 320, ph = 68;
 
-                ctx.fillStyle = idx === 0 ? '#064e3b' : '#0f172a';
-                ctx.strokeStyle = idx === 0 ? '#10b981' : '#334155';
+                ctx.fillStyle = '#0f172a';
+                ctx.strokeStyle = p.col;
                 ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.roundRect(vx, vy, vw, vh, 10); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 10); ctx.fill(); ctx.stroke();
 
-                ctx.font = 'bold 12px Plus Jakarta Sans';
+                ctx.font = '22px Plus Jakarta Sans';
+                ctx.fillText(p.icon, px + 16, py + 42);
+
+                ctx.font = '900 13px Plus Jakarta Sans';
                 ctx.fillStyle = '#ffffff';
-                ctx.fillText(pNom, vx + 16, vy + 32);
+                ctx.fillText(p.nom, px + 52, py + 32);
 
-                ctx.font = '10px Plus Jakarta Sans';
-                ctx.fillStyle = idx === 0 ? '#a7f3d0' : '#64748b';
-                ctx.fillText(idx === 0 ? "🟢 Prête pour analyse IA" : "⏳ En file d'attente", vx + 16, vy + 52);
-
-                ctx.restore();
+                ctx.font = 'bold 11px Plus Jakarta Sans';
+                ctx.fillStyle = '#6ee7b7';
+                ctx.fillText("Prête à chiffrer en 1 clic ⚡", px + 52, py + 52);
             });
         }
 
-        // --- SCÈNE 3 : CHIFFRAGE IA MÉTREUR & RÈGLE 1:1 ---
         function drawScene3(t, dur) {
-            drawCommonBackground("⚡ Chiffrage IA Métreur & Règle Fidélité 1:1", "Étape 03", "#6366f1");
+            drawCommonBackground("⚡ L'IA Métreur Extrait et Chiffre Tout sans Faute", "Précision Chirurgicale", "#6366f1");
 
-            const tblX = 80, tblY = 100, tblW = 800, tblH = 340;
-            ctx.fillStyle = '#0f172a';
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.roundRect(tblX, tblY, tblW, tblH, 12); ctx.fill(); ctx.stroke();
+            const tblX = 60, tblY = 95, tblW = 840, tblH = 350;
+            ctx.fillStyle = '#0b0f19';
+            ctx.strokeStyle = '#4338ca';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.roundRect(tblX, tblY, tblW, tblH, 14); ctx.fill(); ctx.stroke();
 
-            ctx.fillStyle = '#1e3a8a';
-            ctx.beginPath(); ctx.roundRect(tblX, tblY, tblW, 40, [12, 12, 0, 0]); ctx.fill();
-
-            ctx.font = 'bold 14px Plus Jakarta Sans';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText("LOT 01 : TERRASSEMENTS & FOUILLES • CHIFFRAGE CONFORME DZD", tblX + 20, tblY + 26);
-
-            const btnW = 200, btnH = 36;
             ctx.fillStyle = '#059669';
-            ctx.beginPath(); ctx.roundRect(tblX + tblW - btnW - 15, tblY + 2, btnW, btnH, 8); ctx.fill();
-            ctx.font = 'bold 11px Plus Jakarta Sans';
+            ctx.beginPath(); ctx.roundRect(tblX + 20, tblY + 16, 260, 44, 8); ctx.fill();
+            ctx.font = '900 13px Plus Jakarta Sans';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText("⚡ Analyser TOUT le PDF (1 Clic)", tblX + tblW - btnW, tblY + 24);
+            ctx.fillText("⚡ ANALYSER TOUT LE PDF (1 Clic)", tblX + 35, tblY + 43);
 
-            const articles = [
-                { n: "01.01", d: "Fouille en pleine masse en terrain ordinaire", u: "m3", q: "450.00", pu: "650.00", tot: "292 500 DZD" },
-                { n: "01.02", d: "Fouille en rigole pour semelles filantes", u: "m3", q: "120.00", pu: "1 150.00", tot: "138 000 DZD" },
-                { n: "01.03", d: "Fouille en rigole pour semelles filantes (Zone B)", u: "m3", q: "85.00", pu: "1 150.00", tot: "97 750 DZD" },
-                { n: "01.04", d: "Remblaiement des fouilles par tuf compacté", u: "m3", q: "210.00", pu: "1 400.00", tot: "294 000 DZD" }
-            ];
-
-            const headerCols = ["N°", "Désignation des Travaux", "Unité", "Quantité", "P.U (DZD)", "Total H.T"];
-            const colX = [tblX + 20, tblX + 80, tblX + 460, tblX + 530, tblX + 610, tblX + 710];
+            ctx.font = '900 14px Plus Jakarta Sans';
+            ctx.fillStyle = '#93c5fd';
+            ctx.fillText("LOT 02 : GROS-ŒUVRE & BÉTON ARMÉ (Normes Algérie)", tblX + 310, tblY + 43);
 
             ctx.fillStyle = '#1e293b';
-            ctx.fillRect(tblX, tblY + 40, tblW, 28);
+            ctx.fillRect(tblX + 20, tblY + 70, tblW - 40, 30);
             ctx.font = 'bold 11px Plus Jakarta Sans';
             ctx.fillStyle = '#94a3b8';
-            headerCols.forEach((col, idx) => ctx.fillText(col, colX[idx], tblY + 58));
+            ctx.fillText("N°", tblX + 35, tblY + 90);
+            ctx.fillText("Désignation des Travaux", tblX + 90, tblY + 90);
+            ctx.fillText("Unité", tblX + 480, tblY + 90);
+            ctx.fillText("Quantité", tblX + 540, tblY + 90);
+            ctx.fillText("P.U Référentiel DZD", tblX + 620, tblY + 90);
+            ctx.fillText("Montant H.T", tblX + 745, tblY + 90);
 
-            articles.forEach((art, idx) => {
-                const rowY = tblY + 70 + idx * 42;
-                const visible = t > idx * 0.7;
+            const items = [
+                { n: "02.01", d: "Béton de propreté dosé à 150 kg/m3", u: "m3", q: "25.00", pu: "8 500 DZD", tot: "212 500 DZD" },
+                { n: "02.02", d: "Béton armé pour semelles isolées dosé 350 kg", u: "m3", q: "70.00", pu: "32 000 DZD", tot: "2 240 000 DZD" },
+                { n: "02.03", d: "Béton armé pour semelles (Répété - Ligne conservée)", u: "m3", q: "40.00", pu: "32 000 DZD", tot: "1 280 000 DZD" },
+                { n: "02.04", d: "Plancher en corps creux 16+4 cm", u: "m2", q: "320.00", pu: "4 200 DZD", tot: "1 344 000 DZD" }
+            ];
 
-                if (visible) {
-                    ctx.fillStyle = idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)';
-                    ctx.fillRect(tblX, rowY, tblW, 40);
+            items.forEach((it, idx) => {
+                const ry = tblY + 105 + idx * 46;
+                const bg = idx === 2 ? 'rgba(245, 158, 11, 0.2)' : idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)';
+                ctx.fillStyle = bg;
+                ctx.fillRect(tblX + 20, ry, tblW - 40, 42);
 
-                    if (idx === 2) {
-                        ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
-                        ctx.fillRect(tblX, rowY, tblW, 40);
-                    }
+                ctx.font = 'bold 11px JetBrains Mono';
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillText(it.n, tblX + 35, ry + 26);
 
-                    ctx.font = 'mono 11px JetBrains Mono';
-                    ctx.fillStyle = '#38bdf8';
-                    ctx.fillText(art.n, colX[0], rowY + 25);
+                ctx.font = 'bold 12px Plus Jakarta Sans';
+                ctx.fillStyle = idx === 2 ? '#fbbf24' : '#f8fafc';
+                ctx.fillText(it.d, tblX + 90, ry + 26);
 
-                    ctx.font = '11px Plus Jakarta Sans';
-                    ctx.fillStyle = idx === 2 ? '#fbbf24' : '#e2e8f0';
-                    ctx.fillText(art.d, colX[1], rowY + 25);
+                ctx.font = 'bold 11px Plus Jakarta Sans';
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText(it.u, tblX + 480, ry + 26);
+                ctx.fillText(it.q, tblX + 540, ry + 26);
 
-                    ctx.fillStyle = '#94a3b8';
-                    ctx.fillText(art.u, colX[2], rowY + 25);
-                    ctx.fillText(art.q, colX[3], rowY + 25);
+                ctx.font = 'bold 12px JetBrains Mono';
+                ctx.fillStyle = '#10b981';
+                ctx.fillText(it.pu, tblX + 620, ry + 26);
 
-                    ctx.font = 'bold 11px JetBrains Mono';
-                    ctx.fillStyle = '#10b981';
-                    ctx.fillText(art.pu, colX[4], rowY + 25);
-
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillText(art.tot, colX[5], rowY + 25);
-                }
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(it.tot, tblX + 745, ry + 26);
             });
 
             ctx.fillStyle = '#065f46';
-            ctx.beginPath(); ctx.roundRect(tblX + 20, tblY + tblH - 55, tblW - 40, 36, 8); ctx.fill();
-            ctx.font = 'bold 11px Plus Jakarta Sans';
+            ctx.beginPath(); ctx.roundRect(tblX + 20, tblY + tblH - 48, tblW - 40, 36, 6); ctx.fill();
+            ctx.font = '900 12px Plus Jakarta Sans';
             ctx.fillStyle = '#a7f3d0';
-            ctx.fillText("🔒 RÈGLE CARDINALE RESPECTÉE : Les articles répétés sont transcrits ligne par ligne (Zéro fusion)", tblX + 35, tblY + tblH - 32);
+            ctx.fillText("🔒 RÈGLE CARDINALE 1:1 : Vos articles répétés sont TOUS chiffrés sans aucune perte ni fusion !", tblX + 35, tblY + tblH - 25);
         }
 
-        // --- SCÈNE 4 : STRATÉGIE MOINS-DISANT & BASE BPU ---
         function drawScene4(t, dur) {
-            drawCommonBackground("⚖️ Stratégie Moins-Disant & Base BPU (74 Prix DZD)", "Étape 04", "#f59e0b");
+            drawCommonBackground("🎯 Moins-Disant Vainqueur & Base de Données BPU", "Arme Secrète Soumission", "#10b981");
 
-            const pX = 80, pY = 110, pW = 380, pH = 320;
+            const sX = 60, sY = 95, sW = 410, sH = 340;
             ctx.fillStyle = '#0f172a';
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.roundRect(pX, pY, pW, pH, 12); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.roundRect(sX, sY, sW, sH, 16); ctx.fill(); ctx.stroke();
 
-            ctx.font = 'bold 15px Plus Jakarta Sans';
+            ctx.font = '900 17px Plus Jakarta Sans';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText("🎯 Stratégie Tarifaire & Soumission", pX + 20, pY + 36);
+            ctx.fillText("🏆 STRATÉGIE MOINS-DISANT", sX + 25, sY + 40);
 
-            ctx.fillStyle = '#1e3a8a';
-            ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.roundRect(pX + 20, pY + 60, pW - 40, 65, 8); ctx.fill(); ctx.stroke();
-
-            ctx.font = 'bold 13px Plus Jakarta Sans';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText("✓ Moins-Disant (Appel d'offres)", pX + 35, pY + 86);
-            ctx.font = '10px Plus Jakarta Sans';
-            ctx.fillStyle = '#93c5fd';
-            ctx.fillText("Applique le prix plancher réaliste du marché DZD", pX + 35, pY + 106);
-
-            ctx.fillStyle = '#1e293b';
-            ctx.beginPath(); ctx.roundRect(pX + 20, pY + 140, pW - 40, 75, 8); ctx.fill();
-
+            ctx.fillStyle = '#064e3b';
+            ctx.beginPath(); ctx.roundRect(sX + 25, sY + 60, sW - 50, 75, 10); ctx.fill();
+            ctx.font = '900 13px Plus Jakarta Sans';
+            ctx.fillStyle = '#6ee7b7';
+            ctx.fillText("Prix Plancher Réaliste du Marché", sX + 40, sY + 90);
             ctx.font = 'bold 11px Plus Jakarta Sans';
-            ctx.fillStyle = '#fbbf24';
-            ctx.fillText("🎲 Variateur Anti-Collision (±1.5%)", pX + 35, pY + 165);
-            ctx.font = '9px Plus Jakarta Sans';
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText("Rend chaque soumission mathématiquement unique.", pX + 35, pY + 185);
-            ctx.fillText("Conforme Décret marchés publics 15-247.", pX + 35, pY + 200);
+            ctx.fillStyle = '#d1fae5';
+            ctx.fillText("Permet d'être le moins-disant et de remporter", sX + 40, sY + 110);
+            ctx.fillText("les marchés publics en toute légalité.", sX + 40, sY + 125);
 
-            const bX = 500, bY = 110, bW = 380, bH = 320;
+            ctx.fillStyle = '#1e1b4b';
+            ctx.strokeStyle = '#6366f1';
+            ctx.beginPath(); ctx.roundRect(sX + 25, sY + 150, sW - 50, 95, 10); ctx.fill(); ctx.stroke();
+            ctx.font = '900 13px Plus Jakarta Sans';
+            ctx.fillStyle = '#a5b4fc';
+            ctx.fillText("🎲 Variateur Anti-Collision (±1.5%)", sX + 40, sY + 180);
+            ctx.font = 'bold 10px Plus Jakarta Sans';
+            ctx.fillStyle = '#e0e7ff';
+            ctx.fillText("Si deux concurrents scannent le même devis,", sX + 40, sY + 200);
+            ctx.fillText("leurs montants finaux restent strictement différents.", sX + 40, sY + 215);
+            ctx.fillText("Conforme Décret marchés publics 15-247.", sX + 40, sY + 230);
+
+            const bX = 490, bY = 95, bW = 410, bH = 340;
             ctx.fillStyle = '#0f172a';
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.roundRect(bX, bY, bW, bH, 12); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.roundRect(bX, bY, bW, bH, 16); ctx.fill(); ctx.stroke();
 
-            ctx.font = 'bold 15px Plus Jakarta Sans';
+            ctx.font = '900 17px Plus Jakarta Sans';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText("💰 Base des Prix BPU Algérie (74 Ouvrages)", bX + 20, bY + 36);
+            ctx.fillText("💰 74 PRIX DE RÉFÉRENCE BPU DZD", bX + 25, bY + 40);
 
-            const bpuItems = [
-                { cat: "BTP", nom: "Béton armé en élévation poteaux", prix: "36 000 DZD/m3" },
-                { cat: "HYD", nom: "Tuyaux PEHD PN16 DN110 AEP", prix: "2 400 DZD/ml" },
-                { cat: "VRD", nom: "Enrobé à chaud BB 0/10 (6cm)", prix: "2 150 DZD/m2" }
+            const bpuList = [
+                { c: "BTP", d: "Béton armé en élévation poteaux", p: "36 000 DZD/m3" },
+                { c: "HYD", d: "Tuyaux PEHD PN16 DN110 AEP", p: "2 400 DZD/ml" },
+                { c: "VRD", d: "Enrobé à chaud BB 0/10 (6cm)", p: "2 150 DZD/m2" }
             ];
 
-            bpuItems.forEach((it, idx) => {
-                const iy = bY + 60 + idx * 75;
+            bpuList.forEach((b, idx) => {
+                const by = bY + 65 + idx * 80;
                 ctx.fillStyle = '#1e293b';
-                ctx.beginPath(); ctx.roundRect(bX + 20, iy, bW - 40, 62, 8); ctx.fill();
+                ctx.beginPath(); ctx.roundRect(bX + 20, by, bW - 40, 68, 8); ctx.fill();
 
-                ctx.font = 'bold 10px Plus Jakarta Sans';
-                ctx.fillStyle = it.cat === "BTP" ? "#60a5fa" : it.cat === "HYD" ? "#34d399" : "#fbbf24";
-                ctx.fillText(`[${it.cat}]`, bX + 32, iy + 24);
+                ctx.font = '900 11px Plus Jakarta Sans';
+                ctx.fillStyle = b.c === 'BTP' ? '#60a5fa' : b.c === 'HYD' ? '#34d399' : '#fbbf24';
+                ctx.fillText(`[${b.c}]`, bX + 32, by + 26);
 
-                ctx.font = 'bold 11px Plus Jakarta Sans';
+                ctx.font = 'bold 12px Plus Jakarta Sans';
                 ctx.fillStyle = '#ffffff';
-                ctx.fillText(it.nom, bX + 68, iy + 24);
+                ctx.fillText(b.d, bX + 75, by + 26);
 
-                ctx.font = 'mono bold 12px JetBrains Mono';
+                ctx.font = '900 13px JetBrains Mono';
                 ctx.fillStyle = '#10b981';
-                ctx.fillText(it.prix, bX + 32, iy + 48);
+                ctx.fillText(b.p, bX + 32, by + 50);
 
                 ctx.fillStyle = '#2563eb';
-                ctx.beginPath(); ctx.roundRect(bX + bW - 105, iy + 14, 70, 32, 6); ctx.fill();
-                ctx.font = 'bold 10px Plus Jakarta Sans';
+                ctx.beginPath(); ctx.roundRect(bX + bW - 110, by + 18, 75, 34, 6); ctx.fill();
+                ctx.font = '900 11px Plus Jakarta Sans';
                 ctx.fillStyle = '#ffffff';
-                ctx.fillText("➕ Insérer", bX + bW - 95, iy + 34);
+                ctx.fillText("➕ Insérer", bX + bW - 100, by + 40);
             });
         }
 
-        // --- SCÈNE 5 : EXPORT DIRECT WHATSAPP & EXCEL ---
         function drawScene5(t, dur) {
-            drawCommonBackground("📤 Export WhatsApp en Vrai Fichier Excel (.xlsx)", "Étape 05", "#22c55e");
+            drawCommonBackground("📤 Miracle WhatsApp : Fichier Excel .xlsx Direct", "Résultat Magique", "#059669");
 
-            const waX = 220, waY = 95, waW = 520, waH = 360;
+            const waX = 180, waY = 95, waW = 600, waH = 345;
             ctx.fillStyle = '#0b141a';
-            ctx.strokeStyle = '#1f2c34';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2.5;
             ctx.beginPath(); ctx.roundRect(waX, waY, waW, waH, 16); ctx.fill(); ctx.stroke();
 
             ctx.fillStyle = '#1f2c34';
-            ctx.beginPath(); ctx.roundRect(waX, waY, waW, 55, [16, 16, 0, 0]); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(waX, waY, waW, 58, [16, 16, 0, 0]); ctx.fill();
 
-            ctx.font = 'bold 14px Plus Jakarta Sans';
-            ctx.fillStyle = '#e9edef';
-            ctx.fillText("💬 Client BTP Algérie (0550 12 34 56)", waX + 25, waY + 34);
+            ctx.font = '900 15px Plus Jakarta Sans';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText("💬 Client BTP Algérie (0550 12 34 56)", waX + 30, waY + 36);
 
-            const bX = waX + 80, bY = waY + 90, bW = 400, bH = 170;
+            const bx = waX + 70, by = waY + 80, bw = 460, bh = 175;
             ctx.fillStyle = '#005c4b';
-            ctx.beginPath(); ctx.roundRect(bX, bY, bW, bH, 12); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 14); ctx.fill();
 
             ctx.fillStyle = '#025142';
-            ctx.beginPath(); ctx.roundRect(bX + 12, bY + 12, bW - 24, 75, 8); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(bx + 14, by + 14, bw - 28, 80, 8); ctx.fill();
 
             ctx.fillStyle = '#107c41';
-            ctx.beginPath(); ctx.roundRect(bX + 24, bY + 24, 48, 50, 6); ctx.fill();
-            ctx.font = 'bold 22px Plus Jakarta Sans';
+            ctx.beginPath(); ctx.roundRect(bx + 26, by + 24, 55, 58, 8); ctx.fill();
+            ctx.font = '900 24px Plus Jakarta Sans';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText("XLS", bX + 30, bY + 56);
+            ctx.fillText("XLS", bx + 32, by + 62);
 
-            ctx.font = 'bold 13px Plus Jakarta Sans';
+            ctx.font = '900 14px Plus Jakarta Sans';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText("Devis_BTP_Client_DEV01.xlsx", bX + 85, bY + 45);
-            ctx.font = '10px Plus Jakarta Sans';
-            ctx.fillStyle = '#a7f3d0';
-            ctx.fillText("Classeur Excel Multi-Lots • Calculs DZD • 48 Ko", bX + 85, bY + 65);
-
-            ctx.font = '11px Plus Jakarta Sans';
-            ctx.fillStyle = '#e9edef';
-            ctx.fillText("Voici votre devis chiffré et conforme au bordereau.", bX + 16, bY + 115);
-            ctx.font = 'bold 12px Plus Jakarta Sans';
+            ctx.fillText("Devis_BTP_Officiel_Client.xlsx", bx + 95, by + 48);
+            ctx.font = 'bold 11px Plus Jakarta Sans';
             ctx.fillStyle = '#6ee7b7';
-            ctx.fillText("Total Général T.T.C : 1 245 800,00 DZD", bX + 16, bY + 138);
+            ctx.fillText("Classeur Excel Multi-Lots • Formules Actives DZD • 52 Ko", bx + 95, by + 70);
 
-            const expY = waY + 280;
-            const expBtns = [
-                { n: "📤 WhatsApp", col: "#22c55e" },
-                { n: "📧 Email", col: "#3b82f6" },
-                { n: "📥 Excel .xlsx", col: "#10b981" },
-                { n: "🖨️ PDF Signé", col: "#ef4444" }
+            ctx.font = 'bold 12px Plus Jakarta Sans';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText("Voici votre devis complété et chiffré aux normes.", bx + 20, by + 120);
+            ctx.font = '900 13px Plus Jakarta Sans';
+            ctx.fillStyle = '#fef08a';
+            ctx.fillText("Total Général T.T.C : 3 450 000,00 DZD", bx + 20, by + 145);
+
+            const btns = [
+                { l: "📤 Partager WhatsApp (.xlsx)", c: "#22c55e" },
+                { l: "📧 Envoyer Email Pro", c: "#3b82f6" },
+                { l: "🖨️ Imprimer PDF Signé", c: "#ef4444" }
             ];
 
-            expBtns.forEach((b, idx) => {
-                const bx = waX + 30 + idx * 115;
-                ctx.fillStyle = b.col;
-                ctx.beginPath(); ctx.roundRect(bx, expY, 105, 36, 8); ctx.fill();
-                ctx.font = 'bold 11px Plus Jakarta Sans';
+            btns.forEach((b, idx) => {
+                const btx = waX + 30 + idx * 185;
+                const bty = waY + 275;
+                ctx.fillStyle = b.c;
+                ctx.beginPath(); ctx.roundRect(btx, bty, 175, 45, 10); ctx.fill();
+                ctx.font = '900 11px Plus Jakarta Sans';
                 ctx.fillStyle = '#ffffff';
-                ctx.fillText(b.n, bx + 16, expY + 23);
+                ctx.fillText(b.l, btx + 12, bty + 28);
             });
         }
 
-        // --- SCÈNE 6 : ESPACE TITULAIRE & PAIEMENTS BARIDIMOB ---
         function drawScene6(t, dur) {
-            drawCommonBackground("👑 Espace Titulaire & Monétisation BaridiMob", "Étape 06", "#a855f7");
+            drawCommonBackground("🚀 Ne Ratez Pas Cette Opportunité : Testez !", "Offre Exclusive", "#dc2626");
 
-            const admX = 120, admY = 95, admW = 720, admH = 370;
+            const cX = 100, cY = 95, cW = 760, cH = 345;
             ctx.fillStyle = '#0f172a';
-            ctx.strokeStyle = '#4338ca';
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.roundRect(admX, admY, admW, admH, 16); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.roundRect(cX, cY, cW, cH, 20); ctx.fill(); ctx.stroke();
 
-            ctx.fillStyle = '#1e1b4b';
-            ctx.beginPath(); ctx.roundRect(admX, admY, admW, 55, [16, 16, 0, 0]); ctx.fill();
+            ctx.font = '900 24px Plus Jakarta Sans';
+            ctx.fillStyle = '#fef08a';
+            ctx.fillText("🎁 5 PAGES 100% GRATUITES DÈS L'INSCRIPTION", cX + 45, cY + 50);
 
-            ctx.font = 'bold 15px Plus Jakarta Sans';
+            ctx.font = 'bold 14px Plus Jakarta Sans';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText("👑 Espace Titulaire SaaS • Code PIN : 7788", admX + 25, admY + 34);
+            ctx.fillText("Testez immédiatement la puissance de l'IA sur vos vrais devis.", cX + 45, cY + 80);
 
-            const kpis = [
-                { l: "CLÉS GÉMINI", v: "3 Clés", s: "Rotation active", c: "#3b82f6" },
-                { l: "CLIENTS BTP", v: "24 Inscrits", s: "Base Supabase", c: "#10b981" },
-                { l: "DEVIS TRAITÉS", v: "148 Générés", s: "Cloud & Local", c: "#8b5cf6" },
-                { l: "VIREMENTS EN COURS", v: "2 En Attente", s: "BaridiMob / CCP", c: "#f59e0b" }
-            ];
-
-            kpis.forEach((k, idx) => {
-                const kx = admX + 25 + idx * 165;
-                ctx.fillStyle = '#1e293b';
-                ctx.beginPath(); ctx.roundRect(kx, admY + 70, 155, 65, 8); ctx.fill();
-
-                ctx.font = 'bold 9px Plus Jakarta Sans';
-                ctx.fillStyle = k.c;
-                ctx.fillText(k.l, kx + 12, admY + 90);
-
-                ctx.font = 'bold 15px JetBrains Mono';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(k.v, kx + 12, admY + 112);
-
-                ctx.font = '8px Plus Jakarta Sans';
-                ctx.fillStyle = '#94a3b8';
-                ctx.fillText(k.s, kx + 12, admY + 126);
-            });
-
-            const vY = admY + 155;
             ctx.fillStyle = '#1e293b';
-            ctx.strokeStyle = '#334155';
-            ctx.beginPath(); ctx.roundRect(admX + 25, vY, admW - 50, 85, 10); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.roundRect(cX + 45, cY + 110, cW - 90, 105, 12); ctx.fill();
 
-            ctx.font = 'bold 13px Plus Jakarta Sans';
+            ctx.font = '900 14px Plus Jakarta Sans';
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText("📲 Recharge Simple par BaridiMob / CCP :", cX + 65, cY + 140);
+            ctx.font = 'bold 13px JetBrains Mono';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText("📲 Virement Reçu : 0550 12 34 56 • Pack 50 Pages (4 000 DZD)", admX + 45, vY + 32);
-
-            ctx.font = '10px Plus Jakarta Sans';
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText("Réf BaridiMob : TRX-89234710 • RIP: 007 99999 0023456789 25", admX + 45, vY + 54);
-
-            ctx.fillStyle = '#059669';
-            ctx.beginPath(); ctx.roundRect(admX + admW - 200, vY + 22, 150, 42, 8); ctx.fill();
+            ctx.fillText("RIP BaridiMob : 007 99999 0023456789 25", cX + 65, cY + 168);
             ctx.font = 'bold 12px Plus Jakarta Sans';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText("✅ Valider (+50 p.)", admX + admW - 180, vY + 48);
-
-            ctx.fillStyle = '#047857';
-            ctx.beginPath(); ctx.roundRect(admX + 25, admY + admH - 80, admW - 50, 55, 10); ctx.fill();
-            ctx.font = 'bold 13px Plus Jakarta Sans';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText("🚀 LOGICIEL 100% OPÉRATIONNEL : PRÊT POUR DIFFUSION COMMERCIALE !", admX + 60, admY + admH - 52);
-            ctx.font = '11px Plus Jakarta Sans';
-            ctx.fillStyle = '#a7f3d0';
-            ctx.fillText("Vos clients chiffrent en autonomie • Vous encaissez les revenus BaridiMob en direct.", admX + 60, admY + admH - 34);
-        }
-
-        function drawSmartphone(x, y, w, h) {
-            ctx.fillStyle = '#1e293b';
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.roundRect(x, y, w, h, 28); ctx.fill(); ctx.stroke();
-
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath(); ctx.roundRect(x + w / 2 - 35, y + 8, 70, 14, 7); ctx.fill();
-        }
-
-        function drawFloatingBadge(x, y, title, subtitle) {
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-            ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.roundRect(x, y, 220, 65, 12); ctx.fill(); ctx.stroke();
-
-            ctx.font = 'bold 12px Plus Jakarta Sans';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(title, x + 15, y + 26);
-
-            ctx.font = '10px Plus Jakarta Sans';
             ctx.fillStyle = '#94a3b8';
-            ctx.fillText(subtitle, x + 15, y + 46);
+            ctx.fillText("Validation en 1 clic par le Titulaire • Pack 50 pages = 4 000 DZD", cX + 65, cY + 195);
+
+            const bPulse = 1 + Math.sin(t * 10) * 0.03;
+            ctx.save();
+            ctx.translate(cX + cW / 2, cY + 270);
+            ctx.scale(bPulse, bPulse);
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath(); ctx.roundRect(-220, -25, 440, 50, 12); ctx.fill();
+            ctx.font = '900 15px Plus Jakarta Sans';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText("➔ COMMENCER À CHIFFRER MAINTENANT !", -180, 7);
+            ctx.restore();
         }
 
-        // --- Exportation & Téléchargement Vidéo en .webm ---
         function enregistrerEtTelechargerVideo() {
+            getAudioContext();
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 alert("L'enregistrement est déjà en cours !");
                 return;
             }
 
-            const stream = canvas.captureStream(30); // 30 FPS
+            const stream = canvas.captureStream(30);
             recordedChunks = [];
             
             try {
@@ -859,15 +859,15 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'Didacticiel_Logiciel_Devis_BTP_Algerie.webm';
+                a.download = 'Spot_Video_Didacticiel_Devis_BTP_Algerie.webm';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 document.getElementById('recordLabel').textContent = "Télécharger la Vidéo (.webm)";
-                alert("🎉 Vidéo didacticielle générée et téléchargée avec succès !");
+                alert("🎉 Vidéo didacticielle promotionnelle téléchargée avec succès !");
             };
 
-            document.getElementById('recordLabel').textContent = "🔴 Enregistrement en cours...";
+            document.getElementById('recordLabel').textContent = "🔴 Enregistrement HD en cours...";
             mediaRecorder.start();
 
             currentTimeSec = 0;
