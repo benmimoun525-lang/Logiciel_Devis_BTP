@@ -124,19 +124,19 @@
             </div>
         </div>
 
-        <!-- Appel à l'action Majeur sous la vidéo -->
+        <!-- Appel à l'action Majeur sous la vidéo avec URL exacte du logiciel -->
         <div class="p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
             <div>
                 <div class="font-extrabold text-sm md:text-base text-white flex items-center gap-2">
                     ⏱️ Dépôt des offres demain matin ? Des attachements de travaux à finaliser ?
                 </div>
                 <div class="text-xs text-slate-300">
-                    Ne perdez plus vos nuits sur Excel. Le logiciel traduit vos documents en devis HT & TTC garantis en 30 secondes.
+                    Lien officiel direct : <code class="text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-amber-400/30">https://logiciel-devis-btp.onrender.com/</code>
                 </div>
             </div>
 
-            <a href="/" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-black text-sm md:text-base shadow-xl shadow-emerald-600/30 flex items-center gap-2 transition transform hover:scale-105 cta-pulse text-decoration-none">
-                <span>🚀</span> <span>CHIFFRER MES ATTACHEMENTS (5 PAGES OFFERTES)</span> <span>➔</span>
+            <a href="https://logiciel-devis-btp.onrender.com/" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-black text-sm md:text-base shadow-xl shadow-emerald-600/30 flex items-center gap-2 transition transform hover:scale-105 cta-pulse text-decoration-none">
+                <span>🚀</span> <span>OUVRIR LE LOGICIEL (5 PAGES OFFERTES)</span> <span>➔</span>
             </a>
         </div>
 
@@ -288,7 +288,7 @@
                 badge: "Profitez de l'Offre",
                 color: "#dc2626",
                 sfx: "cash",
-                text: "Entreprises et BET : gagnez des journées entières de travail ! Profitez immédiatement de notre offre de lancement : 5 pages de chiffrage 100% offertes. Encaissez vos recharges par BaridiMob. Cliquez maintenant et testez la puissance du logiciel !",
+                text: "Entreprises et BET : gagnez des journées entières de travail ! Profitez immédiatement de notre offre de lancement : 5 pages de chiffrage 100% offertes sur logiciel tiret devis tiret btp point onrender point com. Cliquez maintenant sur le lien et testez la puissance du logiciel !",
                 draw: drawScene6
             }
         ];
@@ -830,36 +830,45 @@
         function drawScene6(t, dur) {
             drawAuthenticSoftwareUI("Passez à l'Action : 5 Pages Offertes Immédiatement !", "action");
 
-            const cX = 80, cY = 175, cW = 800, cH = 300;
+            const cX = 80, cY = 165, cW = 800, cH = 315;
             ctx.fillStyle = '#0f172a';
             ctx.strokeStyle = '#f59e0b';
             ctx.lineWidth = 3;
             ctx.beginPath(); ctx.roundRect(cX, cY, cW, cH, 16); ctx.fill(); ctx.stroke();
 
             ctx.font = '900 22px Plus Jakarta Sans'; ctx.fillStyle = '#fef08a';
-            ctx.fillText("🎁 OFFRE DE LANCEMENT : 5 PAGES 100% GRATUITES !", cX + 40, cY + 45);
+            ctx.fillText("🎁 OFFRE DE LANCEMENT : 5 PAGES 100% GRATUITES !", cX + 40, cY + 40);
 
             ctx.font = 'bold 13px Plus Jakarta Sans'; ctx.fillStyle = '#ffffff';
-            ctx.fillText("Entreprises, BET, Métreurs : testez immédiatement vos vrais attachements sans risquer 1 dinar.", cX + 40, cY + 75);
+            ctx.fillText("Entreprises, BET, Métreurs : testez immédiatement vos vrais attachements sans risquer 1 dinar.", cX + 40, cY + 66);
 
             ctx.fillStyle = '#1e293b';
-            ctx.beginPath(); ctx.roundRect(cX + 40, cY + 100, cW - 80, 95, 10); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(cX + 40, cY + 82, cW - 80, 72, 10); ctx.fill();
 
-            ctx.font = '900 13px Plus Jakarta Sans'; ctx.fillStyle = '#38bdf8';
-            ctx.fillText("📲 Recharge Simple par BaridiMob / CCP :", cX + 60, cY + 128);
+            ctx.font = '900 12px Plus Jakarta Sans'; ctx.fillStyle = '#38bdf8';
+            ctx.fillText("📲 Recharge Simple par BaridiMob / CCP :", cX + 60, cY + 104);
             ctx.font = 'bold 13px JetBrains Mono'; ctx.fillStyle = '#ffffff';
-            ctx.fillText("RIP BaridiMob : 007 99999 0023456789 25", cX + 60, cY + 152);
+            ctx.fillText("RIP BaridiMob : 007 99999 0023456789 25", cX + 60, cY + 125);
             ctx.font = 'bold 11px Plus Jakarta Sans'; ctx.fillStyle = '#94a3b8';
-            ctx.fillText("Validation immédiate par le Titulaire • Pack 50 pages = 4 000 DZD • Mensuel = 4 500 DZD", cX + 60, cY + 175);
+            ctx.fillText("Validation immédiate par le Titulaire • Pack 50 pages = 4 000 DZD • Mensuel = 4 500 DZD", cX + 60, cY + 144);
+
+            // Bannière Lien Officiel Direct
+            ctx.fillStyle = '#0369a1';
+            ctx.beginPath(); ctx.roundRect(cX + 40, cY + 165, cW - 80, 38, 8); ctx.fill();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.font = '900 13px JetBrains Mono'; ctx.fillStyle = '#ffffff';
+            ctx.fillText("🌐 ACCÈS DIRECT : https://logiciel-devis-btp.onrender.com/", cX + 110, cY + 189);
 
             const bPulse = 1 + Math.sin(t * 10) * 0.03;
             ctx.save();
-            ctx.translate(cX + cW / 2, cY + 245);
+            ctx.translate(cX + cW / 2, cY + 252);
             ctx.scale(bPulse, bPulse);
             ctx.fillStyle = '#dc2626';
-            ctx.beginPath(); ctx.roundRect(-240, -22, 480, 44, 10); ctx.fill();
+            ctx.beginPath(); ctx.roundRect(-240, -20, 480, 40, 10); ctx.fill();
             ctx.font = '900 14px Plus Jakarta Sans'; ctx.fillStyle = '#ffffff';
-            ctx.fillText("➔ CLIQUEZ ICI & COMMENCEZ À CHIFFRER GRATUITEMENT !", -210, 6);
+            ctx.fillText("➔ CLIQUEZ SUR LE LIEN & CHIFFREZ GRATUITEMENT !", -210, 6);
             ctx.restore();
         }
 
