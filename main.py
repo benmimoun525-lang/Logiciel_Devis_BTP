@@ -671,6 +671,26 @@ async def chiffrer_page(
             detail="Aucune clé Gemini configurée. Veuillez ajouter votre clé Gemini dans l'interface ou dans les paramètres du serveur."
         )
 
+    # Vérification stricte des crédits dans Supabase avant tout calcul (Rupture d'accès si solde épuisé)
+    sb = get_supabase_client()
+    if sb and telephone and isinstance(telephone, str):
+        tel_clean = re.sub(r'[^0-9+]', '', telephone)
+        if tel_clean:
+            try:
+                c_res = sb.table("clients").select("id, credits_pages, type_abonnement").eq("telephone", tel_clean).execute()
+                if c_res.data and len(c_res.data) > 0:
+                    c_info = c_res.data[0]
+                    solde_actuel = c_info.get("credits_pages", 0)
+                    if solde_actuel <= 0:
+                        raise HTTPException(
+                            status_code=402,
+                            detail="🚫 Solde de crédits épuisé (0 page restante). Veuillez recharger votre compte via BaridiMob pour continuer à chiffrer vos devis."
+                        )
+            except HTTPException as he:
+                raise he
+            except Exception:
+                pass
+
     # Directives contextuelles selon la stratégie commerciale et la région
     instructions_strategie = ""
     if strategie_prix == "moins_disant":

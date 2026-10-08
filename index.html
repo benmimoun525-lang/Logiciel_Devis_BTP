@@ -2883,6 +2883,13 @@
             return;
         }
 
+        const clientActifVerif = JSON.parse(localStorage.getItem('btp_client') || '{}');
+        if (clientActifVerif.credits_pages !== undefined && clientActifVerif.credits_pages <= 0) {
+            alert("🚫 Votre solde de crédits est épuisé (0 page restante).\n\nVeuillez recharger votre compte via BaridiMob pour continuer à chiffrer vos devis.");
+            ouvrirModalAbonnements();
+            return;
+        }
+
         const nbPages = pagesQueue.length || 1;
         if (!confirm(`📑 Analyser tout le document (${nbPages} page(s)) en 1 clic direct ?\n\nL'IA Gemini va analyser toutes les pages simultanément pour extraire l'ensemble des lots et articles.`)) {
             return;
@@ -2969,6 +2976,14 @@
                     const errText = await response.text();
                     let errDetail = errText;
                     try { errDetail = JSON.parse(errText).detail || errText; } catch(e) {}
+                    if (response.status === 402) {
+                        alert(errDetail);
+                        ouvrirModalAbonnements();
+                        pBox.style.display = 'none';
+                        statusBadge.className = 'status-pill status-idle';
+                        statusBadge.textContent = 'Solde épuisé. Recharge requise.';
+                        return;
+                    }
                     throw new Error(`Erreur ${response.status} : ${errDetail}`);
                 }
 
@@ -3060,6 +3075,13 @@
     }
 
     async function executerTraitementPage(idx) {
+        const clientActifVerif = JSON.parse(localStorage.getItem('btp_client') || '{}');
+        if (clientActifVerif.credits_pages !== undefined && clientActifVerif.credits_pages <= 0) {
+            alert("🚫 Votre solde de crédits est épuisé (0 page restante).\n\nVeuillez recharger votre compte via BaridiMob pour continuer à chiffrer vos devis.");
+            ouvrirModalAbonnements();
+            return;
+        }
+
         const page = pagesQueue[idx];
         const statusBadge = document.getElementById('statusBadge');
         page.status = 'cours';
@@ -3120,6 +3142,15 @@
                     const errText = await response.text();
                     let errDetail = errText;
                     try { errDetail = JSON.parse(errText).detail || errText; } catch(e) {}
+                    if (response.status === 402) {
+                        alert(errDetail);
+                        page.status = 'attente';
+                        rafraichirGrilleVignettes();
+                        ouvrirModalAbonnements();
+                        statusBadge.className = 'status-pill status-idle';
+                        statusBadge.textContent = 'Solde épuisé. Recharge requise.';
+                        return;
+                    }
                     throw new Error(`Erreur ${response.status} : ${errDetail}`);
                 }
 
