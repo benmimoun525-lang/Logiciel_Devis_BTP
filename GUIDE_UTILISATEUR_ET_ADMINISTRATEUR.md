@@ -121,18 +121,28 @@ Quand le solde du client s'épuise :
 
 En tant que créateur et propriétaire du logiciel, voici comment tu gères ton activité :
 
-### 1. Accès au Cockpit Administrateur
-1. Dans l'en-tête du logiciel, clique sur le bouton violet : **"👑 Titulaire (Admin)"**.
-2. Saisis ton **code PIN secret** : `7788` *(ce code reste mémorisé sur ton smartphone)*.
+### 1. Accès au Cockpit Administrateur & Sécurité
+1. Dans l'en-tête du logiciel, clique sur le bouton : **"👑 Titulaire"**.
+2. Saisis ton **mot de passe secret / code PIN** (affiché sous forme masquée `••••••••` avec icône œil pour préserver la totale confidentialité).
 3. Le tableau de bord s'ouvre avec les indicateurs clés en direct :
-   - 🤖 **Clés Gemini en service** : nombre de clés IA actives.
-   - 👥 **Clients inscrits** : nombre d'artisans utilisant la plateforme.
-   - 📑 **Devis générés** : total des devis créés.
-   - ⏳ **En attente virement** : nombre de clients ayant payé par BaridiMob.
+   - 👥 **Clients connectés & Abonnés** : jauge et ratio de conversion en direct.
+   - 💰 **Revenus validés** : total des dinars encaissés.
+   - 🤖 **Clés Gemini en service** : rotation des clés IA.
+   - 📑 **Devis générés** : total des devis créés sur la plateforme.
+   - ⏳ **En attente virement** : virements BaridiMob soumis par les clients.
 
-### 2. Encaissement de l'Argent Réel & Validation des Crédits
-- **Flux financier** : L'argent des clients arrive directement sur ton compte BaridiMob / CCP via ton RIP :
-  `007 99999 0023456789 25`.
+### 2. Configuration de tes Coordonnées BaridiMob & Modification du Mot de Passe
+- **Mes Coordonnées BaridiMob & CCP** :
+  1. Dans l'espace Titulaire, renseigne ton vrai **RIP BaridiMob (20 chiffres)**, ton **Nom/Prénom**, ton **CCP/Clé** et ton **WhatsApp**.
+  2. Clique sur **"💾 Enregistrer mes coordonnées BaridiMob"**.
+  3. Ces coordonnées sont immédiatement diffusées à tous les clients lorsqu'ils souhaitent recharger leur compte !
+- **Changement de mot de passe / code PIN** :
+  1. Dans la section **"Sécurité du Compte : Modifier mon Code PIN"**, saisis ton ancien code, ton nouveau code et confirme-le.
+  2. Clique sur **"🔒 Mettre à jour mon mot de passe"**.
+  3. Le nouveau code est haché et chiffré immédiatement.
+
+### 3. Encaissement de l'Argent Réel & Validation des Crédits
+- **Flux financier** : L'argent des clients arrive directement sur ton compte BaridiMob / CCP via ton RIP officiel.
 - **Validation** :
   1. Dès que tu reçois la notification de virement sur ton application BaridiMob (ex: 4 000 DZD reçus de 0550123456), ouvre l'Espace Titulaire du logiciel.
   2. Dans la liste **"Virements BaridiMob & CCP à Valider"**, tu vois la ligne du client avec son téléphone et son numéro de transaction.

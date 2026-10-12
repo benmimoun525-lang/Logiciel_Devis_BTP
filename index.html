@@ -1368,10 +1368,22 @@
         <!-- Espace Virement BaridiMob / CCP -->
         <div style="background: #f8fafc; border: 2px solid #3b82f6; border-radius: 10px; padding: 16px; margin-top: 18px;">
             <div style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem; margin-bottom: 6px;">📲 Recharger mon compte via BaridiMob :</div>
-            <div style="font-size: 0.88rem; color: #334155; margin-bottom: 12px; background: white; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                <b>Coordonnées de virement BaridiMob :</b><br>
-                • <b>RIP BaridiMob :</b> <code style="font-size: 1rem; color: #1e40af; font-weight: bold;">007 99999 0023456789 25</code><br>
-                • <b>Titulaire :</b> Service Chiffrage BTP Algérie
+            <div style="font-size: 0.88rem; color: #334155; margin-bottom: 12px; background: white; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 6px;">Coordonnées officielles de virement BaridiMob & CCP :</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 8px 0; background: #eff6ff; padding: 8px 10px; border-radius: 6px; border: 1px solid #bfdbfe;">
+                    <div>
+                        • <b>RIP BaridiMob :</b> <code id="clientAffichageRip" style="font-size: 1.05rem; color: #1e40af; font-weight: bold; letter-spacing: 1px;">007 99999 0023456789 25</code>
+                    </div>
+                    <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; border-color: #3b82f6; color: #1d4ed8; background: white;" onclick="copierRipClient()">
+                        📋 Copier le RIP
+                    </button>
+                </div>
+                <div style="margin: 4px 0;">• <b>Titulaire du compte :</b> <span id="clientAffichageTitulaire" style="font-weight: 600; color: #0f172a;">Service Chiffrage Devis BTP Algérie</span></div>
+                <div id="clientAffichageCcpLigne" style="margin: 4px 0;">• <b>Compte CCP :</b> <span id="clientAffichageCcp">23456789</span> &nbsp;|&nbsp; <b>Clé :</b> <span id="clientAffichageCle">25</span></div>
+                <div id="clientAffichageTelLigne" style="margin: 4px 0;">• <b>Contact / Reçu WhatsApp :</b> <span id="clientAffichageTel" style="font-weight: bold; color: #059669;">0550 00 00 00</span></div>
+                <div id="clientAffichageInstructions" style="font-size: 0.8rem; color: #64748b; margin-top: 8px; font-style: italic; background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
+                    💡 Veuillez mentionner votre numéro de téléphone dans la note du virement BaridiMob.
+                </div>
             </div>
 
             <div class="form-group" style="margin-bottom: 10px;">
@@ -1477,18 +1489,22 @@
             <button class="close-modal" onclick="fermerModalAdmin()">&times;</button>
         </div>
 
-        <!-- Écran PIN si non authentifié -->
-        <div id="adminPinSection" style="text-align: center; padding: 25px 15px;">
-            <div style="font-size: 2.8rem; margin-bottom: 10px;">🔐</div>
-            <h3 style="margin-top: 0; color: #1e3a8a;">Accès Réservé au Titulaire du Logiciel</h3>
-            <p style="font-size: 0.88rem; color: #64748b; max-width: 440px; margin: 0 auto 16px;">
-                Entrez votre code PIN secret d'administration pour valider les paiements BaridiMob, superviser les clés d'IA et créditer les comptes clients.
+        <!-- Écran PIN sécurisé si non authentifié -->
+        <div id="adminPinSection" style="text-align: center; padding: 28px 15px;">
+            <div style="font-size: 3rem; margin-bottom: 8px;">🔐</div>
+            <h3 style="margin-top: 0; color: #1e3a8a; font-size: 1.25rem;">Accès Privé Titulaire & Administration</h3>
+            <p style="font-size: 0.88rem; color: #64748b; max-width: 460px; margin: 0 auto 18px;">
+                Veuillez saisir votre mot de passe secret pour accéder à la gestion des abonnements, vos coordonnées BaridiMob et la supervision du logiciel.
             </p>
-            <div style="display: flex; justify-content: center; gap: 8px; max-width: 340px; margin: 0 auto 12px;">
-                <input type="password" id="inputAdminPin" class="form-control" placeholder="Code PIN (ex: 7788)" style="text-align: center; font-size: 1.25rem; font-weight: bold; letter-spacing: 4px;">
-                <button class="btn btn-primary" onclick="deverrouillerAdmin()">Déverrouiller</button>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 8px; max-width: 380px; margin: 0 auto 10px; position: relative;">
+                <input type="password" id="inputAdminPin" class="form-control" placeholder="••••••••" style="text-align: center; font-size: 1.3rem; font-weight: bold; letter-spacing: 4px; padding-right: 42px;" onkeydown="if(event.key==='Enter') deverrouillerAdmin()">
+                <button type="button" onclick="basculerVisibilitePin('inputAdminPin', this)" style="position: absolute; right: 145px; background: none; border: none; cursor: pointer; font-size: 1.15rem; color: #64748b; padding: 4px;" title="Afficher/Masquer">👁️</button>
+                <button class="btn btn-primary" style="padding: 10px 18px; font-weight: bold;" onclick="deverrouillerAdmin()">Déverrouiller</button>
             </div>
-            <div style="font-size: 0.8rem; color: #94a3b8;">Code PIN par défaut : <b>7788</b> (personnalisable sur le serveur Render).</div>
+            <div id="adminLoginError" style="display: none; color: #dc2626; font-size: 0.84rem; font-weight: 600; margin-top: 6px;"></div>
+            <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 12px;">
+                🛡️ Accès protégé et chiffré. Toute tentative non autorisée est automatiquement bloquée par le serveur.
+            </div>
         </div>
 
         <!-- Tableau de bord Titulaire (affiché après déverrouillage) -->
@@ -1524,6 +1540,91 @@
                     <div style="font-size: 0.76rem; color: #334155; font-weight: 700;">🤖 CLÉS GÉMINI IA</div>
                     <div id="adminKeysCount" style="font-size: 1.5rem; font-weight: 900; color: #0f172a;">--</div>
                     <div style="font-size: 0.72rem; color: #059669;">Rotation active</div>
+                </div>
+            </div>
+
+            <!-- Configuration Coordonnées BaridiMob & CCP du Titulaire -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.3rem;">📲</span>
+                        <h4 style="margin: 0; color: #1e3a8a; font-size: 0.98rem;">Mes Coordonnées de Virement BaridiMob & CCP (Visibles par vos clients) :</h4>
+                    </div>
+                    <span style="font-size: 0.75rem; background: #e0f2fe; color: #0369a1; padding: 3px 9px; border-radius: 12px; font-weight: bold;">Diffusé automatiquement aux clients</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">Nom & Prénom / Raison sociale du Titulaire :</label>
+                        <input type="text" id="adminBaridiTitulaire" class="form-control" placeholder="Ex: M. BENMIMOUN ..." style="font-size: 0.88rem;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">Numéro RIP BaridiMob (20 chiffres) :</label>
+                        <input type="text" id="adminBaridiRip" class="form-control" placeholder="007 99999 0023456789 25" style="font-size: 0.88rem; font-family: monospace; font-weight: bold; color: #1e40af;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">N° Compte CCP & Clé :</label>
+                        <div style="display: flex; gap: 6px;">
+                            <input type="text" id="adminBaridiCcp" class="form-control" placeholder="N° CCP (ex: 23456789)" style="flex: 2; font-size: 0.88rem;">
+                            <input type="text" id="adminBaridiCle" class="form-control" placeholder="Clé" style="flex: 1; font-size: 0.88rem;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">Tél / WhatsApp pour recevoir les reçus :</label>
+                        <input type="text" id="adminBaridiTel" class="form-control" placeholder="Ex: 0550 12 34 56" style="font-size: 0.88rem;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">Instructions / Message affiché aux clients :</label>
+                    <input type="text" id="adminBaridiInstructions" class="form-control" placeholder="Ex: Veuillez indiquer votre numéro de téléphone dans la note du virement BaridiMob." style="font-size: 0.85rem;">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button class="btn btn-success" style="padding: 8px 18px; font-size: 0.88rem; font-weight: bold;" onclick="enregistrerCoordonneesBaridimob()">
+                        💾 Enregistrer mes coordonnées BaridiMob
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modification Sécurisée du Code PIN / Mot de Passe -->
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 16px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 1.3rem;">🔑</span>
+                    <h4 style="margin: 0; color: #92400e; font-size: 0.98rem;">Sécurité du Compte : Modifier mon Code PIN / Mot de passe :</h4>
+                </div>
+                <p style="font-size: 0.8rem; color: #78350f; margin: 0 0 12px 0;">
+                    Votre mot de passe est chiffré par algorithme cryptographique sécurisé. Il n'est jamais affiché en clair.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <label style="font-size: 0.76rem; font-weight: bold; color: #78350f;">Code PIN Actuel :</label>
+                        <div style="position: relative;">
+                            <input type="password" id="inputAncienPin" class="form-control" placeholder="••••••••" style="font-size: 0.88rem; padding-right: 32px;">
+                            <button type="button" onclick="basculerVisibilitePin('inputAncienPin', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 0.95rem; color: #78350f;" title="Afficher/Masquer">👁️</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.76rem; font-weight: bold; color: #78350f;">Nouveau Code PIN :</label>
+                        <div style="position: relative;">
+                            <input type="password" id="inputNouveauPin" class="form-control" placeholder="Au moins 4 caractères" style="font-size: 0.88rem; padding-right: 32px;">
+                            <button type="button" onclick="basculerVisibilitePin('inputNouveauPin', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 0.95rem; color: #78350f;" title="Afficher/Masquer">👁️</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.76rem; font-weight: bold; color: #78350f;">Confirmer Nouveau PIN :</label>
+                        <div style="position: relative;">
+                            <input type="password" id="inputConfirmerPin" class="form-control" placeholder="Confirmez à l'identique" style="font-size: 0.88rem; padding-right: 32px;">
+                            <button type="button" onclick="basculerVisibilitePin('inputConfirmerPin', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 0.95rem; color: #78350f;" title="Afficher/Masquer">👁️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button class="btn btn-primary" style="background: #b45309; border-color: #92400e; padding: 8px 18px; font-size: 0.88rem; font-weight: bold;" onclick="changerCodePinTitulaire()">
+                        🔒 Mettre à jour mon mot de passe
+                    </button>
                 </div>
             </div>
 
@@ -2623,6 +2724,7 @@
         chargerCompteClientLocal();
         chargerLogoLogiciel();
         chargerJaugeDashboard();
+        chargerInfosBaridimobPubliques();
         chargerBPU();
         verifierConnexionServeur();
     });
@@ -3859,7 +3961,10 @@
         if (ent.rc) document.getElementById('entRc').value = ent.rc;
     }
 
-    function ouvrirModalAbonnements() { document.getElementById('modalAbonnements').style.display = 'flex'; }
+    function ouvrirModalAbonnements() {
+        chargerInfosBaridimobPubliques();
+        document.getElementById('modalAbonnements').style.display = 'flex';
+    }
     function fermerModalAbonnements() { document.getElementById('modalAbonnements').style.display = 'none'; }
 
     function ouvrirModalHistorique() {
@@ -3871,20 +3976,39 @@
     }
 
     // ============================================================
-    // ESPACE TITULAIRE & ADMINISTRATION SAAS
+    // ESPACE TITULAIRE & ADMINISTRATION SAAS (SÉCURITÉ & BARIDIMOB)
     // ============================================================
-    let adminPin = localStorage.getItem('btp_admin_pin') || '';
+    let adminPin = sessionStorage.getItem('btp_admin_pin') || '';
+
+    function basculerVisibilitePin(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁️';
+        }
+    }
 
     function ouvrirModalAdmin() {
         const modal = document.getElementById('modalAdmin');
         if (!modal) return;
         modal.style.display = 'flex';
+        const errEl = document.getElementById('adminLoginError');
+        if (errEl) errEl.style.display = 'none';
+
         if (adminPin) {
             document.getElementById('inputAdminPin').value = adminPin;
             deverrouillerAdmin();
         } else {
             document.getElementById('adminPinSection').style.display = 'block';
             document.getElementById('adminDashboardSection').style.display = 'none';
+            setTimeout(() => {
+                const el = document.getElementById('inputAdminPin');
+                if (el) el.focus();
+            }, 100);
         }
     }
 
@@ -3894,48 +4018,214 @@
     }
 
     async function deverrouillerAdmin() {
-        const pin = (document.getElementById('inputAdminPin').value || '').trim();
-        if (!pin) { alert('Veuillez entrer le code PIN.'); return; }
+        const pinInput = document.getElementById('inputAdminPin');
+        const pin = (pinInput ? pinInput.value : '').trim();
+        const errEl = document.getElementById('adminLoginError');
+        if (errEl) errEl.style.display = 'none';
+
+        if (!pin) {
+            if (errEl) { errEl.textContent = 'Veuillez saisir votre mot de passe secret.'; errEl.style.display = 'block'; }
+            else alert('Veuillez saisir votre mot de passe secret.');
+            return;
+        }
 
         try {
-            const res = await fetch(`${API_BASE}/api/admin/stats?pin=${encodeURIComponent(pin)}`);
-            if (!res.ok) {
-                alert('Code PIN Administrateur incorrect.');
+            const verifRes = await fetch(`${API_BASE}/api/admin/verifier-pin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: pin })
+            });
+
+            if (!verifRes.ok) {
+                const errData = await verifRes.json().catch(() => ({}));
+                const msg = errData.detail || 'Code PIN ou mot de passe incorrect.';
+                if (errEl) {
+                    errEl.textContent = '❌ ' + msg;
+                    errEl.style.display = 'block';
+                } else {
+                    alert('❌ ' + msg);
+                }
                 return;
             }
-            const data = await res.json();
+
+            const verifData = await verifRes.json();
             adminPin = pin;
-            localStorage.setItem('btp_admin_pin', pin);
+            sessionStorage.setItem('btp_admin_pin', pin);
+
+            // Charger les coordonnées BaridiMob dans les champs admin
+            if (verifData.baridimob) {
+                const b = verifData.baridimob;
+                if (document.getElementById('adminBaridiTitulaire')) document.getElementById('adminBaridiTitulaire').value = b.titulaire || '';
+                if (document.getElementById('adminBaridiRip')) document.getElementById('adminBaridiRip').value = b.rip || '';
+                if (document.getElementById('adminBaridiCcp')) document.getElementById('adminBaridiCcp').value = b.ccp || '';
+                if (document.getElementById('adminBaridiCle')) document.getElementById('adminBaridiCle').value = b.cle || '';
+                if (document.getElementById('adminBaridiTel')) document.getElementById('adminBaridiTel').value = b.telephone || '';
+                if (document.getElementById('adminBaridiInstructions')) document.getElementById('adminBaridiInstructions').value = b.instructions || '';
+            }
 
             document.getElementById('adminPinSection').style.display = 'none';
             document.getElementById('adminDashboardSection').style.display = 'block';
 
-            if (data.stats) {
-                const s = data.stats;
-                if (document.getElementById('adminKeysCount')) document.getElementById('adminKeysCount').textContent = s.keys_count || 1;
-                if (document.getElementById('adminClientsTotal')) document.getElementById('adminClientsTotal').textContent = s.clients_total || 0;
-                if (document.getElementById('adminClientsAbonnes')) document.getElementById('adminClientsAbonnes').textContent = s.clients_abonnes || 0;
-                if (document.getElementById('adminClientsGratuits')) document.getElementById('adminClientsGratuits').textContent = (s.clients_gratuits || 0) + ' en essai';
-                if (document.getElementById('adminTauxAbonnes')) document.getElementById('adminTauxAbonnes').textContent = (s.taux_abonnements_pct || 0) + '%';
-                if (document.getElementById('adminRevenusTotal')) document.getElementById('adminRevenusTotal').textContent = formaterMontant(s.revenus_total_dzd || 0);
-                if (document.getElementById('adminDevisCount')) document.getElementById('adminDevisCount').textContent = s.devis_total || 0;
-                if (document.getElementById('adminPaiementsCount')) document.getElementById('adminPaiementsCount').textContent = s.paiements_en_attente || 0;
+            // Charger les statistiques administratives
+            const sRes = await fetch(`${API_BASE}/api/admin/stats?pin=${encodeURIComponent(pin)}`);
+            if (sRes.ok) {
+                const data = await sRes.json();
+                if (data.stats) {
+                    const s = data.stats;
+                    if (document.getElementById('adminKeysCount')) document.getElementById('adminKeysCount').textContent = s.keys_count || 1;
+                    if (document.getElementById('adminClientsTotal')) document.getElementById('adminClientsTotal').textContent = s.clients_total || 0;
+                    if (document.getElementById('adminClientsAbonnes')) document.getElementById('adminClientsAbonnes').textContent = s.clients_abonnes || 0;
+                    if (document.getElementById('adminClientsGratuits')) document.getElementById('adminClientsGratuits').textContent = (s.clients_gratuits || 0) + ' en essai';
+                    if (document.getElementById('adminTauxAbonnes')) document.getElementById('adminTauxAbonnes').textContent = (s.taux_abonnements_pct || 0) + '%';
+                    if (document.getElementById('adminRevenusTotal')) document.getElementById('adminRevenusTotal').textContent = formaterMontant(s.revenus_total_dzd || 0);
+                    if (document.getElementById('adminDevisCount')) document.getElementById('adminDevisCount').textContent = s.devis_total || 0;
+                    if (document.getElementById('adminPaiementsCount')) document.getElementById('adminPaiementsCount').textContent = s.paiements_en_attente || 0;
 
-                actualiserAffichageJauge(s);
+                    actualiserAffichageJauge(s);
+                }
             }
 
             chargerAdminPaiements();
         } catch(e) {
-            alert('Erreur de connexion au serveur admin.');
+            if (errEl) { errEl.textContent = '⚠️ Erreur de communication avec le serveur.'; errEl.style.display = 'block'; }
+            else alert('Erreur de communication avec le serveur.');
         }
     }
 
     function deconnecterAdmin() {
         adminPin = '';
+        sessionStorage.removeItem('btp_admin_pin');
         localStorage.removeItem('btp_admin_pin');
-        document.getElementById('inputAdminPin').value = '';
+        if (document.getElementById('inputAdminPin')) document.getElementById('inputAdminPin').value = '';
+        if (document.getElementById('adminLoginError')) document.getElementById('adminLoginError').style.display = 'none';
         document.getElementById('adminPinSection').style.display = 'block';
         document.getElementById('adminDashboardSection').style.display = 'none';
+        ajouterLog("🔒 Session titulaire verrouillée avec succès.");
+    }
+
+    async function enregistrerCoordonneesBaridimob() {
+        if (!adminPin) {
+            alert("Session verrouillée. Veuillez vous ré-authentifier.");
+            return;
+        }
+        const titulaire = (document.getElementById('adminBaridiTitulaire').value || '').trim();
+        const rip = (document.getElementById('adminBaridiRip').value || '').trim();
+        const ccp = (document.getElementById('adminBaridiCcp').value || '').trim();
+        const cle = (document.getElementById('adminBaridiCle').value || '').trim();
+        const tel = (document.getElementById('adminBaridiTel').value || '').trim();
+        const instructions = (document.getElementById('adminBaridiInstructions').value || '').trim();
+
+        if (!rip) {
+            alert("Veuillez renseigner votre numéro RIP BaridiMob.");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/baridimob-config`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pin: adminPin,
+                    baridimob: { titulaire, rip, ccp, cle, telephone: tel, instructions }
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alert("✅ Vos coordonnées BaridiMob & CCP ont été enregistrées avec succès !\n\nElles sont désormais automatiquement affichées à vos clients lorsqu'ils rechargent leur compte.");
+                chargerInfosBaridimobPubliques();
+                ajouterLog("📲 Coordonnées de paiement BaridiMob mises à jour.");
+            } else {
+                alert("❌ Erreur : " + (data.detail || data.message || "Impossible d'enregistrer"));
+            }
+        } catch(e) {
+            alert("Erreur de connexion au serveur.");
+        }
+    }
+
+    async function changerCodePinTitulaire() {
+        if (!adminPin) {
+            alert("Session verrouillée.");
+            return;
+        }
+        const ancien = (document.getElementById('inputAncienPin').value || '').trim();
+        const nouveau = (document.getElementById('inputNouveauPin').value || '').trim();
+        const confirmer = (document.getElementById('inputConfirmerPin').value || '').trim();
+
+        if (!ancien) {
+            alert("Veuillez saisir votre code PIN / mot de passe actuel.");
+            return;
+        }
+        if (!nouveau || nouveau.length < 4) {
+            alert("Le nouveau code PIN / mot de passe doit comporter au moins 4 caractères.");
+            return;
+        }
+        if (nouveau !== confirmer) {
+            alert("La confirmation du mot de passe ne correspond pas au nouveau code PIN.");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/changer-pin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ancien_pin: ancien, nouveau_pin: nouveau })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                adminPin = nouveau;
+                sessionStorage.setItem('btp_admin_pin', nouveau);
+                document.getElementById('inputAncienPin').value = '';
+                document.getElementById('inputNouveauPin').value = '';
+                document.getElementById('inputConfirmerPin').value = '';
+                document.getElementById('inputAdminPin').value = nouveau;
+                alert("✅ Votre code PIN / mot de passe a été modifié et chiffré avec succès !\n\nConservez-le précieusement, il est indispensable pour déverrouiller votre Espace Titulaire.");
+                ajouterLog("🔐 Code PIN titulaire modifié avec succès.");
+            } else {
+                alert("❌ " + (data.detail || data.message || "Erreur de modification du code PIN"));
+            }
+        } catch(e) {
+            alert("Erreur de communication avec le serveur.");
+        }
+    }
+
+    async function chargerInfosBaridimobPubliques() {
+        try {
+            const res = await fetch(`${API_BASE}/api/public/baridimob-info`);
+            if (res.ok) {
+                const data = await res.json();
+                const b = data.baridimob;
+                if (b) {
+                    const elRip = document.getElementById('clientAffichageRip');
+                    const elTitulaire = document.getElementById('clientAffichageTitulaire');
+                    const elCcp = document.getElementById('clientAffichageCcp');
+                    const elCle = document.getElementById('clientAffichageCle');
+                    const elTel = document.getElementById('clientAffichageTel');
+                    const elInstr = document.getElementById('clientAffichageInstructions');
+
+                    if (elRip && b.rip) elRip.textContent = b.rip;
+                    if (elTitulaire && b.titulaire) elTitulaire.textContent = b.titulaire;
+                    if (elCcp && b.ccp) elCcp.textContent = b.ccp;
+                    if (elCle && b.cle) elCle.textContent = b.cle;
+                    if (elTel && b.telephone) elTel.textContent = b.telephone;
+                    if (elInstr && b.instructions) elInstr.textContent = '💡 ' + b.instructions;
+                }
+            }
+        } catch(e) {}
+    }
+
+    function copierRipClient() {
+        const ripEl = document.getElementById('clientAffichageRip');
+        if (!ripEl) return;
+        const ripClean = ripEl.textContent.replace(/\s+/g, '');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(ripClean).then(() => {
+                alert("✅ RIP BaridiMob copié dans le presse-papier :\n\n" + ripClean + "\n\nVous pouvez le coller directement dans l'application BaridiMob.");
+            }).catch(() => {
+                prompt("Copiez le RIP BaridiMob ci-dessous :", ripClean);
+            });
+        } else {
+            prompt("Copiez le RIP BaridiMob ci-dessous :", ripClean);
+        }
     }
 
     // ============================================================

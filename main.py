@@ -3,6 +3,7 @@ import io
 import re
 import json
 import time
+import hashlib
 import asyncio
 from typing import List, Optional
 from dotenv import load_dotenv
@@ -1061,7 +1062,162 @@ async def declarer_paiement_baridimob(payload: dict = Body(...)):
     except Exception as e:
         return {"success": False, "detail": str(e)}
 
-ADMIN_PIN = (os.environ.get("ADMIN_PIN") or "7788").strip()
+# ============================================================
+# SÉCURITÉ TITULAIRE, CODE PIN CHIFFRÉ & COORDONNÉES BARIDIMOB
+# ============================================================
+ADMIN_CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "admin_config.json")
+PIN_SALT = "BTP_DEV_ALG_2026_SECRET_SALT"
+
+def hash_admin_pin(pin: str) -> str:
+    """Hachage cryptographique sécurisé du PIN avec sel pour empêcher toute rétro-ingénierie."""
+    return hashlib.sha256(f"{PIN_SALT}:{pin.strip()}".encode("utf-8")).hexdigest()
+
+def charger_admin_config() -> dict:
+    """Charge la configuration administrative et les coordonnées officielles BaridiMob."""
+    cfg = {
+        "pin_hash": None,
+        "baridimob": {
+            "titulaire": "Service Chiffrage Devis BTP Algérie",
+            "rip": "007 99999 0023456789 25",
+            "ccp": "23456789",
+            "cle": "25",
+            "telephone": "0550 00 00 00",
+            "instructions": "Veuillez renseigner votre numéro de téléphone dans la note du virement BaridiMob."
+        }
+    }
+    if os.path.exists(ADMIN_CONFIG_FILE):
+        try:
+            with open(ADMIN_CONFIG_FILE, "r", encoding="utf-8") as f:
+                saved = json.load(f)
+                if isinstance(saved, dict):
+                    if "pin_hash" in saved and saved["pin_hash"]:
+                        cfg["pin_hash"] = saved["pin_hash"]
+                    if "baridimob" in saved and isinstance(saved["baridimob"], dict):
+                        cfg["baridimob"].update(saved["baridimob"])
+        except Exception:
+            pass
+    return cfg
+
+def sauvegarder_admin_config(cfg: dict):
+    """Sauvegarde la configuration administrative de manière persistante."""
+    try:
+        with open(ADMIN_CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Erreur sauvegarde admin_config: {e}")
+
+# Protection anti-brute-force (Max 5 tentatives consécutives / 5 minutes)
+FAILED_PIN_ATTEMPTS = []
+MAX_FAILED_PIN_ATTEMPTS = 5
+LOCKOUT_WINDOW_SECONDS = 300
+
+def verifier_tentatives_autorisees():
+    now = time.time()
+    recent = [t for t in FAILED_PIN_ATTEMPTS if now - t < LOCKOUT_WINDOW_SECONDS]
+    FAILED_PIN_ATTEMPTS[:] = recent
+    if len(recent) >= MAX_FAILED_PIN_ATTEMPTS:
+        attente = int(LOCKOUT_WINDOW_SECONDS - (now - recent[0]))
+        raise HTTPException(
+            status_code=429,
+            detail=f"⛔ Accès temporairement verrouillé pour des raisons de sécurité. Réessayez dans {max(1, attente)} secondes."
+        )
+
+def valider_admin_pin(pin_propose: str) -> bool:
+    """Vérifie le code PIN de manière sécurisée sans jamais l'exposer."""
+    verifier_tentatives_autorisees()
+    if not pin_propose or not isinstance(pin_propose, str):
+        FAILED_PIN_ATTEMPTS.append(time.time())
+        return False
+    pin_clean = pin_propose.strip()
+    cfg = charger_admin_config()
+    stored_hash = cfg.get("pin_hash")
+    if stored_hash:
+        if hash_admin_pin(pin_clean) == stored_hash:
+            FAILED_PIN_ATTEMPTS.clear()
+            return True
+        else:
+            FAILED_PIN_ATTEMPTS.append(time.time())
+            return False
+
+    env_pin = (os.environ.get("ADMIN_PIN") or "7788").strip()
+    if pin_clean == env_pin:
+        FAILED_PIN_ATTEMPTS.clear()
+        return True
+    else:
+        FAILED_PIN_ATTEMPTS.append(time.time())
+        return False
+
+@app.get("/api/public/baridimob-info")
+async def public_baridimob_info():
+    """Endpoint public pour diffuser aux clients les coordonnées officielles BaridiMob configurées par le titulaire."""
+    cfg = charger_admin_config()
+    b = cfg.get("baridimob", {})
+    return {
+        "success": True,
+        "baridimob": {
+            "titulaire": b.get("titulaire") or "Service Chiffrage Devis BTP Algérie",
+            "rip": b.get("rip") or "007 99999 0023456789 25",
+            "ccp": b.get("ccp") or "23456789",
+            "cle": b.get("cle") or "25",
+            "telephone": b.get("telephone") or "0550 00 00 00",
+            "instructions": b.get("instructions") or "Veuillez renseigner votre numéro de téléphone dans la note du virement BaridiMob."
+        }
+    }
+
+@app.post("/api/admin/verifier-pin")
+async def api_verifier_pin(payload: dict = Body(...)):
+    """Vérification sécurisée du code PIN titulaire au déverrouillage de la session."""
+    pin = payload.get("pin")
+    if not valider_admin_pin(pin):
+        raise HTTPException(status_code=401, detail="Code PIN ou mot de passe incorrect.")
+    cfg = charger_admin_config()
+    return {
+        "success": True,
+        "message": "Session titulaire sécurisée déverrouillée avec succès.",
+        "baridimob": cfg.get("baridimob", {})
+    }
+
+@app.post("/api/admin/changer-pin")
+async def api_changer_pin(payload: dict = Body(...)):
+    """Modification sécurisée du code PIN par le titulaire."""
+    ancien_pin = payload.get("ancien_pin")
+    nouveau_pin = (payload.get("nouveau_pin") or "").strip()
+    if not valider_admin_pin(ancien_pin):
+        raise HTTPException(status_code=401, detail="Le code PIN actuel est incorrect.")
+    if len(nouveau_pin) < 4:
+        raise HTTPException(status_code=400, detail="Le nouveau code PIN / mot de passe doit comporter au moins 4 caractères.")
+    
+    cfg = charger_admin_config()
+    cfg["pin_hash"] = hash_admin_pin(nouveau_pin)
+    sauvegarder_admin_config(cfg)
+    FAILED_PIN_ATTEMPTS.clear()
+    return {
+        "success": True,
+        "message": "Code PIN / Mot de passe mis à jour et chiffré avec succès !"
+    }
+
+@app.post("/api/admin/baridimob-config")
+async def api_sauvegarder_baridimob_config(payload: dict = Body(...)):
+    """Permet au titulaire de configurer ses véritables coordonnées de virement BaridiMob & CCP."""
+    pin = payload.get("pin")
+    if not valider_admin_pin(pin):
+        raise HTTPException(status_code=401, detail="Code PIN Titulaire incorrect.")
+    b_info = payload.get("baridimob", {})
+    cfg = charger_admin_config()
+    cfg["baridimob"] = {
+        "titulaire": str(b_info.get("titulaire") or "").strip(),
+        "rip": str(b_info.get("rip") or "").strip(),
+        "ccp": str(b_info.get("ccp") or "").strip(),
+        "cle": str(b_info.get("cle") or "").strip(),
+        "telephone": str(b_info.get("telephone") or "").strip(),
+        "instructions": str(b_info.get("instructions") or "").strip()
+    }
+    sauvegarder_admin_config(cfg)
+    return {
+        "success": True,
+        "message": "Vos coordonnées BaridiMob & CCP ont été enregistrées avec succès !",
+        "baridimob": cfg["baridimob"]
+    }
 
 @app.get("/api/public/jauge-stats")
 async def public_jauge_stats():
@@ -1103,7 +1259,7 @@ async def public_jauge_stats():
 
 @app.get("/api/admin/stats")
 async def admin_stats(pin: str = None):
-    if pin != ADMIN_PIN:
+    if not valider_admin_pin(pin):
         raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
     sb = get_supabase_client()
     keys = get_api_keys_pool()
@@ -1155,7 +1311,7 @@ async def admin_stats(pin: str = None):
 
 @app.get("/api/admin/paiements")
 async def admin_liste_paiements(pin: str = None):
-    if pin != ADMIN_PIN:
+    if not valider_admin_pin(pin):
         raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
     sb = get_supabase_client()
     if not sb:
@@ -1169,7 +1325,7 @@ async def admin_liste_paiements(pin: str = None):
 @app.post("/api/admin/valider-paiement")
 async def admin_valider_paiement(payload: dict = Body(...)):
     pin = payload.get("pin")
-    if pin != ADMIN_PIN:
+    if not valider_admin_pin(pin):
         raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
     paiement_id = payload.get("paiement_id")
     action = payload.get("action", "valider")
@@ -1207,7 +1363,7 @@ async def admin_valider_paiement(payload: dict = Body(...)):
 @app.post("/api/admin/crediter-client")
 async def admin_crediter_client(payload: dict = Body(...)):
     pin = payload.get("pin")
-    if pin != ADMIN_PIN:
+    if not valider_admin_pin(pin):
         raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
     telephone = re.sub(r'[^0-9+]', '', payload.get("telephone", ""))
     credits_a_ajouter = int(payload.get("credits", 50))
