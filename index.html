@@ -2825,10 +2825,13 @@
 
     async function traiterPageSelectionnee() {
         if (indexSelectionne === null) return;
+        if (!verifierSoldeAvantAction(1)) return;
         await executerTraitementPage(indexSelectionne);
     }
 
     async function traiterToutesLesPages() {
+        if (!verifierSoldeAvantAction(1)) return;
+
         const btnTout = document.getElementById('btnTraiterTout');
         const btnPage = document.getElementById('btnLancerPage');
         const btnDirect = document.getElementById('btnAnalyserToutDirect');
@@ -2850,15 +2853,35 @@
 
         let traitees = 0;
         for (let i = 0; i < pagesNonTraitees.length; i++) {
+            // Vérification stricte avant chaque page
+            if (!verifierSoldeAvantAction(1)) {
+                ajouterLog("🛑 Traitement interrompu : Solde de crédits épuisé.");
+                break;
+            }
+
             const item = pagesNonTraitees[i];
             selectionnerPage(item.idx);
             ajouterLog(`▶️ [Page ${i + 1}/${pagesNonTraitees.length}] Lancement de l'analyse : "${item.p.name}"...`);
 
-            await executerTraitementPage(item.idx);
+            const ok = await executerTraitementPage(item.idx);
+            if (!ok) {
+                const cVerif = obtenirOuCreerClient();
+                if (cVerif.credits_pages <= 0) {
+                    ajouterLog("🛑 Solde de crédits épuisé (0 page restante). Arrêt immédiat.");
+                    break;
+                }
+            }
             traitees++;
             const pct = Math.round((traitees / pagesNonTraitees.length) * 100);
             pBar.style.width = pct + '%';
             pLbl.textContent = `${traitees} / ${pagesNonTraitees.length} (${pct}%)`;
+
+            // Vérifier après la page si le solde est tombé à 0
+            const cPost = obtenirOuCreerClient();
+            if (cPost.credits_pages <= 0) {
+                ajouterLog("🛑 Solde de crédits épuisé (0 page restante). Arrêt du traitement des pages suivantes.");
+                break;
+            }
 
             // Si d'autres pages suivent, observer une pause de 3s pour éviter les limitations de débit Gemini API (429)
             if (i < pagesNonTraitees.length - 1) {
@@ -2883,14 +2906,11 @@
             return;
         }
 
-        const clientActifVerif = JSON.parse(localStorage.getItem('btp_client') || '{}');
-        if (clientActifVerif.credits_pages !== undefined && clientActifVerif.credits_pages <= 0) {
-            alert("🚫 Votre solde de crédits est épuisé (0 page restante).\n\nVeuillez recharger votre compte via BaridiMob pour continuer à chiffrer vos devis.");
-            ouvrirModalAbonnements();
+        const nbPages = pagesQueue.length || 1;
+        if (!verifierSoldeAvantAction(nbPages)) {
             return;
         }
 
-        const nbPages = pagesQueue.length || 1;
         if (!confirm(`📑 Analyser tout le document (${nbPages} page(s)) en 1 clic direct ?\n\nL'IA Gemini va analyser toutes les pages simultanément pour extraire l'ensemble des lots et articles.`)) {
             return;
         }
@@ -2936,10 +2956,10 @@
             formData.append('gemini_key', GEMINI_API_KEY.trim());
         }
 
-        const clientActif = JSON.parse(localStorage.getItem('btp_client') || '{}');
-        if (clientActif.telephone) {
-            formData.append('telephone', clientActif.telephone);
-        }
+        const clientActif = obtenirOuCreerClient();
+        formData.append('telephone', clientActif.telephone || clientActif.id);
+        formData.append('credits_actuels', clientActif.credits_pages);
+        formData.append('nb_pages_demandees', nbPages);
 
         statusBadge.textContent = `Analyse globale IA en cours (${nbPages} pages)...`;
         pBar.style.width = '55%';
@@ -2977,8 +2997,7 @@
                     let errDetail = errText;
                     try { errDetail = JSON.parse(errText).detail || errText; } catch(e) {}
                     if (response.status === 402) {
-                        alert(errDetail);
-                        ouvrirModalAbonnements();
+                        declencherRuptureAbonnement(errDetail);
                         pBox.style.display = 'none';
                         statusBadge.className = 'status-pill status-idle';
                         statusBadge.textContent = 'Solde épuisé. Recharge requise.';
@@ -2991,11 +3010,7 @@
                 pBar.style.width = '100%';
                 pLbl.textContent = '100%';
 
-                if (data.credits_restants !== undefined && data.credits_restants !== null) {
-                    clientActif.credits_pages = data.credits_restants;
-                    localStorage.setItem('btp_client', JSON.stringify(clientActif));
-                    chargerCompteClientLocal();
-                }
+                consommerCreditApresSucces(nbPages, data.credits_restants);
 
                 if (data.client && !document.getElementById('nomClient').value) {
                     document.getElementById('nomClient').value = data.client;
@@ -3075,11 +3090,8 @@
     }
 
     async function executerTraitementPage(idx) {
-        const clientActifVerif = JSON.parse(localStorage.getItem('btp_client') || '{}');
-        if (clientActifVerif.credits_pages !== undefined && clientActifVerif.credits_pages <= 0) {
-            alert("🚫 Votre solde de crédits est épuisé (0 page restante).\n\nVeuillez recharger votre compte via BaridiMob pour continuer à chiffrer vos devis.");
-            ouvrirModalAbonnements();
-            return;
+        if (!verifierSoldeAvantAction(1)) {
+            return false;
         }
 
         const page = pagesQueue[idx];
@@ -3107,10 +3119,10 @@
             formData.append('gemini_key', GEMINI_API_KEY.trim());
         }
 
-        const clientActif = JSON.parse(localStorage.getItem('btp_client') || '{}');
-        if (clientActif.telephone) {
-            formData.append('telephone', clientActif.telephone);
-        }
+        const clientActif = obtenirOuCreerClient();
+        formData.append('telephone', clientActif.telephone || clientActif.id);
+        formData.append('credits_actuels', clientActif.credits_pages);
+        formData.append('nb_pages_demandees', 1);
 
         let success = false;
         let retries = 0;
@@ -3143,26 +3155,17 @@
                     let errDetail = errText;
                     try { errDetail = JSON.parse(errText).detail || errText; } catch(e) {}
                     if (response.status === 402) {
-                        alert(errDetail);
+                        declencherRuptureAbonnement(errDetail);
                         page.status = 'attente';
                         rafraichirGrilleVignettes();
-                        ouvrirModalAbonnements();
                         statusBadge.className = 'status-pill status-idle';
                         statusBadge.textContent = 'Solde épuisé. Recharge requise.';
-                        return;
+                        return false;
                     }
                     throw new Error(`Erreur ${response.status} : ${errDetail}`);
                 }
 
                 const data = await response.json();
-
-                // Mise à jour du solde de crédits
-                if (data.credits_restants !== undefined && data.credits_restants !== null) {
-                    clientActif.credits_pages = data.credits_restants;
-                    localStorage.setItem('btp_client', JSON.stringify(clientActif));
-                    chargerCompteClientLocal();
-                    ajouterLog(`🪙 Crédit décompté. Solde restant : ${data.credits_restants} page(s).`);
-                }
 
                 // Pré-remplir automatiquement client/projet si détectés
                 if (data.client && !document.getElementById('nomClient').value) {
@@ -3194,6 +3197,10 @@
                     statusBadge.className = 'status-pill status-done';
                     statusBadge.textContent = `Analyse terminée — aucun article détecté.`;
                 }
+
+                // Décompte garanti du crédit et rupture automatique si solde = 0
+                consommerCreditApresSucces(1, data.credits_restants);
+                return true;
 
             } catch (err) {
                 retries++;
@@ -4239,7 +4246,137 @@
         document.getElementById('modalConfidentialite').style.display = 'none';
     }
 
-    // Gestion du compte client Supabase & Crédits
+    // ============================================================
+    // GESTION INVIOLABLE DU COMPTE CLIENT & CRÉDITS (RUPTURE À 0)
+    // ============================================================
+
+    function obtenirOuCreerClient() {
+        let client = null;
+        try {
+            client = JSON.parse(localStorage.getItem('btp_client'));
+        } catch (e) {
+            client = null;
+        }
+
+        // Empreinte appareil pour éviter le contournement par suppression de btp_client
+        let quotaAppareil = localStorage.getItem('btp_device_pages_consommees');
+        let pagesConsommees = quotaAppareil ? parseInt(quotaAppareil, 10) : 0;
+
+        if (!client || typeof client !== 'object') {
+            const creditsInitiaux = Math.max(0, 5 - pagesConsommees);
+            client = {
+                id: 'btp_usr_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+                nom_complet: 'Client Invité',
+                telephone: '',
+                credits_pages: creditsInitiaux,
+                pages_consommees: pagesConsommees,
+                type_abonnement: 'gratuit'
+            };
+            localStorage.setItem('btp_client', JSON.stringify(client));
+        } else {
+            if (client.credits_pages === undefined || client.credits_pages === null || isNaN(client.credits_pages)) {
+                client.credits_pages = Math.max(0, 5 - pagesConsommees);
+                localStorage.setItem('btp_client', JSON.stringify(client));
+            }
+        }
+        return client;
+    }
+
+    function actualiserAffichageCredits(solde) {
+        const nb = Math.max(0, parseInt(solde, 10) || 0);
+        const badge = document.getElementById('soldeCreditsBadge');
+        const clientBadge = document.getElementById('clientCreditsAffiche');
+        const btnCompte = document.getElementById('btnCompteClient');
+
+        if (badge) {
+            if (nb <= 0) {
+                badge.innerHTML = `<span style="color:#ef4444; font-weight:900;">0 p. 🔒 (Épuisé)</span>`;
+            } else {
+                badge.textContent = `${nb}`;
+            }
+        }
+        if (clientBadge) {
+            clientBadge.textContent = `${nb}`;
+            clientBadge.style.color = nb <= 0 ? "#ef4444" : "#d97706";
+        }
+        if (btnCompte) {
+            if (nb <= 0) {
+                btnCompte.style.border = "2px solid #ef4444";
+                btnCompte.style.background = "#7f1d1d";
+            } else {
+                btnCompte.style.border = "";
+                btnCompte.style.background = "";
+            }
+        }
+    }
+
+    function declencherRuptureAbonnement(message) {
+        const client = obtenirOuCreerClient();
+        client.credits_pages = 0;
+        localStorage.setItem('btp_client', JSON.stringify(client));
+        localStorage.setItem('btp_device_pages_consommees', '5');
+        actualiserAffichageCredits(0);
+
+        const msgDefaut = "🚫 Solde de crédits épuisé (0 page restante) !\n\n" +
+                          "Vos 5 pages gratuites offertes sont intégralement consommées.\n\n" +
+                          "Le système est automatiquement verrouillé. Pour continuer à chiffrer vos devis et exporter en Excel (.xlsx), veuillez recharger votre compte via BaridiMob.";
+
+        alert(message || msgDefaut);
+        ouvrirModalAbonnements();
+    }
+
+    function verifierSoldeAvantAction(nbPagesDemandees = 1) {
+        const client = obtenirOuCreerClient();
+        const solde = parseInt(client.credits_pages, 10);
+
+        if (isNaN(solde) || solde <= 0) {
+            declencherRuptureAbonnement();
+            return false;
+        }
+
+        if (solde < nbPagesDemandees) {
+            declencherRuptureAbonnement(
+                `⚠️ Solde insuffisant !\n\n` +
+                `Votre solde actuel est de ${solde} crédit(s) restant(s), mais ce document nécessite ${nbPagesDemandees} page(s).\n\n` +
+                `Veuillez recharger votre compte via BaridiMob pour traiter l'intégralité du document.`
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    function consommerCreditApresSucces(nbPagesTraitees = 1, soldeServeur = null) {
+        const client = obtenirOuCreerClient();
+        let nouveauSolde = 0;
+
+        if (soldeServeur !== null && soldeServeur !== undefined && !isNaN(soldeServeur)) {
+            nouveauSolde = Math.max(0, parseInt(soldeServeur, 10));
+        } else {
+            nouveauSolde = Math.max(0, (parseInt(client.credits_pages, 10) || 0) - nbPagesTraitees);
+        }
+
+        client.credits_pages = nouveauSolde;
+        client.pages_consommees = (parseInt(client.pages_consommees, 10) || 0) + nbPagesTraitees;
+        localStorage.setItem('btp_client', JSON.stringify(client));
+
+        const quotaAppareil = parseInt(localStorage.getItem('btp_device_pages_consommees') || '0', 10);
+        localStorage.setItem('btp_device_pages_consommees', String(quotaAppareil + nbPagesTraitees));
+
+        actualiserAffichageCredits(nouveauSolde);
+        ajouterLog(`🪙 Crédit décompté (-${nbPagesTraitees} p.). Solde restant : ${nouveauSolde} page(s).`);
+
+        // RUPTURE IMMÉDIATE DÈS QUE LE SOLDE ATTEINT 0 !
+        if (nouveauSolde <= 0) {
+            declencherRuptureAbonnement(
+                "🎉 Félicitations ! Vos 5 pages de chiffrage offertes ont été intégralement utilisées !\n\n" +
+                "Le logiciel se verrouille automatiquement.\n" +
+                "Pour continuer à chiffrer vos soumissions et attachements, rechargez votre compte par BaridiMob (Pack 50 pages = 4 000 DZD)."
+            );
+        }
+        return nouveauSolde;
+    }
+
     function ouvrirModalCompte() {
         chargerCompteClientLocal();
         document.getElementById('modalCompte').style.display = 'flex';
@@ -4265,9 +4402,14 @@
                 chargerCompteClientLocal();
                 ajouterLog(`👤 Compte connecté : ${data.client.nom_complet} (${data.client.credits_pages || 0} crédits restants).`);
                 alert(`Bienvenue ${data.client.nom_complet} !\nSolde actuel : ${data.client.credits_pages || 0} page(s) de devis.`);
+                if ((data.client.credits_pages || 0) <= 0) {
+                    declencherRuptureAbonnement();
+                }
             }
         } catch (e) {
-            const offlineClient = { telephone: tel, nom_complet: nom, credits_pages: 5 };
+            const offlineClient = obtenirOuCreerClient();
+            offlineClient.telephone = tel;
+            offlineClient.nom_complet = nom;
             localStorage.setItem('btp_client', JSON.stringify(offlineClient));
             chargerCompteClientLocal();
             ajouterLog(`👤 Compte enregistré en mode local.`);
@@ -4275,27 +4417,33 @@
     }
 
     function deconnecterClient() {
-        localStorage.removeItem('btp_client');
+        const c = obtenirOuCreerClient();
+        localStorage.setItem('btp_device_pages_consommees', String(c.pages_consommees || 5));
+        c.telephone = '';
+        c.nom_complet = 'Client Déconnecté';
+        c.credits_pages = 0; // Aucun crédit anonyme supplémentaire
+        localStorage.setItem('btp_client', JSON.stringify(c));
+
         document.getElementById('compteConnecteBloc').style.display = 'none';
         document.getElementById('compteFormConnexion').style.display = 'block';
-        document.getElementById('soldeCreditsBadge').textContent = '0';
-        ajouterLog('👋 Compte déconnecté.');
+        actualiserAffichageCredits(0);
+        ajouterLog('👋 Compte déconnecté. Reconnectez-vous pour retrouver vos crédits.');
     }
 
     function chargerCompteClientLocal() {
-        const c = JSON.parse(localStorage.getItem('btp_client') || 'null');
-        if (c) {
+        const c = obtenirOuCreerClient();
+        if (c.telephone) {
             document.getElementById('compteConnecteBloc').style.display = 'block';
             document.getElementById('compteFormConnexion').style.display = 'none';
             document.getElementById('clientNomAffiche').textContent = c.nom_complet || 'Client BTP';
             document.getElementById('clientTelAffiche').textContent = c.telephone || '';
-            document.getElementById('clientCreditsAffiche').textContent = c.credits_pages !== undefined ? c.credits_pages : 5;
-            document.getElementById('soldeCreditsBadge').textContent = c.credits_pages !== undefined ? c.credits_pages : 5;
+            document.getElementById('clientCreditsAffiche').textContent = c.credits_pages !== undefined ? c.credits_pages : 0;
+            actualiserAffichageCredits(c.credits_pages);
             rafraichirSoldeServeur(c.telephone);
         } else {
             document.getElementById('compteConnecteBloc').style.display = 'none';
             document.getElementById('compteFormConnexion').style.display = 'block';
-            document.getElementById('soldeCreditsBadge').textContent = '5';
+            actualiserAffichageCredits(c.credits_pages);
         }
     }
 
@@ -4307,8 +4455,10 @@
                 const data = await res.json();
                 if (data.client) {
                     localStorage.setItem('btp_client', JSON.stringify(data.client));
-                    document.getElementById('clientCreditsAffiche').textContent = data.client.credits_pages || 0;
-                    document.getElementById('soldeCreditsBadge').textContent = data.client.credits_pages || 0;
+                    actualiserAffichageCredits(data.client.credits_pages);
+                    if ((data.client.credits_pages || 0) <= 0) {
+                        declencherRuptureAbonnement();
+                    }
                 }
             }
         } catch(e) {}

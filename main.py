@@ -658,11 +658,20 @@ async def chiffrer_page(
     texte_descriptif: str = Form(None),
     page_num: int = Form(1),
     telephone: str = Form(None),
+    credits_actuels: Optional[int] = Form(None),
+    nb_pages_demandees: Optional[int] = Form(1),
     gemini_key: str = Form(None),
     strategie_prix: str = Form("moins_disant"),
     region: str = Form("centre")
 ):
     global current_key_index
+
+    # 1. Vérification stricte du solde local transmis (barrière d'accès immédiate)
+    if credits_actuels is not None and int(credits_actuels) <= 0:
+        raise HTTPException(
+            status_code=402,
+            detail="🚫 Solde de crédits épuisé (0 page restante). Veuillez recharger votre compte via BaridiMob pour continuer à chiffrer vos devis."
+        )
 
     keys_pool = get_api_keys_pool(client_key=gemini_key)
     if not keys_pool:
@@ -671,21 +680,39 @@ async def chiffrer_page(
             detail="Aucune clé Gemini configurée. Veuillez ajouter votre clé Gemini dans l'interface ou dans les paramètres du serveur."
         )
 
-    # Vérification stricte des crédits dans Supabase avant tout calcul (Rupture d'accès si solde épuisé)
+    # 2. Vérification stricte des crédits dans Supabase avant tout calcul (Rupture d'accès si solde épuisé)
     sb = get_supabase_client()
-    if sb and telephone and isinstance(telephone, str):
-        tel_clean = re.sub(r'[^0-9+]', '', telephone)
+    client_sb = None
+    if sb and telephone and isinstance(telephone, str) and telephone.strip():
+        tel_clean = re.sub(r'[^0-9+a-zA-Z_-]', '', telephone.strip())
         if tel_clean:
             try:
                 c_res = sb.table("clients").select("id, credits_pages, type_abonnement").eq("telephone", tel_clean).execute()
+                if not c_res.data:
+                    c_res = sb.table("clients").select("id, credits_pages, type_abonnement").eq("id", tel_clean).execute()
+
                 if c_res.data and len(c_res.data) > 0:
-                    c_info = c_res.data[0]
-                    solde_actuel = c_info.get("credits_pages", 0)
+                    client_sb = c_res.data[0]
+                    solde_actuel = int(client_sb.get("credits_pages", 0) or 0)
                     if solde_actuel <= 0:
                         raise HTTPException(
                             status_code=402,
                             detail="🚫 Solde de crédits épuisé (0 page restante). Veuillez recharger votre compte via BaridiMob pour continuer à chiffrer vos devis."
                         )
+                else:
+                    # Enregistrer automatiquement le nouveau client avec ses 5 pages offertes
+                    try:
+                        new_c = {
+                            "telephone": tel_clean,
+                            "nom_complet": "Client Invité BTP",
+                            "type_abonnement": "gratuit",
+                            "credits_pages": 5
+                        }
+                        ins = sb.table("clients").insert(new_c).execute()
+                        if ins.data:
+                            client_sb = ins.data[0]
+                    except Exception:
+                        pass
             except HTTPException as he:
                 raise he
             except Exception:
@@ -781,21 +808,26 @@ async def chiffrer_page(
 
                 current_key_index = (key_idx + 1) % total_keys
 
-                # Décompte automatique du crédit page dans Supabase
+                # Décompte automatique et garanti du crédit page
+                nb_a_deduire = max(1, int(nb_pages_demandees or 1))
+                if fichiers_a_traiter and len(fichiers_a_traiter) > 1:
+                    nb_a_deduire = max(nb_a_deduire, len(fichiers_a_traiter))
+
                 credits_restants = None
-                sb = get_supabase_client()
-                if sb and telephone and isinstance(telephone, str):
+                if sb and client_sb:
                     try:
-                        tel_clean = re.sub(r'[^0-9+]', '', telephone)
-                        c_res = sb.table("clients").select("id, credits_pages").eq("telephone", tel_clean).execute()
-                        if c_res.data and len(c_res.data) > 0:
-                            solde = c_res.data[0].get("credits_pages", 0)
-                            if solde > 0:
-                                solde -= 1
-                                sb.table("clients").update({"credits_pages": solde}).eq("id", c_res.data[0]["id"]).execute()
-                            credits_restants = solde
+                        solde = int(client_sb.get("credits_pages", 0) or 0)
+                        nouveau_solde = max(0, solde - nb_a_deduire)
+                        sb.table("clients").update({"credits_pages": nouveau_solde}).eq("id", client_sb["id"]).execute()
+                        credits_restants = nouveau_solde
                     except Exception:
                         pass
+
+                if credits_restants is None:
+                    if credits_actuels is not None:
+                        credits_restants = max(0, int(credits_actuels) - nb_a_deduire)
+                    else:
+                        credits_restants = 0
 
                 return {
                     "success": True,
