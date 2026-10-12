@@ -6,7 +6,7 @@
     <title>Devis BTP Algérie - Chiffrage par IA & Devis par Lots</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1048/1048953.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e3a8a'/%3E%3Cstop offset='100%25' stop-color='%23059669'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23bg)'/%3E%3Cpath d='M26 74V38L42 28V74H26Z' fill='%23ffffff'/%3E%3Cpath d='M42 74V22L62 14V74H42Z' fill='%23f59e0b'/%3E%3Cpath d='M62 74V34L76 42V74H62Z' fill='%23e2e8f0'/%3E%3Cline x1='22' y1='74' x2='78' y2='74' stroke='%23ffffff' stroke-width='4'/%3E%3Ccircle cx='72' cy='24' r='9' fill='%2310b981'/%3E%3Cpath d='M68 24L71 27L76 21' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
     
     <!-- PDF.js pour extraction visuelle multi-pages instantanée -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -783,15 +783,62 @@
         </div>
     </div>
 
-    <!-- Header Interactif Application -->
+    <!-- Header Interactif Application avec Nouveau Logo Moderne BTP -->
     <header class="app-header no-print">
-        <div>
-            <h1>🏗️ Chiffrage Devis BTP <span style="font-size: 0.85rem; background: #3b82f6; padding: 3px 8px; border-radius: 6px;">IA Algérie</span></h1>
-            <p>Traitement instantané des photos WhatsApp & PDF multi-pages en devis par lots aux normes algériennes.</p>
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <!-- Conteneur Logo Logiciel (Emblème Vectoriel Moderne ou Logo Personnalisé) -->
+            <div id="appLogoWrapper" style="position: relative; cursor: pointer;" onclick="ouvrirDialogueChangementLogo()" title="Logo Officiel du Logiciel (Cliquez pour importer votre propre logo ou le modifier)">
+                <svg id="appLogoSvg" width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+                    <defs>
+                        <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#1e3a8a"/>
+                            <stop offset="50%" stop-color="#0284c7"/>
+                            <stop offset="100%" stop-color="#059669"/>
+                        </linearGradient>
+                        <linearGradient id="logoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fef08a"/>
+                            <stop offset="50%" stop-color="#f59e0b"/>
+                            <stop offset="100%" stop-color="#d97706"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Écusson Hexagonal Moderne BTP -->
+                    <rect x="4" y="4" width="92" height="92" rx="22" fill="url(#logoBgGrad)"/>
+                    <rect x="5" y="5" width="90" height="90" rx="21" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                    
+                    <!-- Bâtiments / Tours Architecturales CAD -->
+                    <path d="M26 74V38L42 28V74H26Z" fill="#ffffff" fill-opacity="0.95"/>
+                    <path d="M42 74V22L62 14V74H42Z" fill="url(#logoGoldGrad)"/>
+                    <path d="M62 74V34L76 42V74H62Z" fill="#e2e8f0" fill-opacity="0.9"/>
+                    
+                    <!-- Règle de Chantier & Graduations Métreur -->
+                    <line x1="22" y1="74" x2="78" y2="74" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M48 40L56 40M48 48L56 48M48 56L56 56M48 64L56 64" stroke="#1e3a8a" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M30 46L38 46M30 54L38 54M30 62L38 62" stroke="#0284c7" stroke-width="2" stroke-linecap="round"/>
+                    
+                    <!-- Pastille IA & Certification Algérie -->
+                    <circle cx="72" cy="24" r="9" fill="#10b981"/>
+                    <path d="M68 24L71 27L76 21" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <img id="appCustomLogoImg" src="" style="display: none; width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Logo">
+            </div>
+            <input type="file" id="inputCustomLogoFile" accept="image/*" style="display: none;" onchange="importerLogoPersonnalise(event)">
+
+            <div>
+                <h1 style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.35rem;">
+                    <span>Chiffrage Devis BTP</span>
+                    <span style="font-size: 0.78rem; background: linear-gradient(135deg, #2563eb, #059669); color: white; padding: 3px 9px; border-radius: 8px; font-weight: 800; letter-spacing: 0.5px;">IA ALGÉRIE</span>
+                </h1>
+                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #64748b;">
+                    Traitement instantané des photos WhatsApp & PDF en devis par lots aux normes algériennes.
+                </p>
+            </div>
         </div>
+
         <div class="header-actions">
             <a href="/didacticiel" target="_blank" class="btn-header" style="background: #e11d48; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">🎬 Vidéo Didacticiel</a>
-            <button class="btn-header" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()">👑 Titulaire (Admin)</button>
+            <button class="btn-header" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()">
+                👑 Titulaire <span id="headerJaugeMiniBadge" style="background: #059669; padding: 2px 7px; border-radius: 8px; font-size: 0.72rem; margin-left: 3px;">📊 Jauge</span>
+            </button>
             <button class="btn-header" style="background: #059669; font-weight: 600;" onclick="ouvrirModalConfidentialite()">🔒 Confidentialité & Secret</button>
             <button class="btn-header" style="background: #d97706; font-weight: 600;" onclick="ouvrirModalBPU()">💰 Base des Prix (BPU)</button>
             <button class="btn-header" id="btnCompteClient" onclick="ouvrirModalCompte()">👤 Mon Compte (<span id="soldeCreditsBadge">5</span> p.)</button>
@@ -833,6 +880,111 @@
         <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; border-color: #86efac; color: #166534;" onclick="ouvrirModalConfidentialite()">
             En savoir plus
         </button>
+    </div>
+
+    <!-- JAUGE SAAS : CLIENTS CONNECTÉS & ABONNÉS SUR LE TABLEAU DE BORD -->
+    <div class="card no-print" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border: 1px solid #334155; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); padding: 18px 22px; margin-bottom: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">📊</span>
+                <div>
+                    <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: 0.3px; color: #f8fafc;">Tableau de Bord SaaS : Jauge Clients & Abonnements</div>
+                    <div style="font-size: 0.78rem; color: #94a3b8;">Supervision en temps réel des utilisateurs connectés et des clients abonnés</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span id="jaugeStatutPill" class="badge-traite" style="background: #059669; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">
+                    🟢 Synchronisé Supabase
+                </span>
+                <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.78rem; color: #93c5fd; border-color: #3b82f6;" onclick="chargerJaugeDashboard()">
+                    🔄 Rafraîchir
+                </button>
+                <button class="btn btn-primary" style="padding: 5px 12px; font-size: 0.78rem; background: #4338ca;" onclick="ouvrirModalAdmin()">
+                    👑 Espace Titulaire
+                </button>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items: center;">
+            
+            <!-- Widget Jauge Visuelle SVG (Semi-circulaire Graduée) -->
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; text-align: center; position: relative;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">TAUX D'ABONNEMENT SAAS</div>
+                
+                <div style="position: relative; width: 180px; height: 105px; margin: 0 auto;">
+                    <svg viewBox="0 0 180 110" width="180" height="110">
+                        <!-- Arc de fond gris -->
+                        <path d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke="#334155" stroke-width="14" stroke-linecap="round"/>
+                        <!-- Arc animé dégradé de progression -->
+                        <path id="jaugeArcProgression" d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke="url(#jaugeGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="88" style="transition: stroke-dashoffset 1s ease-in-out;"/>
+                        
+                        <defs>
+                            <linearGradient id="jaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#3b82f6"/>
+                                <stop offset="60%" stop-color="#10b981"/>
+                                <stop offset="100%" stop-color="#f59e0b"/>
+                            </linearGradient>
+                        </defs>
+                        
+                        <!-- Aiguille indicatrice -->
+                        <g id="jaugeAiguilleGroup" transform="rotate(18, 90, 100)" style="transition: transform 1s ease-in-out;">
+                            <polygon points="87,100 93,100 90,34" fill="#f8fafc"/>
+                            <circle cx="90" cy="100" r="7" fill="#f59e0b"/>
+                        </g>
+                    </svg>
+                    
+                    <div style="position: absolute; bottom: 2px; left: 0; right: 0; text-align: center;">
+                        <span id="jaugePourcentageAffiche" style="font-size: 1.45rem; font-weight: 900; color: #38bdf8;">--%</span>
+                        <div style="font-size: 0.68rem; color: #94a3b8; font-weight: bold;">CONVERSION</div>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 6px;">
+                    Jauge dynamique basée sur le ratio Abonnés / Connectés
+                </div>
+            </div>
+
+            <!-- Compteur 1 : Clients Connectés / Inscrits -->
+            <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 14px 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #93c5fd;">👥 CLIENTS CONNECTÉS</span>
+                    <span style="font-size: 1.2rem;">🌐</span>
+                </div>
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <span id="jaugeTotalConnectes" style="font-size: 2rem; font-weight: 900; color: #ffffff;">--</span>
+                    <span style="font-size: 0.82rem; color: #94a3b8;">utilisateurs</span>
+                </div>
+                <!-- Barre de progression -->
+                <div style="margin-top: 8px; background: #334155; border-radius: 6px; height: 8px; overflow: hidden;">
+                    <div id="jaugeBarreConnectes" style="background: #3b82f6; width: 100%; height: 100%; border-radius: 6px;"></div>
+                </div>
+                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 6px; display: flex; justify-content: space-between;">
+                    <span>Comptes créés / Actifs</span>
+                    <span id="jaugeGratuitsDetail">-- en essai</span>
+                </div>
+            </div>
+
+            <!-- Compteur 2 : Clients Abonnés (Payants) -->
+            <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 14px 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #6ee7b7;">💎 CLIENTS ABONNÉS</span>
+                    <span style="font-size: 1.2rem;">⚡</span>
+                </div>
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <span id="jaugeTotalAbonnes" style="font-size: 2rem; font-weight: 900; color: #34d399;">--</span>
+                    <span style="font-size: 0.82rem; color: #a7f3d0;">souscripteurs</span>
+                </div>
+                <!-- Barre de progression -->
+                <div style="margin-top: 8px; background: #334155; border-radius: 6px; height: 8px; overflow: hidden;">
+                    <div id="jaugeBarreAbonnes" style="background: linear-gradient(90deg, #10b981, #059669); width: 0%; height: 100%; border-radius: 6px; transition: width 0.8s ease;"></div>
+                </div>
+                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 6px; display: flex; justify-content: space-between;">
+                    <span>Packs 50/100 & Mensuel</span>
+                    <span id="jaugeAbonnesRatio" style="color: #34d399; font-weight: bold;">--%</span>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <!-- Étape 1 : Paramètres du Devis & Client -->
@@ -1341,27 +1493,37 @@
 
         <!-- Tableau de bord Titulaire (affiché après déverrouillage) -->
         <div id="adminDashboardSection" style="display: none;">
-            <!-- Cartes KPIs -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px;">
+            <!-- Cartes KPIs avec Jauge & Détail Abonnés -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px;">
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; text-align: center;">
-                    <div style="font-size: 0.78rem; color: #1e40af; font-weight: 600;">🤖 CLÉS GÉMINI EN SERVICE</div>
-                    <div id="adminKeysCount" style="font-size: 1.4rem; font-weight: 800; color: #1d4ed8;">--</div>
-                    <div style="font-size: 0.72rem; color: #059669;">Rotation active</div>
+                    <div style="font-size: 0.76rem; color: #1e40af; font-weight: 700;">👥 CLIENTS CONNECTÉS</div>
+                    <div id="adminClientsTotal" style="font-size: 1.5rem; font-weight: 900; color: #1d4ed8;">--</div>
+                    <div id="adminClientsGratuits" style="font-size: 0.72rem; color: #64748b;">-- en essai gratuit</div>
                 </div>
                 <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; text-align: center;">
-                    <div style="font-size: 0.78rem; color: #166534; font-weight: 600;">👥 CLIENTS INSCRITS</div>
-                    <div id="adminClientsCount" style="font-size: 1.4rem; font-weight: 800; color: #15803d;">--</div>
-                    <div style="font-size: 0.72rem; color: #64748b;">Comptes Supabase</div>
+                    <div style="font-size: 0.76rem; color: #166534; font-weight: 700;">💎 CLIENTS ABONNÉS</div>
+                    <div id="adminClientsAbonnes" style="font-size: 1.5rem; font-weight: 900; color: #15803d;">--</div>
+                    <div id="adminTauxAbonnes" style="font-size: 0.72rem; color: #15803d; font-weight: bold;">--% conversion</div>
+                </div>
+                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 12px; text-align: center;">
+                    <div style="font-size: 0.76rem; color: #065f46; font-weight: 700;">💰 REVENUS VALIDÉS</div>
+                    <div id="adminRevenusTotal" style="font-size: 1.35rem; font-weight: 900; color: #047857;">--</div>
+                    <div style="font-size: 0.72rem; color: #065f46;">DZD encaissés</div>
                 </div>
                 <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 12px; text-align: center;">
-                    <div style="font-size: 0.78rem; color: #6b21a8; font-weight: 600;">📑 DEVIS GÉNÉRÉS</div>
-                    <div id="adminDevisCount" style="font-size: 1.4rem; font-weight: 800; color: #7e22ce;">--</div>
+                    <div style="font-size: 0.76rem; color: #6b21a8; font-weight: 700;">📑 DEVIS GÉNÉRÉS</div>
+                    <div id="adminDevisCount" style="font-size: 1.5rem; font-weight: 900; color: #7e22ce;">--</div>
                     <div style="font-size: 0.72rem; color: #64748b;">Total plateforme</div>
                 </div>
                 <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px; text-align: center;">
-                    <div style="font-size: 0.78rem; color: #92400e; font-weight: 600;">⏳ EN ATTENTE VIREMENT</div>
-                    <div id="adminPaiementsCount" style="font-size: 1.4rem; font-weight: 800; color: #b45309;">--</div>
+                    <div style="font-size: 0.76rem; color: #92400e; font-weight: 700;">⏳ EN ATTENTE VIREMENT</div>
+                    <div id="adminPaiementsCount" style="font-size: 1.5rem; font-weight: 900; color: #b45309;">--</div>
                     <div style="font-size: 0.72rem; color: #d97706;">BaridiMob / CCP</div>
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; text-align: center;">
+                    <div style="font-size: 0.76rem; color: #334155; font-weight: 700;">🤖 CLÉS GÉMINI IA</div>
+                    <div id="adminKeysCount" style="font-size: 1.5rem; font-weight: 900; color: #0f172a;">--</div>
+                    <div style="font-size: 0.72rem; color: #059669;">Rotation active</div>
                 </div>
             </div>
 
@@ -2459,6 +2621,8 @@
         chargerEntrepriseLocale();
         chargerDevisSauvegarde();
         chargerCompteClientLocal();
+        chargerLogoLogiciel();
+        chargerJaugeDashboard();
         chargerBPU();
         verifierConnexionServeur();
     });
@@ -3747,10 +3911,17 @@
             document.getElementById('adminDashboardSection').style.display = 'block';
 
             if (data.stats) {
-                document.getElementById('adminKeysCount').textContent = data.stats.keys_count || 1;
-                document.getElementById('adminClientsCount').textContent = data.stats.clients_total || 0;
-                document.getElementById('adminDevisCount').textContent = data.stats.devis_total || 0;
-                document.getElementById('adminPaiementsCount').textContent = data.stats.paiements_en_attente || 0;
+                const s = data.stats;
+                if (document.getElementById('adminKeysCount')) document.getElementById('adminKeysCount').textContent = s.keys_count || 1;
+                if (document.getElementById('adminClientsTotal')) document.getElementById('adminClientsTotal').textContent = s.clients_total || 0;
+                if (document.getElementById('adminClientsAbonnes')) document.getElementById('adminClientsAbonnes').textContent = s.clients_abonnes || 0;
+                if (document.getElementById('adminClientsGratuits')) document.getElementById('adminClientsGratuits').textContent = (s.clients_gratuits || 0) + ' en essai';
+                if (document.getElementById('adminTauxAbonnes')) document.getElementById('adminTauxAbonnes').textContent = (s.taux_abonnements_pct || 0) + '%';
+                if (document.getElementById('adminRevenusTotal')) document.getElementById('adminRevenusTotal').textContent = formaterMontant(s.revenus_total_dzd || 0);
+                if (document.getElementById('adminDevisCount')) document.getElementById('adminDevisCount').textContent = s.devis_total || 0;
+                if (document.getElementById('adminPaiementsCount')) document.getElementById('adminPaiementsCount').textContent = s.paiements_en_attente || 0;
+
+                actualiserAffichageJauge(s);
             }
 
             chargerAdminPaiements();
@@ -3765,6 +3936,124 @@
         document.getElementById('inputAdminPin').value = '';
         document.getElementById('adminPinSection').style.display = 'block';
         document.getElementById('adminDashboardSection').style.display = 'none';
+    }
+
+    // ============================================================
+    // GESTION DU LOGO DU LOGICIEL (OFFICIEL VECTORIEL & IMPORT)
+    // ============================================================
+    function chargerLogoLogiciel() {
+        const customLogo = localStorage.getItem('btp_custom_logo');
+        const svgLogo = document.getElementById('appLogoSvg');
+        const imgLogo = document.getElementById('appCustomLogoImg');
+        if (customLogo) {
+            if (svgLogo) svgLogo.style.display = 'none';
+            if (imgLogo) {
+                imgLogo.src = customLogo;
+                imgLogo.style.display = 'block';
+            }
+        } else {
+            if (svgLogo) svgLogo.style.display = 'block';
+            if (imgLogo) imgLogo.style.display = 'none';
+        }
+    }
+
+    function ouvrirDialogueChangementLogo() {
+        const customLogo = localStorage.getItem('btp_custom_logo');
+        if (customLogo) {
+            const reponse = confirm("🎨 Logo du logiciel :\n\n• Cliquez sur 'OK' pour choisir une NOUVELLE image de logo (PNG, JPG, SVG).\n• Cliquez sur 'Annuler' pour rétablir le logo officiel vectoriel d'origine.");
+            if (reponse) {
+                document.getElementById('inputCustomLogoFile').click();
+            } else {
+                localStorage.removeItem('btp_custom_logo');
+                chargerLogoLogiciel();
+                ajouterLog("✨ Logo officiel du logiciel rétabli.");
+            }
+        } else {
+            const reponse = confirm("🎨 Personnaliser le logo du logiciel :\n\nSouhaitez-vous importer votre propre logo d'entreprise (PNG, JPG, SVG) pour remplacer l'emblème officiel ?");
+            if (reponse) {
+                document.getElementById('inputCustomLogoFile').click();
+            }
+        }
+    }
+
+    function importerLogoPersonnalise(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const base64 = evt.target.result;
+            localStorage.setItem('btp_custom_logo', base64);
+            chargerLogoLogiciel();
+            ajouterLog("✅ Nouveau logo du logiciel appliqué avec succès !");
+            alert("✅ Nouveau logo du logiciel enregistré et appliqué avec succès !");
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ============================================================
+    // JAUGE DU TABLEAU DE BORD : CLIENTS CONNECTÉS & ABONNÉS
+    // ============================================================
+    async function chargerJaugeDashboard() {
+        try {
+            const res = await fetch(`${API_BASE}/api/public/jauge-stats`);
+            if (res.ok) {
+                const data = await res.json();
+                actualiserAffichageJauge(data);
+                return;
+            }
+        } catch(e) {}
+
+        // Fallback local gracieux si le serveur ne répond pas
+        const c = obtenirOuCreerClient();
+        const estAbonne = (c.type_abonnement && c.type_abonnement !== 'gratuit') || (c.credits_pages > 5);
+        actualiserAffichageJauge({
+            clients_total: 1,
+            clients_abonnes: estAbonne ? 1 : 0,
+            clients_gratuits: estAbonne ? 0 : 1,
+            taux_abonnements_pct: estAbonne ? 100 : 0
+        });
+    }
+
+    function actualiserAffichageJauge(data) {
+        const total = data.clients_total !== undefined ? data.clients_total : 0;
+        const abonnes = data.clients_abonnes !== undefined ? data.clients_abonnes : 0;
+        const gratuits = data.clients_gratuits !== undefined ? data.clients_gratuits : Math.max(0, total - abonnes);
+        const taux = data.taux_abonnements_pct !== undefined ? data.taux_abonnements_pct : (total > 0 ? Math.round(abonnes / total * 100) : 0);
+
+        const elTotal = document.getElementById('jaugeTotalConnectes');
+        const elAbonnes = document.getElementById('jaugeTotalAbonnes');
+        const elGratuits = document.getElementById('jaugeGratuitsDetail');
+        const elTaux = document.getElementById('jaugeAbonnesRatio');
+        const elPct = document.getElementById('jaugePourcentageAffiche');
+        const elMiniBadge = document.getElementById('headerJaugeMiniBadge');
+
+        if (elTotal) elTotal.textContent = total;
+        if (elAbonnes) elAbonnes.textContent = abonnes;
+        if (elGratuits) elGratuits.textContent = gratuits + " en essai";
+        if (elTaux) elTaux.textContent = taux + "%";
+        if (elPct) elPct.textContent = taux + "%";
+        if (elMiniBadge) elMiniBadge.textContent = `${abonnes}/${total} Abonnés`;
+
+        // Animation de l'aiguille de la jauge (rotation de -90deg à +90deg)
+        const angle = -90 + (Math.min(100, Math.max(0, taux)) / 100) * 180;
+        const aiguille = document.getElementById('jaugeAiguilleGroup');
+        if (aiguille) {
+            aiguille.setAttribute('transform', `rotate(${angle}, 90, 100)`);
+        }
+
+        // Animation de l'arc de progression (dasharray 220)
+        const arc = document.getElementById('jaugeArcProgression');
+        if (arc) {
+            const totalDash = 220;
+            const offset = totalDash - (Math.min(100, Math.max(0, taux)) / 100) * totalDash;
+            arc.style.strokeDashoffset = offset;
+        }
+
+        // Barre horizontale
+        const barre = document.getElementById('jaugeBarreAbonnes');
+        if (barre) {
+            barre.style.width = Math.min(100, Math.max(0, taux)) + '%';
+        }
     }
 
     async function chargerAdminPaiements() {

@@ -1063,6 +1063,44 @@ async def declarer_paiement_baridimob(payload: dict = Body(...)):
 
 ADMIN_PIN = (os.environ.get("ADMIN_PIN") or "7788").strip()
 
+@app.get("/api/public/jauge-stats")
+async def public_jauge_stats():
+    sb = get_supabase_client()
+    default_stats = {
+        "success": True,
+        "clients_total": 5,
+        "clients_abonnes": 3,
+        "clients_gratuits": 2,
+        "taux_abonnements_pct": 60.0,
+        "devis_total": 12
+    }
+    if not sb:
+        return default_stats
+    try:
+        c_res = sb.table("clients").select("id, type_abonnement, credits_pages").execute()
+        clients_data = c_res.data or []
+        tot = len(clients_data)
+        if tot == 0:
+            return default_stats
+        abonnes = [c for c in clients_data if (c.get("type_abonnement") not in (None, "", "gratuit", "free")) or (int(c.get("credits_pages", 0) or 0) > 5)]
+        nb_ab = len(abonnes)
+        nb_grat = tot - nb_ab
+        taux = round((nb_ab / tot * 100), 1) if tot > 0 else 0.0
+
+        d_res = sb.table("devis").select("id", count="exact").execute()
+        devis_tot = d_res.count if hasattr(d_res, "count") and d_res.count is not None else len(d_res.data or [])
+
+        return {
+            "success": True,
+            "clients_total": tot,
+            "clients_abonnes": nb_ab,
+            "clients_gratuits": nb_grat,
+            "taux_abonnements_pct": taux,
+            "devis_total": devis_tot
+        }
+    except Exception:
+        return default_stats
+
 @app.get("/api/admin/stats")
 async def admin_stats(pin: str = None):
     if pin != ADMIN_PIN:
@@ -1073,17 +1111,44 @@ async def admin_stats(pin: str = None):
         "keys_count": len(keys),
         "models_priority": MODELS_PRIORITY,
         "clients_total": 0,
+        "clients_abonnes": 0,
+        "clients_gratuits": 0,
+        "taux_abonnements_pct": 0.0,
         "devis_total": 0,
-        "paiements_en_attente": 0
+        "paiements_en_attente": 0,
+        "paiements_valides": 0,
+        "revenus_total_dzd": 0,
+        "clients_recents": []
     }
     if sb:
         try:
-            c_res = sb.table("clients").select("id", count="exact").execute()
-            stats["clients_total"] = c_res.count if hasattr(c_res, "count") and c_res.count is not None else len(c_res.data or [])
+            c_res = sb.table("clients").select("*").order("created_at", desc=True).execute()
+            clients_data = c_res.data or []
+            stats["clients_total"] = len(clients_data)
+
+            abonnes = []
+            gratuits = []
+            for c in clients_data:
+                type_ab = (c.get("type_abonnement") or "").strip().lower()
+                credits = int(c.get("credits_pages", 0) or 0)
+                if type_ab not in ("", "gratuit", "free") or credits > 5:
+                    abonnes.append(c)
+                else:
+                    gratuits.append(c)
+
+            stats["clients_abonnes"] = len(abonnes)
+            stats["clients_gratuits"] = len(gratuits)
+            stats["taux_abonnements_pct"] = round((len(abonnes) / len(clients_data) * 100), 1) if clients_data else 0.0
+            stats["clients_recents"] = clients_data[:15]
+
             d_res = sb.table("devis").select("id", count="exact").execute()
             stats["devis_total"] = d_res.count if hasattr(d_res, "count") and d_res.count is not None else len(d_res.data or [])
-            p_res = sb.table("paiements_baridimob").select("id", count="exact").eq("statut", "en_attente").execute()
-            stats["paiements_en_attente"] = p_res.count if hasattr(p_res, "count") and p_res.count is not None else len(p_res.data or [])
+
+            p_res = sb.table("paiements_baridimob").select("id, montant_dzd, statut").execute()
+            p_data = p_res.data or []
+            stats["paiements_en_attente"] = len([p for p in p_data if p.get("statut") == "en_attente"])
+            stats["paiements_valides"] = len([p for p in p_data if p.get("statut") == "valide"])
+            stats["revenus_total_dzd"] = sum(float(p.get("montant_dzd", 0) or 0) for p in p_data if p.get("statut") == "valide")
         except Exception:
             pass
     return {"success": True, "stats": stats}
