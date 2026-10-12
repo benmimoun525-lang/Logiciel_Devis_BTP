@@ -836,8 +836,8 @@
 
         <div class="header-actions">
             <a href="/didacticiel" target="_blank" class="btn-header" style="background: #e11d48; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">🎬 Vidéo Didacticiel</a>
-            <button class="btn-header" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()">
-                👑 Titulaire <span id="headerJaugeMiniBadge" style="background: #059669; padding: 2px 7px; border-radius: 8px; font-size: 0.72rem; margin-left: 3px;">📊 Jauge</span>
+            <button class="btn-header" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()" title="Espace Propriétaire">
+                👑 Titulaire
             </button>
             <button class="btn-header" style="background: #059669; font-weight: 600;" onclick="ouvrirModalConfidentialite()">🔒 Confidentialité & Secret</button>
             <button class="btn-header" style="background: #d97706; font-weight: 600;" onclick="ouvrirModalBPU()">💰 Base des Prix (BPU)</button>
@@ -880,111 +880,6 @@
         <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; border-color: #86efac; color: #166534;" onclick="ouvrirModalConfidentialite()">
             En savoir plus
         </button>
-    </div>
-
-    <!-- JAUGE SAAS : CLIENTS CONNECTÉS & ABONNÉS SUR LE TABLEAU DE BORD -->
-    <div class="card no-print" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border: 1px solid #334155; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); padding: 18px 22px; margin-bottom: 22px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.5rem;">📊</span>
-                <div>
-                    <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: 0.3px; color: #f8fafc;">Tableau de Bord SaaS : Jauge Clients & Abonnements</div>
-                    <div style="font-size: 0.78rem; color: #94a3b8;">Supervision en temps réel des utilisateurs connectés et des clients abonnés</div>
-                </div>
-            </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <span id="jaugeStatutPill" class="badge-traite" style="background: #059669; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">
-                    🟢 Synchronisé Supabase
-                </span>
-                <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.78rem; color: #93c5fd; border-color: #3b82f6;" onclick="chargerJaugeDashboard()">
-                    🔄 Rafraîchir
-                </button>
-                <button class="btn btn-primary" style="padding: 5px 12px; font-size: 0.78rem; background: #4338ca;" onclick="ouvrirModalAdmin()">
-                    👑 Espace Titulaire
-                </button>
-            </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items: center;">
-            
-            <!-- Widget Jauge Visuelle SVG (Semi-circulaire Graduée) -->
-            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; text-align: center; position: relative;">
-                <div style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">TAUX D'ABONNEMENT SAAS</div>
-                
-                <div style="position: relative; width: 180px; height: 105px; margin: 0 auto;">
-                    <svg viewBox="0 0 180 110" width="180" height="110">
-                        <!-- Arc de fond gris -->
-                        <path d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke="#334155" stroke-width="14" stroke-linecap="round"/>
-                        <!-- Arc animé dégradé de progression -->
-                        <path id="jaugeArcProgression" d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke="url(#jaugeGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="88" style="transition: stroke-dashoffset 1s ease-in-out;"/>
-                        
-                        <defs>
-                            <linearGradient id="jaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stop-color="#3b82f6"/>
-                                <stop offset="60%" stop-color="#10b981"/>
-                                <stop offset="100%" stop-color="#f59e0b"/>
-                            </linearGradient>
-                        </defs>
-                        
-                        <!-- Aiguille indicatrice -->
-                        <g id="jaugeAiguilleGroup" transform="rotate(18, 90, 100)" style="transition: transform 1s ease-in-out;">
-                            <polygon points="87,100 93,100 90,34" fill="#f8fafc"/>
-                            <circle cx="90" cy="100" r="7" fill="#f59e0b"/>
-                        </g>
-                    </svg>
-                    
-                    <div style="position: absolute; bottom: 2px; left: 0; right: 0; text-align: center;">
-                        <span id="jaugePourcentageAffiche" style="font-size: 1.45rem; font-weight: 900; color: #38bdf8;">--%</span>
-                        <div style="font-size: 0.68rem; color: #94a3b8; font-weight: bold;">CONVERSION</div>
-                    </div>
-                </div>
-
-                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 6px;">
-                    Jauge dynamique basée sur le ratio Abonnés / Connectés
-                </div>
-            </div>
-
-            <!-- Compteur 1 : Clients Connectés / Inscrits -->
-            <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 14px 16px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #93c5fd;">👥 CLIENTS CONNECTÉS</span>
-                    <span style="font-size: 1.2rem;">🌐</span>
-                </div>
-                <div style="display: flex; align-items: baseline; gap: 8px;">
-                    <span id="jaugeTotalConnectes" style="font-size: 2rem; font-weight: 900; color: #ffffff;">--</span>
-                    <span style="font-size: 0.82rem; color: #94a3b8;">utilisateurs</span>
-                </div>
-                <!-- Barre de progression -->
-                <div style="margin-top: 8px; background: #334155; border-radius: 6px; height: 8px; overflow: hidden;">
-                    <div id="jaugeBarreConnectes" style="background: #3b82f6; width: 100%; height: 100%; border-radius: 6px;"></div>
-                </div>
-                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 6px; display: flex; justify-content: space-between;">
-                    <span>Comptes créés / Actifs</span>
-                    <span id="jaugeGratuitsDetail">-- en essai</span>
-                </div>
-            </div>
-
-            <!-- Compteur 2 : Clients Abonnés (Payants) -->
-            <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 14px 16px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #6ee7b7;">💎 CLIENTS ABONNÉS</span>
-                    <span style="font-size: 1.2rem;">⚡</span>
-                </div>
-                <div style="display: flex; align-items: baseline; gap: 8px;">
-                    <span id="jaugeTotalAbonnes" style="font-size: 2rem; font-weight: 900; color: #34d399;">--</span>
-                    <span style="font-size: 0.82rem; color: #a7f3d0;">souscripteurs</span>
-                </div>
-                <!-- Barre de progression -->
-                <div style="margin-top: 8px; background: #334155; border-radius: 6px; height: 8px; overflow: hidden;">
-                    <div id="jaugeBarreAbonnes" style="background: linear-gradient(90deg, #10b981, #059669); width: 0%; height: 100%; border-radius: 6px; transition: width 0.8s ease;"></div>
-                </div>
-                <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 6px; display: flex; justify-content: space-between;">
-                    <span>Packs 50/100 & Mensuel</span>
-                    <span id="jaugeAbonnesRatio" style="color: #34d399; font-weight: bold;">--%</span>
-                </div>
-            </div>
-
-        </div>
     </div>
 
     <!-- Étape 1 : Paramètres du Devis & Client -->
@@ -1094,19 +989,9 @@
             <div id="progressLabel" class="progress-label">0%</div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px;">
+        <div style="margin-top: 14px;">
             <div id="statusBadge" class="status-pill status-idle">En attente de vos photos ou documents BTP...</div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="reveillerServeur()">
-                    🔌 Réveiller le serveur
-                </button>
-                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="toggleConsole()">
-                    🖥️ Console & Logs
-                </button>
-            </div>
         </div>
-
-        <div id="logArea" class="log-box" style="display: block;">Console prête. Connecté au moteur de chiffrage BTP.</div>
     </div>
 
     <!-- Étape 3 : Tableau Interactif de Révision & Chiffrage par Lots -->
@@ -1519,6 +1404,96 @@
 
         <!-- Tableau de bord Titulaire (affiché après déverrouillage) -->
         <div id="adminDashboardSection" style="display: none;">
+            <!-- Jauge SaaS Graphique des Clients & Abonnés (Cockpit Titulaire Privé) -->
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.4rem;">📊</span>
+                        <div>
+                            <div style="font-weight: 800; font-size: 1rem; color: #f8fafc;">Jauge SaaS : Suivi Clients Connectés & Abonnés</div>
+                            <div style="font-size: 0.75rem; color: #94a3b8;">Supervision temps réel réservée exclusivement au Titulaire</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; color: #93c5fd; border-color: #3b82f6;" onclick="chargerJaugeDashboard()">
+                            🔄 Rafraîchir la jauge
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: center;">
+                    <!-- Widget Jauge Visuelle SVG (Semi-circulaire Graduée) -->
+                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-align: center; position: relative;">
+                        <div style="font-size: 0.75rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">TAUX D'ABONNEMENT SAAS</div>
+                        <div style="position: relative; width: 180px; height: 105px; margin: 0 auto;">
+                            <svg viewBox="0 0 180 110" width="180" height="110">
+                                <!-- Arc de fond gris -->
+                                <path d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke="#334155" stroke-width="14" stroke-linecap="round"/>
+                                <!-- Arc animé dégradé de progression -->
+                                <path id="jaugeArcProgression" d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke="url(#jaugeGradAdmin)" stroke-width="14" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="88" style="transition: stroke-dashoffset 1s ease-in-out;"/>
+                                <defs>
+                                    <linearGradient id="jaugeGradAdmin" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#3b82f6"/>
+                                        <stop offset="60%" stop-color="#10b981"/>
+                                        <stop offset="100%" stop-color="#f59e0b"/>
+                                    </linearGradient>
+                                </defs>
+                                <!-- Aiguille indicatrice -->
+                                <g id="jaugeAiguilleGroup" transform="rotate(-90, 90, 100)" style="transition: transform 1s ease-in-out;">
+                                    <polygon points="87,100 93,100 90,34" fill="#f8fafc"/>
+                                    <circle cx="90" cy="100" r="7" fill="#f59e0b"/>
+                                </g>
+                            </svg>
+                            <div style="position: absolute; bottom: 2px; left: 0; right: 0; text-align: center;">
+                                <span id="jaugePourcentageAffiche" style="font-size: 1.4rem; font-weight: 900; color: #38bdf8;">--%</span>
+                                <div style="font-size: 0.65rem; color: #94a3b8; font-weight: bold;">CONVERSION</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">
+                            Jauge en temps réel (Abonnés / Total)
+                        </div>
+                    </div>
+
+                    <!-- Compteur 1 : Clients Connectés / Inscrits -->
+                    <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; padding: 12px 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-size: 0.76rem; font-weight: 700; color: #93c5fd;">👥 CLIENTS CONNECTÉS</span>
+                            <span style="font-size: 1.1rem;">🌐</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 8px;">
+                            <span id="jaugeTotalConnectes" style="font-size: 1.8rem; font-weight: 900; color: #ffffff;">--</span>
+                            <span style="font-size: 0.78rem; color: #94a3b8;">utilisateurs</span>
+                        </div>
+                        <div style="margin-top: 6px; background: #334155; border-radius: 6px; height: 7px; overflow: hidden;">
+                            <div id="jaugeBarreConnectes" style="background: #3b82f6; width: 100%; height: 100%; border-radius: 6px;"></div>
+                        </div>
+                        <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 5px; display: flex; justify-content: space-between;">
+                            <span>Comptes enregistrés</span>
+                            <span id="jaugeGratuitsDetail">-- en essai</span>
+                        </div>
+                    </div>
+
+                    <!-- Compteur 2 : Clients Abonnés (Payants) -->
+                    <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 12px 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-size: 0.76rem; font-weight: 700; color: #6ee7b7;">💎 CLIENTS ABONNÉS</span>
+                            <span style="font-size: 1.1rem;">⚡</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 8px;">
+                            <span id="jaugeTotalAbonnes" style="font-size: 1.8rem; font-weight: 900; color: #34d399;">--</span>
+                            <span style="font-size: 0.78rem; color: #a7f3d0;">souscripteurs</span>
+                        </div>
+                        <div style="margin-top: 6px; background: #334155; border-radius: 6px; height: 7px; overflow: hidden;">
+                            <div id="jaugeBarreAbonnes" style="background: linear-gradient(90deg, #10b981, #059669); width: 0%; height: 100%; border-radius: 6px; transition: width 0.8s ease;"></div>
+                        </div>
+                        <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 5px; display: flex; justify-content: space-between;">
+                            <span>Packs 50/100 & Mensuel</span>
+                            <span id="jaugeAbonnesRatio" style="color: #34d399; font-weight: bold;">--%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Cartes KPIs avec Jauge & Détail Abonnés -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px;">
                 <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; text-align: center;">
@@ -1666,9 +1641,26 @@
                 </div>
             </div>
 
-            <!-- Note sécurité clés et revenus -->
-            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px; font-size: 0.82rem; color: #1e40af; margin-bottom: 14px;">
-                🛡️ <b>Sécurité Titulaire :</b> Vos clés API Gemini et vos revenus sont strictement protégés. Les clients n'ont aucun accès à vos paramètres d'administration ni aux clés API.
+            <!-- Section Diagnostics & Console Logs (Réservé exclusivement au Titulaire) -->
+            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">🖥️</span>
+                        <div>
+                            <div style="font-weight: 700; color: #f8fafc; font-size: 0.9rem;">Console Technique & Logs Système</div>
+                            <div style="font-size: 0.72rem; color: #94a3b8;">Journal technique des opérations (strictement invisible pour vos clients)</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.76rem; color: #93c5fd; border-color: #3b82f6;" onclick="reveillerServeur()">
+                            🔌 Réveiller le serveur
+                        </button>
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.76rem; color: #cbd5e1; border-color: #475569;" onclick="toggleConsoleAdmin()">
+                            👁️ Afficher / Masquer
+                        </button>
+                    </div>
+                </div>
+                <div id="logArea" class="log-box" style="display: block; max-height: 180px; overflow-y: auto; background: #020617; border: 1px solid #1e293b; color: #38bdf8; font-family: monospace; font-size: 0.78rem; padding: 10px; border-radius: 6px;">Console prête. Connecté au moteur de chiffrage BTP.</div>
             </div>
 
             <!-- Boutons de contrôle -->
@@ -5368,6 +5360,7 @@
 
     function ajouterLog(msg) {
         const logs = document.getElementById('logArea');
+        if (!logs) return;
         const heure = new Date().toLocaleTimeString('fr-FR');
         logs.textContent += `\n[${heure}] ${msg}`;
         logs.scrollTop = logs.scrollHeight;
@@ -5375,7 +5368,12 @@
 
     function toggleConsole() {
         const logs = document.getElementById('logArea');
+        if (!logs) return;
         logs.style.display = logs.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleConsoleAdmin() {
+        toggleConsole();
     }
 
     function formaterMontant(val) {
