@@ -4043,20 +4043,41 @@
         return { blob, nomFichier, nomClient, nomProjet, numDevis, dateDevis };
     }
 
+    let telechargementEnCours = false;
     async function telechargerExcel() {
+        if (telechargementEnCours) return;
+        const btn = document.getElementById('btnExportExcel');
+        const texteOriginal = btn ? btn.innerHTML : "📥 Télécharger Excel (.xlsx)";
         try {
+            telechargementEnCours = true;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = "⏳ Génération Excel...";
+            }
             ajouterLog("⏳ Génération du classeur Excel en cours...");
             const { blob, nomFichier } = await genererBlobExcelDevis();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
+            a.style.display = 'none';
             a.href = url;
             a.download = nomFichier;
             document.body.appendChild(a);
             a.click();
-            a.remove();
+            setTimeout(() => {
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            }, 1000);
             ajouterLog(`📥 Fichier Excel "${nomFichier}" téléchargé avec succès !`);
         } catch (e) {
             alert("Erreur de téléchargement : " + e.message);
+        } finally {
+            setTimeout(() => {
+                telechargementEnCours = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = texteOriginal;
+                }
+            }, 1000);
         }
     }
 
@@ -5904,11 +5925,15 @@
                 // et ouvrir WhatsApp avec le texte de synthèse prêt
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
+                a.style.display = 'none';
                 a.href = url;
                 a.download = nomFichier;
                 document.body.appendChild(a);
                 a.click();
-                a.remove();
+                setTimeout(() => {
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }, 1000);
 
                 ajouterLog(`📥 Fichier Excel "${nomFichier}" téléchargé sur votre terminal.`);
                 alert(
@@ -5996,11 +6021,15 @@
             // 2. Repli standard : Télécharger le fichier Excel et ouvrir l'application mail via mailto:
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
+            a.style.display = 'none';
             a.href = url;
             a.download = nomFichier;
             document.body.appendChild(a);
             a.click();
-            a.remove();
+            setTimeout(() => {
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            }, 1000);
 
             alert(
                 `📁 Le fichier Excel officiel "${nomFichier}" a été téléchargé sur votre appareil.\n\n` +
