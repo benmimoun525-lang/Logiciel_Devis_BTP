@@ -95,6 +95,27 @@
             transform: translateY(-1px);
         }
 
+        /* Profil Utilisateur tout en haut */
+        .user-profile-badge {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 9px 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        }
+        .user-profile-badge:hover {
+            background: rgba(30, 58, 138, 0.7);
+            border-color: rgba(147, 197, 253, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        }
+
         /* Cartes & sections */
         .card {
             background: white;
@@ -783,58 +804,89 @@
         </div>
     </div>
 
-    <!-- Header Interactif Application avec Nouveau Logo Moderne BTP -->
+    <!-- Header Interactif Application avec Nouveau Logo Moderne BTP & Profil Utilisateur -->
     <header class="app-header no-print">
-        <div style="display: flex; align-items: center; gap: 14px;">
-            <!-- Conteneur Logo Logiciel (Emblème Vectoriel Moderne ou Logo Personnalisé) -->
-            <div id="appLogoWrapper" style="position: relative; cursor: pointer;" onclick="ouvrirDialogueChangementLogo()" title="Logo Officiel du Logiciel (Cliquez pour importer votre propre logo ou le modifier)">
-                <svg id="appLogoSvg" width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
-                    <defs>
-                        <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#1e3a8a"/>
-                            <stop offset="50%" stop-color="#0284c7"/>
-                            <stop offset="100%" stop-color="#059669"/>
-                        </linearGradient>
-                        <linearGradient id="logoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#fef08a"/>
-                            <stop offset="50%" stop-color="#f59e0b"/>
-                            <stop offset="100%" stop-color="#d97706"/>
-                        </linearGradient>
-                    </defs>
-                    <!-- Écusson Hexagonal Moderne BTP -->
-                    <rect x="4" y="4" width="92" height="92" rx="22" fill="url(#logoBgGrad)"/>
-                    <rect x="5" y="5" width="90" height="90" rx="21" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-                    
-                    <!-- Bâtiments / Tours Architecturales CAD -->
-                    <path d="M26 74V38L42 28V74H26Z" fill="#ffffff" fill-opacity="0.95"/>
-                    <path d="M42 74V22L62 14V74H42Z" fill="url(#logoGoldGrad)"/>
-                    <path d="M62 74V34L76 42V74H62Z" fill="#e2e8f0" fill-opacity="0.9"/>
-                    
-                    <!-- Règle de Chantier & Graduations Métreur -->
-                    <line x1="22" y1="74" x2="78" y2="74" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
-                    <path d="M48 40L56 40M48 48L56 48M48 56L56 56M48 64L56 64" stroke="#1e3a8a" stroke-width="2.5" stroke-linecap="round"/>
-                    <path d="M30 46L38 46M30 54L38 54M30 62L38 62" stroke="#0284c7" stroke-width="2" stroke-linecap="round"/>
-                    
-                    <!-- Pastille IA & Certification Algérie -->
-                    <circle cx="72" cy="24" r="9" fill="#10b981"/>
-                    <path d="M68 24L71 27L76 21" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <img id="appCustomLogoImg" src="" style="display: none; width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Logo">
-            </div>
-            <input type="file" id="inputCustomLogoFile" accept="image/*" style="display: none;" onchange="importerLogoPersonnalise(event)">
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <!-- Conteneur Logo Logiciel (Emblème Vectoriel Moderne ou Logo Personnalisé) -->
+                <div id="appLogoWrapper" style="position: relative; cursor: pointer;" onclick="ouvrirDialogueChangementLogo()" title="Logo Officiel du Logiciel (Cliquez pour importer votre propre logo ou le modifier)">
+                    <svg id="appLogoSvg" width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+                        <defs>
+                            <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1e3a8a"/>
+                                <stop offset="50%" stop-color="#0284c7"/>
+                                <stop offset="100%" stop-color="#059669"/>
+                            </linearGradient>
+                            <linearGradient id="logoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#fef08a"/>
+                                <stop offset="50%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#d97706"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Écusson Hexagonal Moderne BTP -->
+                        <rect x="4" y="4" width="92" height="92" rx="22" fill="url(#logoBgGrad)"/>
+                        <rect x="5" y="5" width="90" height="90" rx="21" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        
+                        <!-- Bâtiments / Tours Architecturales CAD -->
+                        <path d="M26 74V38L42 28V74H26Z" fill="#ffffff" fill-opacity="0.95"/>
+                        <path d="M42 74V22L62 14V74H42Z" fill="url(#logoGoldGrad)"/>
+                        <path d="M62 74V34L76 42V74H62Z" fill="#e2e8f0" fill-opacity="0.9"/>
+                        
+                        <!-- Règle de Chantier & Graduations Métreur -->
+                        <line x1="22" y1="74" x2="78" y2="74" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M48 40L56 40M48 48L56 48M48 56L56 56M48 64L56 64" stroke="#1e3a8a" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M30 46L38 46M30 54L38 54M30 62L38 62" stroke="#0284c7" stroke-width="2" stroke-linecap="round"/>
+                        
+                        <!-- Pastille IA & Certification Algérie -->
+                        <circle cx="72" cy="24" r="9" fill="#10b981"/>
+                        <path d="M68 24L71 27L76 21" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <img id="appCustomLogoImg" src="" style="display: none; width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Logo">
+                </div>
+                <input type="file" id="inputCustomLogoFile" accept="image/*" style="display: none;" onchange="importerLogoPersonnalise(event)">
 
-            <div>
-                <h1 style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.35rem;">
-                    <span>Chiffrage Devis BTP</span>
-                    <span style="font-size: 0.78rem; background: linear-gradient(135deg, #2563eb, #059669); color: white; padding: 3px 9px; border-radius: 8px; font-weight: 800; letter-spacing: 0.5px;">IA ALGÉRIE</span>
-                </h1>
-                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #64748b;">
-                    Traitement instantané des photos WhatsApp & PDF en devis par lots aux normes algériennes.
-                </p>
+                <div>
+                    <h1 style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.35rem;">
+                        <span>Chiffrage Devis BTP</span>
+                        <span style="font-size: 0.78rem; background: linear-gradient(135deg, #2563eb, #059669); color: white; padding: 3px 9px; border-radius: 8px; font-weight: 800; letter-spacing: 0.5px;">IA ALGÉRIE</span>
+                    </h1>
+                    <p style="margin: 3px 0 0; font-size: 0.82rem; color: #64748b;">
+                        Traitement instantané des photos WhatsApp & PDF en devis par lots aux normes algériennes.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Profil de l'utilisateur avec son nom mis en avant tout en haut -->
+            <div id="headerUserProfileBox" class="user-profile-badge" onclick="ouvrirModalCompte()" title="Profil Utilisateur (Cliquez pour afficher ou modifier vos informations)">
+                <div style="position: relative;">
+                    <div id="topUserAvatarCircle" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #10b981); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.05rem; color: white; border: 2px solid rgba(255, 255, 255, 0.85); box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
+                        <span id="topUserAvatarInitiale">👤</span>
+                    </div>
+                    <span style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: #10b981; border: 2px solid #0f172a; border-radius: 50%;" title="En ligne / Session active"></span>
+                </div>
+                <div style="display: flex; flex-direction: column; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.70rem; text-transform: uppercase; letter-spacing: 0.6px; color: #93c5fd; font-weight: 700;">PROFIL UTILISATEUR</span>
+                        <span id="topUserRoleBadge" style="font-size: 0.68rem; background: rgba(59, 130, 246, 0.25); color: #bfdbfe; border: 1px solid rgba(147, 197, 253, 0.3); padding: 1px 6px; border-radius: 10px; font-weight: 600;">Client</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span id="topUserNomAffiche" style="font-size: 1.05rem; font-weight: 800; color: #ffffff; letter-spacing: 0.2px; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            Utilisateur BTP
+                        </span>
+                        <button type="button" onclick="event.stopPropagation(); modifierNomUtilisateurDirect();" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #f8fafc; border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; cursor: pointer;" title="Modifier mon nom">
+                            ✏️
+                        </button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; margin-top: 1px;">
+                        <span id="topUserStatutBadge" style="color: #34d399; font-weight: 700;">🟢 Solde : <b id="topUserSoldePages">5</b> pages</span>
+                        <span style="color: rgba(255,255,255,0.4);">•</span>
+                        <span id="topUserFormuleAffiche" style="color: #cbd5e1; font-size: 0.72rem;">Essai Gratuit</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="header-actions">
+        <div class="header-actions" style="margin-top: 14px; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.14); padding-top: 12px;">
             <a href="/didacticiel" target="_blank" class="btn-header" style="background: #e11d48; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">🎬 Vidéo Didacticiel</a>
             <button class="btn-header" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()" title="Espace Propriétaire">
                 👑 Titulaire
@@ -1181,21 +1233,37 @@
     </div>
 </div>
 
-<!-- Modal Mon Compte & Crédits Supabase -->
+<!-- Modal Mon Compte & Profil Utilisateur -->
 <div id="modalCompte" class="modal-overlay">
     <div class="modal" style="max-width: 520px;">
         <div class="modal-header">
-            <div class="modal-title">👤 Mon Compte & Crédits Pages</div>
+            <div class="modal-title">👤 Profil Utilisateur & Mon Compte</div>
             <button class="close-modal" onclick="fermerModalCompte()">&times;</button>
         </div>
-        <p style="font-size: 0.88rem; color: #64748b; margin-top: 0;">Connectez-vous avec votre numéro WhatsApp/téléphone pour synchroniser vos devis dans le Cloud et gérer vos crédits.</p>
+        <p style="font-size: 0.88rem; color: #64748b; margin-top: 0;">Gérez votre profil utilisateur, personnalisez votre nom affiché et consultez votre solde de crédits.</p>
+
+        <!-- Bloc de personnalisation directe du nom (affiché tout en haut) -->
+        <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+            <label style="font-size: 0.84rem; font-weight: 700; color: #1e3a8a; display: block; margin-bottom: 6px;">
+                👤 Nom Complet ou Entreprise (affiché tout en haut de l'interface) :
+            </label>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="inputClientNomLibre" class="form-control" placeholder="Ex: Mohamed Benmimoun / Travaux BTP" style="font-size: 0.92rem; font-weight: 600;" onkeydown="if(event.key==='Enter') sauvegarderNomDepuisModal()">
+                <button type="button" class="btn btn-success" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700; white-space: nowrap;" onclick="sauvegarderNomDepuisModal()">
+                    💾 Enregistrer
+                </button>
+            </div>
+            <div style="font-size: 0.74rem; color: #64748b; margin-top: 5px;">
+                Ce nom est immédiatement affiché sur votre profil en haut de la page.
+            </div>
+        </div>
 
         <div id="compteConnecteBloc" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <span style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem;" id="clientNomAffiche">Artisan BTP</span>
                 <span class="badge-traite" style="padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold;" id="clientStatutAffiche">Actif</span>
             </div>
-            <div style="font-size: 0.88rem; color: #475569; margin-bottom: 6px;">📱 Téléphone : <b id="clientTelAffiche">0550 00 00 00</b></div>
+            <div style="font-size: 0.88rem; color: #475569; margin-bottom: 6px;">📱 Téléphone WhatsApp : <b id="clientTelAffiche">0550 00 00 00</b></div>
             <div style="font-size: 1rem; color: #1e3a8a; margin-top: 8px; font-weight: bold;">
                 🪙 Solde restant : <span id="clientCreditsAffiche" style="font-size: 1.3rem; color: #d97706;">5</span> pages
             </div>
@@ -1206,17 +1274,21 @@
         </div>
 
         <div id="compteFormConnexion">
-            <div class="form-group" style="margin-bottom: 12px;">
-                <label>Numéro de Téléphone (WhatsApp) :</label>
-                <input type="tel" id="inputClientTel" class="form-control" placeholder="Ex: 0550 12 34 56" style="font-size: 1.05rem; font-weight: 600;">
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 8px;">
+                <h4 style="margin: 0 0 6px 0; font-size: 0.9rem; color: #1e3a8a;">📱 Synchronisation Cloud WhatsApp (Optionnelle) :</h4>
+                <p style="font-size: 0.78rem; color: #64748b; margin-top: 0 0 10px 0;">Associez votre numéro de téléphone pour synchroniser vos devis dans le Cloud et retrouver vos crédits sur tout appareil :</p>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label>Numéro de Téléphone :</label>
+                    <input type="tel" id="inputClientTel" class="form-control" placeholder="Ex: 0550 12 34 56" style="font-size: 1.05rem; font-weight: 600;">
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Nom ou Entreprise :</label>
+                    <input type="text" id="inputClientNom" class="form-control" placeholder="Ex: Mohamed Benmimoun">
+                </div>
+                <button class="btn btn-primary" style="width: 100%; font-weight: 700;" onclick="connecterClient()">
+                    🚀 Synchroniser mon Compte (+5 pages offertes)
+                </button>
             </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label>Nom ou Entreprise (Optionnel) :</label>
-                <input type="text" id="inputClientNom" class="form-control" placeholder="Ex: Entreprise Maçonnerie Moderne">
-            </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="connecterClient()">
-                🚀 Se Connecter / Créer mon Compte (+5 pages offertes)
-            </button>
         </div>
 
         <button class="btn btn-outline" style="width: 100%; margin-top: 12px;" onclick="fermerModalCompte()">Fermer</button>
@@ -2729,6 +2801,7 @@
         chargerInfosBaridimobPubliques();
         chargerBPU();
         verifierConnexionServeur();
+        actualiserAffichageProfilUtilisateur();
     });
 
     // Vérification de l'état du serveur
@@ -3950,6 +4023,7 @@
             rc: document.getElementById('entRc').value
         };
         localStorage.setItem('btp_entreprise', JSON.stringify(ent));
+        actualiserAffichageProfilUtilisateur();
         fermerModalEntreprise();
         alert("Profil entreprise enregistré !");
     }
@@ -3961,6 +4035,7 @@
         if (ent.adresse) document.getElementById('entAdr').value = ent.adresse;
         if (ent.nif) document.getElementById('entNif').value = ent.nif;
         if (ent.rc) document.getElementById('entRc').value = ent.rc;
+        actualiserAffichageProfilUtilisateur();
     }
 
     function ouvrirModalAbonnements() {
@@ -4953,6 +5028,7 @@
                 btnCompte.style.background = "";
             }
         }
+        actualiserAffichageProfilUtilisateur();
     }
 
     function declencherRuptureAbonnement(message) {
@@ -5090,6 +5166,130 @@
             document.getElementById('compteFormConnexion').style.display = 'block';
             actualiserAffichageCredits(c.credits_pages);
         }
+        actualiserAffichageProfilUtilisateur();
+    }
+
+    // ============================================================
+    // GESTION DU PROFIL UTILISATEUR & NOM AFFICHÉ EN HAUT
+    // ============================================================
+    function modifierNomUtilisateurDirect() {
+        const c = obtenirOuCreerClient();
+        const ent = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
+        const nomActuel = (c.nom_complet && c.nom_complet !== 'Client Invité' && c.nom_complet !== 'Client Déconnecté') 
+            ? c.nom_complet 
+            : (ent.nom || '');
+        const nouveauNom = prompt("👤 Entrez votre Nom complet ou le Nom de votre Entreprise (affiché tout en haut) :", nomActuel);
+        if (nouveauNom !== null && nouveauNom.trim() !== '') {
+            enregistrerNomUtilisateur(nouveauNom.trim());
+        }
+    }
+
+    function sauvegarderNomDepuisModal() {
+        const input = document.getElementById('inputClientNomLibre');
+        const nom = input ? input.value.trim() : '';
+        if (!nom) {
+            alert("Veuillez saisir votre nom ou le nom de votre entreprise.");
+            return;
+        }
+        enregistrerNomUtilisateur(nom);
+        alert(`✅ Profil mis à jour avec succès : "${nom}" !\n\nVotre nom est désormais affiché tout en haut de votre logiciel.`);
+    }
+
+    function enregistrerNomUtilisateur(nom) {
+        if (!nom) return;
+        const c = obtenirOuCreerClient();
+        c.nom_complet = nom;
+        localStorage.setItem('btp_client', JSON.stringify(c));
+
+        // Synchroniser également avec l'entreprise si vide
+        const ent = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
+        if (!ent.nom) {
+            ent.nom = nom;
+            localStorage.setItem('btp_entreprise', JSON.stringify(ent));
+            if (document.getElementById('entNom')) document.getElementById('entNom').value = nom;
+            if (document.getElementById('pEntNom')) document.getElementById('pEntNom').textContent = nom;
+        }
+
+        actualiserAffichageProfilUtilisateur();
+        ajouterLog(`👤 Profil utilisateur mis à jour : ${nom}`);
+
+        // Synchroniser vers le serveur si connecté par téléphone
+        if (c.telephone) {
+            fetch(`${API_BASE}/api/clients/connexion`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telephone: c.telephone, nom_complet: nom })
+            }).catch(() => {});
+        }
+    }
+
+    function actualiserAffichageProfilUtilisateur() {
+        const c = obtenirOuCreerClient();
+        const ent = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
+
+        let nom = '';
+        if (c.nom_complet && c.nom_complet !== 'Client Invité' && c.nom_complet !== 'Client Déconnecté') {
+            nom = c.nom_complet.trim();
+        } else if (ent.nom && ent.nom.trim()) {
+            nom = ent.nom.trim();
+        } else {
+            nom = 'Utilisateur BTP';
+        }
+
+        // Calculer les initiales (ex: Mohamed Benmimoun -> MB, ou Kaddour -> K)
+        let initiales = '👤';
+        if (nom && nom !== 'Utilisateur BTP') {
+            const parts = nom.split(/\s+/).filter(Boolean);
+            if (parts.length >= 2) {
+                initiales = (parts[0][0] + parts[1][0]).toUpperCase();
+            } else if (parts.length === 1 && parts[0].length > 0) {
+                initiales = parts[0].substring(0, Math.min(2, parts[0].length)).toUpperCase();
+            }
+        }
+
+        const credits = c.credits_pages !== undefined ? Math.max(0, parseInt(c.credits_pages, 10)) : 0;
+        const estAbonne = (c.type_abonnement && c.type_abonnement !== 'gratuit') || credits > 5;
+        const formule = estAbonne 
+            ? (c.type_abonnement === 'pack_100' ? 'Pack 100 p.' : c.type_abonnement === 'mensuel' ? 'Abonnement Mensuel' : 'Abonné BTP')
+            : (credits > 0 ? 'Essai Gratuit' : 'Solde Épuisé');
+
+        const elNom = document.getElementById('topUserNomAffiche');
+        const elAvatar = document.getElementById('topUserAvatarInitiale');
+        const elSolde = document.getElementById('topUserSoldePages');
+        const elFormule = document.getElementById('topUserFormuleAffiche');
+        const elBadgeStatut = document.getElementById('topUserStatutBadge');
+        const elRole = document.getElementById('topUserRoleBadge');
+
+        if (elNom) elNom.textContent = nom;
+        if (elAvatar) elAvatar.textContent = initiales;
+        if (elSolde) elSolde.textContent = credits;
+        if (elFormule) elFormule.textContent = formule;
+        if (elBadgeStatut) {
+            elBadgeStatut.style.color = credits <= 0 ? '#ef4444' : '#34d399';
+            elBadgeStatut.innerHTML = credits <= 0 
+                ? '🔴 Solde : <b>0</b> p. 🔒' 
+                : `🟢 Solde : <b>${credits}</b> p.`;
+        }
+        if (elRole) {
+            elRole.textContent = estAbonne ? '💎 Abonné Pro' : 'Client';
+            elRole.style.background = estAbonne ? 'rgba(16, 185, 129, 0.25)' : 'rgba(59, 130, 246, 0.25)';
+            elRole.style.color = estAbonne ? '#6ee7b7' : '#bfdbfe';
+        }
+
+        const btnCompte = document.getElementById('btnCompteClient');
+        if (btnCompte) {
+            const nomCourt = nom.length > 16 ? nom.substring(0, 14) + '…' : nom;
+            btnCompte.innerHTML = `👤 ${escapeHtml(nomCourt)} (<span id="soldeCreditsBadge">${credits}</span> p.)`;
+        }
+
+        const elModalNom = document.getElementById('clientNomAffiche');
+        if (elModalNom) elModalNom.textContent = nom;
+
+        const inputNomLibre = document.getElementById('inputClientNomLibre');
+        if (inputNomLibre && nom !== 'Utilisateur BTP' && !inputNomLibre.value) inputNomLibre.value = nom;
+
+        const inputClientNom = document.getElementById('inputClientNom');
+        if (inputClientNom && nom !== 'Utilisateur BTP' && !inputClientNom.value) inputClientNom.value = nom;
     }
 
     async function rafraichirSoldeServeur(tel) {
