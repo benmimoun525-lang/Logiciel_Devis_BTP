@@ -66,12 +66,12 @@ def get_api_keys_pool(client_key: str = None):
                 keys.append(val)
     return keys
 
-# Modèles Gemini par ordre d'efficacité pour le BTP (Testés en production)
+# Modèles Gemini par ordre d'efficacité et de vitesse pour le BTP (Testés en production)
 MODELS_PRIORITY = [
-    "gemini-3.5-flash",       # Modèle de référence : Ultra rapide (2-4s), haute fidélité métreur BTP
-    "gemini-3.5-flash-lite",  # Très rapide (1s), ultra économique, quota distinct
-    "gemini-3.1-flash-lite",  # Backup haute disponibilité
-    "gemini-3.8-flash",       # Modèle supérieur
+    "gemini-3.5-flash-lite",  # Ultra rapide (~1.5s), haute disponibilité, pas de saturation 503
+    "gemini-3.8-flash",       # Modèle supérieur dernière génération (haute fidélité)
+    "gemini-3.1-flash-lite",  # Backup flash-lite
+    "gemini-3.5-flash",       # Modèle standard (secours)
     "gemini-3-flash-preview", # Fallback
 ]
 
@@ -777,8 +777,11 @@ async def chiffrer_page(
 
         for model_name in MODELS_PRIORITY:
             try:
-                # Exécution asynchrone non-bloquante pour ne jamais geler le serveur
-                raw_text = await asyncio.to_thread(call_gemini_sync, api_key, model_name, contents_list)
+                # Exécution asynchrone non-bloquante avec timeout de sécurité de 25s par modèle
+                raw_text = await asyncio.wait_for(
+                    asyncio.to_thread(call_gemini_sync, api_key, model_name, contents_list),
+                    timeout=25.0
+                )
                 parsed = clean_and_parse_json(raw_text or "{}")
                 articles = parsed.get("articles", []) if isinstance(parsed, dict) else (parsed if isinstance(parsed, list) else [])
 

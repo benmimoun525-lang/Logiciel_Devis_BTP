@@ -3052,7 +3052,7 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 img.onload = () => {
-                    const MAX_DIM = 2048; // Résolution optimale document BTP & OCR
+                    const MAX_DIM = 1600; // Résolution optimale document BTP & OCR haute vitesse (téléversement ultra-rapide)
                     let width = img.width;
                     let height = img.height;
 
@@ -3091,7 +3091,7 @@
                         } else {
                             resolve(file);
                         }
-                    }, 'image/jpeg', 0.88);
+                    }, 'image/jpeg', 0.82);
                 };
                 img.onerror = () => resolve(file);
                 img.src = e.target.result;
@@ -3348,14 +3348,11 @@
                 break;
             }
 
-            // Si d'autres pages suivent, observer une pause de 3s pour éviter les limitations de débit Gemini API (429)
+            // Si d'autres pages suivent, enchaînement fluide et rapide (pause technique de 1s)
             if (i < pagesNonTraitees.length - 1) {
                 const statusBadge = document.getElementById('statusBadge');
-                ajouterLog(`⏳ Pause de sécurité de 3s avant la page suivante pour préserver les quotas de l'API Gemini...`);
-                for (let sec = 3; sec > 0; sec--) {
-                    statusBadge.textContent = `⏳ Pause anti-saturation API : page suivante dans ${sec}s...`;
-                    await new Promise(r => setTimeout(r, 1000));
-                }
+                statusBadge.textContent = `⚡ Enchaînement rapide de la page suivante...`;
+                await new Promise(r => setTimeout(r, 1000));
             }
         }
 
