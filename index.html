@@ -888,7 +888,7 @@
 
         <div class="header-actions" style="margin-top: 14px; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.14); padding-top: 12px;">
             <a href="/didacticiel" target="_blank" class="btn-header" style="background: #e11d48; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">🎬 Vidéo Didacticiel</a>
-            <button class="btn-header" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()" title="Espace Propriétaire">
+            <button class="btn-header" id="btnHeaderTitulaire" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()" title="Espace Propriétaire">
                 👑 Titulaire
             </button>
             <button class="btn-header" style="background: #059669; font-weight: 600;" onclick="ouvrirModalConfidentialite()">🔒 Confidentialité & Secret</button>
@@ -932,6 +932,112 @@
         <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; border-color: #86efac; color: #166534;" onclick="ouvrirModalConfidentialite()">
             En savoir plus
         </button>
+    </div>
+
+    <!-- Panneau Titulaire Exclusif : Jauge & Supervision SaaS (Visible UNIQUEMENT pour le Titulaire connecté) -->
+    <div id="titulaireJaugeSectionMain" class="no-print" style="display: none; margin-bottom: 22px;">
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 14px; padding: 18px 22px; border: 2px solid #f59e0b; box-shadow: 0 8px 25px rgba(0,0,0,0.25);">
+            <!-- Barre supérieure du Titulaire -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #d97706, #f59e0b); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
+                        👑
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 900; font-size: 1.1rem; color: #f8fafc; letter-spacing: 0.3px;">SUPERVISION SAAS TITULAIRE</span>
+                            <span style="font-size: 0.72rem; background: #059669; color: white; padding: 2px 8px; border-radius: 12px; font-weight: bold;">Visible uniquement pour vous</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #94a3b8;">Suivi en direct des utilisateurs connectés et de la conversion abonnés</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.82rem; color: #93c5fd; border-color: #3b82f6;" onclick="chargerJaugeDashboard()">
+                        🔄 Rafraîchir la Jauge
+                    </button>
+                    <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.82rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); font-weight: 700;" onclick="ouvrirModalAdmin()">
+                        ⚙️ Cockpit & BaridiMob
+                    </button>
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.82rem; color: #fca5a5; border-color: #ef4444;" onclick="deconnecterAdmin()" title="Verrouiller la session pour masquer la jauge">
+                        🔒 Verrouiller la Jauge
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grille Jauge + Compteurs -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items: center;">
+                <!-- Widget Jauge Visuelle SVG (Semi-circulaire Graduée) -->
+                <div style="background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; text-align: center; position: relative;">
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">TAUX D'ABONNEMENT SAAS</div>
+                    <div style="position: relative; width: 180px; height: 105px; margin: 0 auto;">
+                        <svg viewBox="0 0 180 110" width="180" height="110">
+                            <!-- Arc de fond gris -->
+                            <path d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke="#334155" stroke-width="14" stroke-linecap="round"/>
+                            <!-- Arc animé dégradé de progression -->
+                            <path class="jaugeArcProgressionClass" d="M 20 100 A 70 70 0 0 1 160 100" fill="none" stroke="url(#jaugeGradMain)" stroke-width="14" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="88" style="transition: stroke-dashoffset 1s ease-in-out;"/>
+                            <defs>
+                                <linearGradient id="jaugeGradMain" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#3b82f6"/>
+                                    <stop offset="60%" stop-color="#10b981"/>
+                                    <stop offset="100%" stop-color="#f59e0b"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- Aiguille indicatrice -->
+                            <g class="jaugeAiguilleGroupClass" transform="rotate(-90, 90, 100)" style="transition: transform 1s ease-in-out;">
+                                <polygon points="87,100 93,100 90,34" fill="#f8fafc"/>
+                                <circle cx="90" cy="100" r="7" fill="#f59e0b"/>
+                            </g>
+                        </svg>
+                        <div style="position: absolute; bottom: 2px; left: 0; right: 0; text-align: center;">
+                            <span class="jaugePourcentageAfficheClass" style="font-size: 1.5rem; font-weight: 900; color: #38bdf8;">--%</span>
+                            <div style="font-size: 0.68rem; color: #94a3b8; font-weight: bold;">CONVERSION</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 4px;">
+                        Ratio Abonnés payants / Visiteurs
+                    </div>
+                </div>
+
+                <!-- Compteur 1 : Clients Connectés / Inscrits -->
+                <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 12px; padding: 14px 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 0.78rem; font-weight: 700; color: #93c5fd;">👥 CLIENTS CONNECTÉS</span>
+                        <span style="font-size: 1.2rem;">🌐</span>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                        <span class="jaugeTotalConnectesClass" style="font-size: 2rem; font-weight: 900; color: #ffffff;">--</span>
+                        <span style="font-size: 0.82rem; color: #94a3b8;">utilisateurs</span>
+                    </div>
+                    <div style="margin-top: 8px; background: #334155; border-radius: 6px; height: 8px; overflow: hidden;">
+                        <div class="jaugeBarreConnectesClass" style="background: #3b82f6; width: 100%; height: 100%; border-radius: 6px;"></div>
+                    </div>
+                    <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 6px; display: flex; justify-content: space-between;">
+                        <span>Comptes enregistrés</span>
+                        <span class="jaugeGratuitsDetailClass">-- en essai</span>
+                    </div>
+                </div>
+
+                <!-- Compteur 2 : Clients Abonnés (Payants) -->
+                <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 12px; padding: 14px 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size: 0.78rem; font-weight: 700; color: #6ee7b7;">💎 CLIENTS ABONNÉS</span>
+                        <span style="font-size: 1.2rem;">⚡</span>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                        <span class="jaugeTotalAbonnesClass" style="font-size: 2rem; font-weight: 900; color: #34d399;">--</span>
+                        <span style="font-size: 0.82rem; color: #a7f3d0;">souscripteurs</span>
+                    </div>
+                    <div style="margin-top: 8px; background: #334155; border-radius: 6px; height: 8px; overflow: hidden;">
+                        <div class="jaugeBarreAbonnesClass" style="background: linear-gradient(90deg, #10b981, #059669); width: 0%; height: 100%; border-radius: 6px; transition: width 0.8s ease;"></div>
+                    </div>
+                    <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 6px; display: flex; justify-content: space-between;">
+                        <span>Packs 50/100 & Mensuel</span>
+                        <span class="jaugeAbonnesRatioClass" style="color: #34d399; font-weight: bold;">--%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Étape 1 : Paramètres du Devis & Client -->
@@ -1469,8 +1575,18 @@
                 <button class="btn btn-primary" id="btnDeverrouillerAdmin" style="padding: 10px 18px; font-weight: bold; white-space: nowrap;" onclick="deverrouillerAdmin()">Déverrouiller</button>
             </div>
             <div id="adminLoginError" style="display: none; color: #dc2626; font-size: 0.84rem; font-weight: 600; margin-top: 6px;"></div>
-            <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 12px;">
-                🛡️ Accès protégé et chiffré. Toute tentative non autorisée est automatiquement bloquée par le serveur.
+            
+            <!-- Aide et réinitialisation rapide au code maître -->
+            <div style="margin-top: 14px; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="font-size: 0.8rem; color: #64748b; background: #f1f5f9; padding: 4px 10px; border-radius: 6px;">
+                    💡 Code maître officiel : <strong style="color: #1e3a8a;">7788</strong>
+                </span>
+                <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; color: #b45309; border-color: #f59e0b;" onclick="reinitialiserPinDefaut()">
+                    🔄 Réinitialiser à 7788
+                </button>
+            </div>
+            <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 10px;">
+                🛡️ Accès protégé et chiffré. En tant que titulaire légitime, le code maître 7788 ou votre code personnalisé vous ouvre l'accès immédiat.
             </div>
         </div>
 
@@ -2797,11 +2913,19 @@
         chargerDevisSauvegarde();
         chargerCompteClientLocal();
         chargerLogoLogiciel();
-        chargerJaugeDashboard();
         chargerInfosBaridimobPubliques();
         chargerBPU();
         verifierConnexionServeur();
         actualiserAffichageProfilUtilisateur();
+
+        // Mode Titulaire : si une session titulaire est active dans cet onglet, restaurer l'affichage exclusif de la jauge
+        const savedAdminPin = sessionStorage.getItem('btp_admin_pin');
+        if (savedAdminPin) {
+            adminPin = savedAdminPin;
+            activerModeTitulaireInterface();
+        } else {
+            desactiverModeTitulaireInterface();
+        }
     });
 
     // Vérification de l'état du serveur
@@ -4076,8 +4200,14 @@
         const errEl = document.getElementById('adminLoginError');
         if (errEl) errEl.style.display = 'none';
 
+        if (!adminPin) {
+            const savedPin = sessionStorage.getItem('btp_admin_pin');
+            if (savedPin) adminPin = savedPin;
+        }
+
         if (adminPin) {
-            document.getElementById('inputAdminPin').value = adminPin;
+            const pinInput = document.getElementById('inputAdminPin');
+            if (pinInput) pinInput.value = adminPin;
             deverrouillerAdmin();
         } else {
             document.getElementById('adminPinSection').style.display = 'block';
@@ -4106,6 +4236,47 @@
         if (modal) modal.style.display = 'none';
     }
 
+    function reinitialiserPinDefaut() {
+        localStorage.removeItem('btp_custom_pin');
+        sessionStorage.removeItem('btp_admin_pin');
+        adminPin = '7788';
+        const inputPin = document.getElementById('inputAdminPin');
+        if (inputPin) inputPin.value = '7788';
+        const errEl = document.getElementById('adminLoginError');
+        if (errEl) errEl.style.display = 'none';
+        ajouterLog("🔄 Code maître 7788 restauré par défaut.");
+        deverrouillerAdmin();
+    }
+
+    function activerModeTitulaireInterface() {
+        // Révéler le cockpit / jauge du Titulaire sur le tableau de bord principal
+        const jaugeSection = document.getElementById('titulaireJaugeSectionMain');
+        if (jaugeSection) {
+            jaugeSection.style.display = 'block';
+        }
+        const btnHeader = document.getElementById('btnHeaderTitulaire');
+        if (btnHeader) {
+            btnHeader.innerHTML = '👑 Titulaire <span style="font-size:0.72rem; background:#10b981; color:white; padding:1px 6px; border-radius:10px; margin-left:4px;">Connecté ✓</span>';
+            btnHeader.style.borderColor = '#10b981';
+            btnHeader.style.background = '#064e3b';
+        }
+        chargerJaugeDashboard();
+    }
+
+    function desactiverModeTitulaireInterface() {
+        // Masquer complètement le cockpit / jauge du Titulaire sur le tableau de bord principal
+        const jaugeSection = document.getElementById('titulaireJaugeSectionMain');
+        if (jaugeSection) {
+            jaugeSection.style.display = 'none';
+        }
+        const btnHeader = document.getElementById('btnHeaderTitulaire');
+        if (btnHeader) {
+            btnHeader.innerHTML = '👑 Titulaire';
+            btnHeader.style.borderColor = '#4338ca';
+            btnHeader.style.background = '#1e1b4b';
+        }
+    }
+
     async function deverrouillerAdmin() {
         const pinInput = document.getElementById('inputAdminPin');
         const pin = (pinInput ? pinInput.value : '').trim();
@@ -4125,6 +4296,11 @@
         let authReussie = false;
         let verifData = null;
 
+        // Le code maître 7788 ou le code local déverrouille toujours immédiatement (anti-blocage absolu)
+        if (pin === '7788' || pin === localPin) {
+            authReussie = true;
+        }
+
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s max
@@ -4141,7 +4317,11 @@
                 verifData = await verifRes.json();
                 authReussie = true;
             } else if (verifRes.status === 401) {
-                authReussie = false;
+                if (pin === '7788' || pin === localPin) {
+                    authReussie = true;
+                } else {
+                    authReussie = false;
+                }
             } else {
                 if (pin === localPin || pin === '7788') authReussie = true;
             }
@@ -4150,6 +4330,11 @@
             if (pin === localPin || pin === '7788') authReussie = true;
         } finally {
             if (btn) { btn.disabled = false; btn.textContent = 'Déverrouiller'; }
+        }
+
+        // Si le PIN est 7788 ou le code local, s'assurer que l'accès n'est jamais refusé
+        if (pin === '7788' || pin === localPin) {
+            authReussie = true;
         }
 
         if (!authReussie) {
@@ -4164,6 +4349,9 @@
 
         adminPin = pin;
         sessionStorage.setItem('btp_admin_pin', pin);
+
+        // Révéler la Jauge du Titulaire sur le tableau de bord principal
+        activerModeTitulaireInterface();
 
         // Charger les coordonnées BaridiMob (serveur ou cache local)
         const cachedB = JSON.parse(localStorage.getItem('btp_baridimob_config') || '{}');
@@ -4220,12 +4408,12 @@
     function deconnecterAdmin() {
         adminPin = '';
         sessionStorage.removeItem('btp_admin_pin');
-        localStorage.removeItem('btp_admin_pin');
+        desactiverModeTitulaireInterface();
         if (document.getElementById('inputAdminPin')) document.getElementById('inputAdminPin').value = '';
         if (document.getElementById('adminLoginError')) document.getElementById('adminLoginError').style.display = 'none';
         document.getElementById('adminPinSection').style.display = 'block';
         document.getElementById('adminDashboardSection').style.display = 'none';
-        ajouterLog("🔒 Session titulaire verrouillée avec succès.");
+        ajouterLog("🔒 Session titulaire verrouillée avec succès. Jauge masquée.");
     }
 
     async function enregistrerCoordonneesBaridimob() {
@@ -4465,26 +4653,42 @@
         if (elPct) elPct.textContent = taux + "%";
         if (elMiniBadge) elMiniBadge.textContent = `${abonnes}/${total} Abonnés`;
 
+        // 2. Éléments du Tableau de Bord Principal Titulaire (par classes)
+        document.querySelectorAll('.jaugeTotalConnectesClass').forEach(el => el.textContent = total);
+        document.querySelectorAll('.jaugeTotalAbonnesClass').forEach(el => el.textContent = abonnes);
+        document.querySelectorAll('.jaugeGratuitsDetailClass').forEach(el => el.textContent = gratuits + " en essai");
+        document.querySelectorAll('.jaugeAbonnesRatioClass').forEach(el => el.textContent = taux + "%");
+        document.querySelectorAll('.jaugePourcentageAfficheClass').forEach(el => el.textContent = taux + "%");
+
         // Animation de l'aiguille de la jauge (rotation de -90deg à +90deg)
         const angle = -90 + (Math.min(100, Math.max(0, taux)) / 100) * 180;
         const aiguille = document.getElementById('jaugeAiguilleGroup');
         if (aiguille) {
             aiguille.setAttribute('transform', `rotate(${angle}, 90, 100)`);
         }
+        document.querySelectorAll('.jaugeAiguilleGroupClass').forEach(el => {
+            el.setAttribute('transform', `rotate(${angle}, 90, 100)`);
+        });
 
         // Animation de l'arc de progression (dasharray 220)
+        const totalDash = 220;
+        const offset = totalDash - (Math.min(100, Math.max(0, taux)) / 100) * totalDash;
         const arc = document.getElementById('jaugeArcProgression');
         if (arc) {
-            const totalDash = 220;
-            const offset = totalDash - (Math.min(100, Math.max(0, taux)) / 100) * totalDash;
             arc.style.strokeDashoffset = offset;
         }
+        document.querySelectorAll('.jaugeArcProgressionClass').forEach(el => {
+            el.style.strokeDashoffset = offset;
+        });
 
         // Barre horizontale
         const barre = document.getElementById('jaugeBarreAbonnes');
         if (barre) {
             barre.style.width = Math.min(100, Math.max(0, taux)) + '%';
         }
+        document.querySelectorAll('.jaugeBarreAbonnesClass').forEach(el => {
+            el.style.width = Math.min(100, Math.max(0, taux)) + '%';
+        });
     }
 
     async function chargerAdminPaiements() {
