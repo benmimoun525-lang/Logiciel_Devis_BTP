@@ -1553,7 +1553,7 @@
 </div>
 
 <!-- Modal Espace Titulaire / Administrateur -->
-<div id="modalAdmin" class="modal-overlay" style="display:none;">
+<div id="modalAdmin" class="modal-overlay">
     <div class="modal" style="max-width: 820px; width: 95%;">
         <div class="modal-header">
             <div class="modal-title">👑 Espace Titulaire & Administration SaaS</div>
@@ -2926,6 +2926,11 @@
         } else {
             desactiverModeTitulaireInterface();
         }
+
+        // Accès direct si l'URL contient /titulaire, /admin ou #titulaire
+        if (window.location.pathname.includes('/titulaire') || window.location.pathname.includes('/admin') || window.location.hash.includes('titulaire') || window.location.hash.includes('admin')) {
+            setTimeout(() => ouvrirModalAdmin(), 300);
+        }
     });
 
     // Vérification de l'état du serveur
@@ -4213,27 +4218,40 @@
 
     function ouvrirModalAdmin() {
         const modal = document.getElementById('modalAdmin');
-        if (!modal) return;
+        if (!modal) {
+            alert("Espace Titulaire inaccessible.");
+            return;
+        }
+
+        // Affichage immédiat au premier plan absolu
         modal.style.display = 'flex';
+        modal.style.zIndex = '999999';
+
         const errEl = document.getElementById('adminLoginError');
         if (errEl) errEl.style.display = 'none';
 
-        if (!adminPin) {
-            const savedPin = sessionStorage.getItem('btp_admin_pin');
-            if (savedPin) adminPin = savedPin;
-        }
+        const savedPin = adminPin || sessionStorage.getItem('btp_admin_pin') || '';
 
-        if (adminPin) {
-            const pinInput = document.getElementById('inputAdminPin');
-            if (pinInput) pinInput.value = adminPin;
-            deverrouillerAdmin();
+        if (savedPin) {
+            adminPin = savedPin;
+            // Déjà authentifié : Afficher DIRECTEMENT le Cockpit Titulaire sans aucune latence réseau
+            document.getElementById('adminPinSection').style.display = 'none';
+            document.getElementById('adminDashboardSection').style.display = 'block';
+
+            // Remplir immédiatement les coordonnées depuis le cache local
+            const cachedB = JSON.parse(localStorage.getItem('btp_baridimob_config') || '{}');
+            chargerChampsAdminBaridimob(cachedB);
+            chargerAdminPaiements();
+            chargerJaugeDashboard();
         } else {
+            // Non authentifié : Afficher l'écran de saisie du PIN secret 7788
             document.getElementById('adminPinSection').style.display = 'block';
             document.getElementById('adminDashboardSection').style.display = 'none';
-            setTimeout(() => {
-                const el = document.getElementById('inputAdminPin');
-                if (el) el.focus();
-            }, 100);
+            const el = document.getElementById('inputAdminPin');
+            if (el) {
+                el.value = '';
+                setTimeout(() => el.focus(), 120);
+            }
         }
     }
 

@@ -561,6 +561,15 @@ def serve_index():
         return FileResponse(index_path, media_type="text/html")
     return {"status": "ok", "message": "Serveur BTP opérationnel."}
 
+@app.get("/titulaire")
+@app.get("/admin")
+def serve_titulaire_espace():
+    """Route directe pour accéder à l'espace Titulaire / Administration."""
+    index_path = os.path.join(os.path.dirname(__file__), "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="index.html non trouvé")
+
 @app.get("/didacticiel")
 def serve_didacticiel():
     didacticiel_path = os.path.join(os.path.dirname(__file__), "video_didacticiel.html")
