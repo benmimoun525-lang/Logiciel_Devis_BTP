@@ -4279,6 +4279,7 @@
             btnHeader.style.background = '#064e3b';
         }
         chargerJaugeDashboard();
+        actualiserAffichageProfilUtilisateur();
     }
 
     function desactiverModeTitulaireInterface() {
@@ -4293,6 +4294,7 @@
             btnHeader.style.borderColor = '#4338ca';
             btnHeader.style.background = '#1e1b4b';
         }
+        actualiserAffichageProfilUtilisateur();
     }
 
     async function deverrouillerAdmin() {
@@ -5485,17 +5487,31 @@
         if (elNom) elNom.textContent = nom;
         if (elAvatar) elAvatar.textContent = initiales;
         if (elSolde) elSolde.textContent = credits;
-        if (elFormule) elFormule.textContent = formule;
-        if (elBadgeStatut) {
-            elBadgeStatut.style.color = credits <= 0 ? '#ef4444' : '#34d399';
-            elBadgeStatut.innerHTML = credits <= 0 
-                ? '🔴 Solde : <b>0</b> p. 🔒' 
-                : `🟢 Solde : <b>${credits}</b> p.`;
-        }
-        if (elRole) {
-            elRole.textContent = estAbonne ? '💎 Abonné Pro' : 'Client';
-            elRole.style.background = estAbonne ? 'rgba(16, 185, 129, 0.25)' : 'rgba(59, 130, 246, 0.25)';
-            elRole.style.color = estAbonne ? '#6ee7b7' : '#bfdbfe';
+        const estTitulaireConnecte = Boolean(adminPin || sessionStorage.getItem('btp_admin_pin'));
+        if (estTitulaireConnecte) {
+            if (elRole) {
+                elRole.textContent = '👑 Titulaire';
+                elRole.style.background = 'linear-gradient(135deg, rgba(217, 119, 6, 0.4), rgba(245, 158, 11, 0.4))';
+                elRole.style.color = '#fef08a';
+            }
+            if (elFormule) elFormule.textContent = 'Espace Titulaire Maître';
+            if (elBadgeStatut) {
+                elBadgeStatut.style.color = '#fcd34d';
+                elBadgeStatut.innerHTML = '👑 Propriétaire • Accès Maître';
+            }
+        } else {
+            if (elFormule) elFormule.textContent = formule;
+            if (elBadgeStatut) {
+                elBadgeStatut.style.color = credits <= 0 ? '#ef4444' : '#34d399';
+                elBadgeStatut.innerHTML = credits <= 0 
+                    ? '🔴 Solde : <b>0</b> p. 🔒' 
+                    : `🟢 Solde : <b>${credits}</b> p.`;
+            }
+            if (elRole) {
+                elRole.textContent = estAbonne ? '💎 Abonné Pro' : 'Client';
+                elRole.style.background = estAbonne ? 'rgba(16, 185, 129, 0.25)' : 'rgba(59, 130, 246, 0.25)';
+                elRole.style.color = estAbonne ? '#6ee7b7' : '#bfdbfe';
+            }
         }
 
         const btnCompte = document.getElementById('btnCompteClient');
