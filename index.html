@@ -6,7 +6,7 @@
     <title>Devis BTP Algérie - Chiffrage par IA & Devis par Lots</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e3a8a'/%3E%3Cstop offset='100%25' stop-color='%23059669'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23bg)'/%3E%3Cpath d='M26 74V38L42 28V74H26Z' fill='%23ffffff'/%3E%3Cpath d='M42 74V22L62 14V74H42Z' fill='%23f59e0b'/%3E%3Cpath d='M62 74V34L76 42V74H62Z' fill='%23e2e8f0'/%3E%3Cline x1='22' y1='74' x2='78' y2='74' stroke='%23ffffff' stroke-width='4'/%3E%3Ccircle cx='72' cy='24' r='9' fill='%2310b981'/%3E%3Cpath d='M68 24L71 27L76 21' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230b132b'/%3E%3Cstop offset='50%25' stop-color='%231e293b'/%3E%3Cstop offset='100%25' stop-color='%231e3a8a'/%3E%3C/linearGradient%3E%3ClinearGradient id='gd' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23fef08a'/%3E%3Cstop offset='100%25' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='92' height='92' rx='22' fill='url(%23bg)'/%3E%3Crect x='5' y='5' width='90' height='90' rx='21' stroke='url(%23gd)' stroke-width='2'/%3E%3Cpath d='M 20 26 L 46 26 L 56 36 L 56 82 A 3 3 0 0 1 53 85 L 20 85 A 3 3 0 0 1 17 82 L 17 29 A 3 3 0 0 1 20 26 Z' fill='%23ffffff'/%3E%3Cpath d='M 46 26 L 46 36 L 56 36 Z' fill='%23cbd5e1'/%3E%3Crect x='21' y='31' width='21' height='3' rx='1' fill='%232563eb'/%3E%3Cline x1='21' y1='40' x2='52' y2='40' stroke='%2394a3b8' stroke-width='2'/%3E%3Cline x1='21' y1='48' x2='52' y2='48' stroke='%23cbd5e1' stroke-width='2'/%3E%3Cline x1='21' y1='56' x2='52' y2='56' stroke='%23cbd5e1' stroke-width='2'/%3E%3Cline x1='21' y1='64' x2='52' y2='64' stroke='%23cbd5e1' stroke-width='2'/%3E%3Crect x='20' y='71' width='33' height='8' rx='2' fill='%23eff6ff'/%3E%3Ctext x='64' y='26' font-family='sans-serif' font-weight='900' font-size='10' fill='%23fde047'%3E8%3C/text%3E%3Ctext x='74' y='42' font-family='sans-serif' font-weight='900' font-size='9' fill='%2338bdf8'%3E%25%3C/text%3E%3Ctext x='66' y='60' font-family='sans-serif' font-weight='900' font-size='9' fill='%234ade80'%3E5%3C/text%3E%3Ctext x='72' y='76' font-family='sans-serif' font-weight='900' font-size='9' fill='%23f59e0b'%3E0%3C/text%3E%3Cpath d='M 86 13 L 88 15 L 54 42 L 52 40 Z' fill='%23e2e8f0'/%3E%3Cpath d='M 83 16 L 85 18 L 88 15 L 86 13 Z' fill='%23f59e0b'/%3E%3Ccircle cx='50' cy='36' r='3.5' fill='%23ffffff'/%3E%3Ccircle cx='50' cy='36' r='6' fill='%23fef08a' opacity='0.4'/%3E%3C/svg%3E">
     
     <!-- PDF.js pour extraction visuelle multi-pages instantanée -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -808,38 +808,94 @@
     <header class="app-header no-print">
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 16px;">
             <div style="display: flex; align-items: center; gap: 14px;">
-                <!-- Conteneur Logo Logiciel (Emblème Vectoriel Moderne ou Logo Personnalisé) -->
-                <div id="appLogoWrapper" style="position: relative; cursor: pointer;" onclick="ouvrirDialogueChangementLogo()" title="Logo Officiel du Logiciel (Cliquez pour importer votre propre logo ou le modifier)">
-                    <svg id="appLogoSvg" width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+                <!-- Conteneur Logo Logiciel (Devis Vierge, Baguette Magique & Chiffres en Lévitation ou Logo Personnalisé) -->
+                <div id="appLogoWrapper" style="position: relative; cursor: pointer;" onclick="ouvrirDialogueChangementLogo()" title="Logo Officiel du Logiciel (Devis vierge, baguette magique & chiffres - Cliquez pour importer votre propre logo ou le modifier)">
+                    <svg id="appLogoSvg" width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
                         <defs>
                             <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#1e3a8a"/>
-                                <stop offset="50%" stop-color="#0284c7"/>
-                                <stop offset="100%" stop-color="#059669"/>
+                                <stop offset="0%" stop-color="#0b132b"/>
+                                <stop offset="50%" stop-color="#1e293b"/>
+                                <stop offset="100%" stop-color="#1e3a8a"/>
                             </linearGradient>
                             <linearGradient id="logoGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stop-color="#fef08a"/>
                                 <stop offset="50%" stop-color="#f59e0b"/>
                                 <stop offset="100%" stop-color="#d97706"/>
                             </linearGradient>
+                            <linearGradient id="logoWandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#e2e8f0"/>
+                                <stop offset="40%" stop-color="#475569"/>
+                                <stop offset="100%" stop-color="#0f172a"/>
+                            </linearGradient>
+                            <filter id="logoGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="2" result="blur"/>
+                                <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                            </filter>
                         </defs>
-                        <!-- Écusson Hexagonal Moderne BTP -->
+
+                        <!-- Fond écusson moderne arrondi avec liseré or -->
                         <rect x="4" y="4" width="92" height="92" rx="22" fill="url(#logoBgGrad)"/>
-                        <rect x="5" y="5" width="90" height="90" rx="21" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-                        
-                        <!-- Bâtiments / Tours Architecturales CAD -->
-                        <path d="M26 74V38L42 28V74H26Z" fill="#ffffff" fill-opacity="0.95"/>
-                        <path d="M42 74V22L62 14V74H42Z" fill="url(#logoGoldGrad)"/>
-                        <path d="M62 74V34L76 42V74H62Z" fill="#e2e8f0" fill-opacity="0.9"/>
-                        
-                        <!-- Règle de Chantier & Graduations Métreur -->
-                        <line x1="22" y1="74" x2="78" y2="74" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
-                        <path d="M48 40L56 40M48 48L56 48M48 56L56 56M48 64L56 64" stroke="#1e3a8a" stroke-width="2.5" stroke-linecap="round"/>
-                        <path d="M30 46L38 46M30 54L38 54M30 62L38 62" stroke="#0284c7" stroke-width="2" stroke-linecap="round"/>
-                        
-                        <!-- Pastille IA & Certification Algérie -->
-                        <circle cx="72" cy="24" r="9" fill="#10b981"/>
-                        <path d="M68 24L71 27L76 21" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="5" y="5" width="90" height="90" rx="21" stroke="url(#logoGoldGrad)" stroke-width="1.8" stroke-opacity="0.7"/>
+
+                        <!-- Tracé magique courbé vers le devis (trajectoire d'étincelles) -->
+                        <path d="M 78 20 C 72 32, 68 40, 52 42" stroke="url(#logoGoldGrad)" stroke-width="1.5" stroke-dasharray="2 3" opacity="0.6"/>
+
+                        <!-- 1. DEVIS VIERGE (Feuille blanche avec coin replié, en-tête et lignes de tableau) -->
+                        <g filter="drop-shadow(0 4px 6px rgba(0,0,0,0.4))">
+                            <!-- Feuille de papier -->
+                            <path d="M 20 26 L 46 26 L 56 36 L 56 82 A 3 3 0 0 1 53 85 L 20 85 A 3 3 0 0 1 17 82 L 17 29 A 3 3 0 0 1 20 26 Z" fill="#ffffff"/>
+                            <!-- Coin replié -->
+                            <path d="M 46 26 L 46 36 L 56 36 Z" fill="#cbd5e1"/>
+                            <path d="M 46 36 L 56 36" stroke="#94a3b8" stroke-width="0.8"/>
+                            <!-- En-tête du devis vierge -->
+                            <rect x="21" y="31" width="21" height="3" rx="1" fill="#2563eb"/>
+                            <circle cx="45" cy="32.5" r="1" fill="#10b981"/>
+                            <!-- Lignes du tableau de devis vierge -->
+                            <line x1="21" y1="40" x2="38" y2="40" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="41" y1="40" x2="52" y2="40" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="21" y1="48" x2="35" y2="48" stroke="#cbd5e1" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="39" y1="48" x2="52" y2="48" stroke="#cbd5e1" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="21" y1="56" x2="33" y2="56" stroke="#cbd5e1" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="37" y1="56" x2="52" y2="56" stroke="#cbd5e1" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="21" y1="64" x2="36" y2="64" stroke="#cbd5e1" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="40" y1="64" x2="52" y2="64" stroke="#cbd5e1" stroke-width="1.8" stroke-linecap="round"/>
+                            <!-- Barre Total H.T / T.T.C -->
+                            <rect x="20" y="71" width="33" height="8" rx="2" fill="#eff6ff" stroke="#bfdbfe" stroke-width="0.8"/>
+                            <line x1="24" y1="75" x2="32" y2="75" stroke="#1d4ed8" stroke-width="1.8" stroke-linecap="round"/>
+                            <line x1="36" y1="75" x2="49" y2="75" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+                        </g>
+
+                        <!-- 2. CHIFFRES EN LÉVITATION DIRIGÉS VERS LE DEVIS -->
+                        <text x="64" y="24" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="8" fill="#fde047" opacity="0.95" transform="rotate(-10 64 24)">8</text>
+                        <text x="76" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="7" fill="#38bdf8" opacity="0.9" transform="rotate(12 76 32)">%</text>
+                        <text x="44" y="20" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="7.5" fill="#f59e0b" opacity="0.95" transform="rotate(-15 44 20)">3</text>
+                        <text x="67" y="52" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="7.5" fill="#38bdf8" opacity="0.95" transform="rotate(8 67 52)">5</text>
+                        <text x="59" y="65" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="7" fill="#fde047" opacity="0.9" transform="rotate(-18 59 65)">0</text>
+                        <text x="74" y="62" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="8" fill="#4ade80" opacity="0.95" transform="rotate(15 74 62)">7</text>
+                        <text x="66" y="76" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="7" fill="#f59e0b" opacity="0.9" transform="rotate(-5 66 76)">4</text>
+                        <text x="57" y="31" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="6.5" fill="#fcd34d" opacity="0.9">+</text>
+                        <text x="77" y="47" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="5.5" fill="#67e8f9" opacity="0.9" transform="rotate(-12 77 47)">DA</text>
+
+                        <!-- Petites étincelles magiques -->
+                        <circle cx="58" cy="22" r="1.2" fill="#fef08a"/>
+                        <circle cx="72" cy="26" r="1" fill="#38bdf8"/>
+                        <circle cx="62" cy="45" r="1.2" fill="#ffffff"/>
+                        <circle cx="73" cy="70" r="1" fill="#fef08a"/>
+                        <circle cx="55" cy="58" r="0.9" fill="#38bdf8"/>
+
+                        <!-- 3. BAGUETTE MAGIQUE (Pointée vers le devis) -->
+                        <path d="M 86 13 L 88 15 L 54 42 L 52 40 Z" fill="url(#logoWandGrad)" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.5))"/>
+                        <path d="M 83 16 L 85 18 L 88 15 L 86 13 Z" fill="url(#logoGoldGrad)"/>
+                        <path d="M 74 23 L 75.5 24.5 L 77.5 22.5 L 76 21 Z" fill="url(#logoGoldGrad)"/>
+                        <path d="M 58 35.5 L 59.5 37 L 61 35.5 L 59.5 34 Z" fill="url(#logoGoldGrad)"/>
+
+                        <!-- Étoile magique étincelante à la pointe de la baguette -->
+                        <g filter="url(#logoGlowFilter)">
+                            <path d="M 50 41 Q 50 36 46 36 Q 50 36 50 31 Q 50 36 54 36 Q 50 36 50 41 Z" fill="#ffffff"/>
+                            <path d="M 50 41 Q 50 36 46 36 Q 50 36 50 31 Q 50 36 54 36 Q 50 36 50 41 Z" fill="url(#logoGoldGrad)" transform="rotate(45 50 36) scale(0.7 0.7)"/>
+                            <circle cx="50" cy="36" r="2" fill="#ffffff"/>
+                            <circle cx="50" cy="36" r="4" fill="#fef08a" opacity="0.4"/>
+                        </g>
                     </svg>
                     <img id="appCustomLogoImg" src="" style="display: none; width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Logo">
                 </div>
@@ -4599,6 +4655,11 @@
     // GESTION DU LOGO DU LOGICIEL (OFFICIEL VECTORIEL & IMPORT)
     // ============================================================
     function chargerLogoLogiciel() {
+        // Activation immédiate du nouveau logo officiel (devis vierge, baguette magique et chiffres)
+        if (!localStorage.getItem('btp_nouveau_logo_2026_vu')) {
+            localStorage.removeItem('btp_custom_logo');
+            localStorage.setItem('btp_nouveau_logo_2026_vu', '1');
+        }
         const customLogo = localStorage.getItem('btp_custom_logo');
         const svgLogo = document.getElementById('appLogoSvg');
         const imgLogo = document.getElementById('appCustomLogoImg');
