@@ -897,7 +897,8 @@ async def client_connexion(payload: dict = Body(...)):
     
     tel_clean = re.sub(r'[^0-9+]', '', telephone_brut)
     if not tel_clean or len(tel_clean) < 8:
-        raise HTTPException(status_code=400, detail="Numéro de téléphone algérien invalide.")
+        # Identifiant client automatique si pas encore de téléphone
+        tel_clean = "05" + str(int(time.time()))[-8:]
         
     sb = get_supabase_client()
     if not sb:
@@ -1325,6 +1326,19 @@ async def admin_stats(pin: str = None):
         except Exception:
             pass
     return {"success": True, "stats": stats}
+
+@app.get("/api/admin/clients")
+async def admin_liste_clients(pin: str = None):
+    if not valider_admin_pin(pin):
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
+    sb = get_supabase_client()
+    if not sb:
+        return {"success": True, "clients": []}
+    try:
+        res = sb.table("clients").select("*").order("created_at", desc=True).limit(150).execute()
+        return {"success": True, "clients": res.data or []}
+    except Exception as e:
+        return {"success": False, "detail": str(e), "clients": []}
 
 @app.get("/api/admin/paiements")
 async def admin_liste_paiements(pin: str = None):

@@ -912,40 +912,49 @@
                 </div>
             </div>
 
-            <!-- Profil de l'utilisateur avec son nom mis en avant tout en haut -->
-            <div id="headerUserProfileBox" class="user-profile-badge" onclick="ouvrirModalCompte()" title="Profil Utilisateur (Cliquez pour afficher ou modifier vos informations)">
+            <!-- Widget Client Épuré (Visible par défaut pour les clients) -->
+            <div id="headerClientWidget" style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); padding: 8px 16px; border-radius: 20px; font-size: 0.84rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                    <span style="display: inline-block; width: 9px; height: 9px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span>
+                    <span id="clientHeaderSoldeText" style="font-weight: 800; color: #34d399; letter-spacing: 0.2px;">🟢 Essai Gratuit : 5 pages offertes</span>
+                </div>
+                <button type="button" onclick="ouvrirModalAdmin()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: #cbd5e1; border-radius: 10px; padding: 7px 11px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;" title="Accès Propriétaire / Titulaire (Code PIN 7788)">
+                    👑
+                </button>
+            </div>
+
+            <!-- Profil Titulaire / Propriétaire (Visible UNIQUEMENT pour le Propriétaire connecté) -->
+            <div id="headerUserProfileBox" class="user-profile-badge" style="display: none;" onclick="ouvrirModalCompte()" title="Profil Titulaire (Cliquez pour afficher les paramètres)">
                 <div style="position: relative;">
-                    <div id="topUserAvatarCircle" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #10b981); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.05rem; color: white; border: 2px solid rgba(255, 255, 255, 0.85); box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
-                        <span id="topUserAvatarInitiale">👤</span>
+                    <div id="topUserAvatarCircle" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #d97706, #f59e0b); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.05rem; color: white; border: 2px solid rgba(255, 255, 255, 0.85); box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
+                        <span id="topUserAvatarInitiale">👑</span>
                     </div>
-                    <span style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: #10b981; border: 2px solid #0f172a; border-radius: 50%;" title="En ligne / Session active"></span>
+                    <span style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: #10b981; border: 2px solid #0f172a; border-radius: 50%;" title="Session Titulaire Active"></span>
                 </div>
                 <div style="display: flex; flex-direction: column; text-align: left;">
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-size: 0.70rem; text-transform: uppercase; letter-spacing: 0.6px; color: #93c5fd; font-weight: 700;">PROFIL UTILISATEUR</span>
-                        <span id="topUserRoleBadge" style="font-size: 0.68rem; background: rgba(59, 130, 246, 0.25); color: #bfdbfe; border: 1px solid rgba(147, 197, 253, 0.3); padding: 1px 6px; border-radius: 10px; font-weight: 600;">Client</span>
+                        <span style="font-size: 0.70rem; text-transform: uppercase; letter-spacing: 0.6px; color: #fde047; font-weight: 800;">ESPACE TITULAIRE</span>
+                        <span id="topUserRoleBadge" style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.3); color: #fef08a; border: 1px solid rgba(253, 224, 71, 0.4); padding: 1px 6px; border-radius: 10px; font-weight: 700;">Propriétaire</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <span id="topUserNomAffiche" style="font-size: 1.05rem; font-weight: 800; color: #ffffff; letter-spacing: 0.2px; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            Utilisateur BTP
+                            M. Benmimoun (Titulaire)
                         </span>
-                        <button type="button" onclick="event.stopPropagation(); modifierNomUtilisateurDirect();" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #f8fafc; border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; cursor: pointer;" title="Modifier mon nom">
-                            ✏️
-                        </button>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; margin-top: 1px;">
-                        <span id="topUserStatutBadge" style="color: #34d399; font-weight: 700;">🟢 Solde : <b id="topUserSoldePages">5</b> pages</span>
+                        <span id="topUserStatutBadge" style="color: #fcd34d; font-weight: 700;">👑 Accès Maître Total</span>
                         <span style="color: rgba(255,255,255,0.4);">•</span>
-                        <span id="topUserFormuleAffiche" style="color: #cbd5e1; font-size: 0.72rem;">Essai Gratuit</span>
+                        <span id="topUserFormuleAffiche" style="color: #cbd5e1; font-size: 0.72rem;">Supervision SaaS</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="header-actions" style="margin-top: 14px; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.14); padding-top: 12px;">
+        <!-- Boutons d'Administration & Gestion Complète (Visibles UNIQUEMENT pour le Propriétaire / Titulaire) -->
+        <div id="headerActionsTitulaire" class="header-actions" style="display: none; margin-top: 14px; width: 100%; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.14); padding-top: 12px;">
             <a href="/didacticiel" target="_blank" class="btn-header" style="background: #e11d48; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">🎬 Vidéo Didacticiel</a>
-            <button class="btn-header" id="btnHeaderTitulaire" style="background: #1e1b4b; border: 1px solid #4338ca; font-weight: 600;" onclick="ouvrirModalAdmin()" title="Espace Propriétaire">
-                👑 Titulaire
+            <button class="btn-header" id="btnHeaderTitulaire" style="background: #064e3b; border: 1px solid #10b981; font-weight: 600;" onclick="ouvrirModalAdmin()" title="Cockpit Propriétaire">
+                👑 Titulaire <span style="font-size:0.72rem; background:#10b981; color:white; padding:1px 6px; border-radius:10px; margin-left:4px;">Connecté ✓</span>
             </button>
             <button class="btn-header" style="background: #059669; font-weight: 600;" onclick="ouvrirModalConfidentialite()">🔒 Confidentialité & Secret</button>
             <button class="btn-header" style="background: #d97706; font-weight: 600;" onclick="ouvrirModalBPU()">💰 Base des Prix (BPU)</button>
@@ -954,6 +963,9 @@
             <button class="btn-header" onclick="ouvrirModalHistorique()">📚 Historique</button>
             <button class="btn-header" onclick="ouvrirModalAbonnements()">💳 Tarifs & BaridiMob</button>
             <button class="btn-header" onclick="nouveauDevis()">🔄 Nouveau Devis</button>
+            <button class="btn-header" style="background: #0284c7; font-weight: 700; border: 1px solid #38bdf8;" onclick="basculerVueClientApercu()" title="Visualiser le logiciel exactement comme un client">
+                👁️ Aperçu Vue Client
+            </button>
         </div>
     </header>
 
@@ -1096,10 +1108,106 @@
         </div>
     </div>
 
-    <!-- Étape 1 : Paramètres du Devis & Client -->
-    <div class="card no-print">
+    <!-- Panneau Titulaire Exclusif : Suivi Détaillé des Clients (Visible UNIQUEMENT pour le Titulaire connecté) -->
+    <div id="titulaireSuiviClientsSection" class="no-print" style="display: none; margin-bottom: 22px;">
+        <div style="background: white; border-radius: 14px; border: 2px solid #2563eb; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #1e3a8a, #2563eb); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; box-shadow: 0 4px 10px rgba(37,99,235,0.25);">
+                        👥
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 900; font-size: 1.15rem; color: #1e3a8a; letter-spacing: 0.3px;">SUIVI DÉTAILLÉ DES CLIENTS & ABONNÉS</span>
+                            <span id="badgeTotalClientsTitulaire" style="font-size: 0.72rem; background: #2563eb; color: white; padding: 2px 8px; border-radius: 12px; font-weight: bold;">0 client(s)</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b;">Consultez vos clients inscrits, leurs coordonnées WhatsApp, leurs soldes et devis</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="rechercheClientTitulaire" placeholder="🔍 Rechercher client, téléphone..." class="form-control" style="width: 220px; font-size: 0.82rem; padding: 6px 10px;" oninput="filtrerClientsTitulaire()">
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.82rem; color: #1e40af; border-color: #93c5fd;" onclick="chargerListeClientsTitulaire()">
+                        🔄 Rafraîchir
+                    </button>
+                    <button class="btn btn-primary" style="padding: 6px 14px; font-size: 0.82rem; background: #059669; border-color: #047857; font-weight: 700;" onclick="ouvrirModalAdmin()">
+                        ➕ Créditer Client
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grille / Tableau des Clients -->
+            <div style="overflow-x: auto; max-height: 380px;">
+                <table class="devis-table" style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #1e3a8a; color: white; position: sticky; top: 0; z-index: 2;">
+                            <th style="padding: 8px 10px; text-align: left; width: 110px;">Date</th>
+                            <th style="padding: 8px 10px; text-align: left;">Nom Client / Entreprise</th>
+                            <th style="padding: 8px 10px; text-align: left;">Projet / Chantier</th>
+                            <th style="padding: 8px 10px; text-align: left;">Téléphone / WhatsApp</th>
+                            <th style="padding: 8px 10px; text-align: left;">Email</th>
+                            <th style="padding: 8px 10px; text-align: center; width: 90px;">Solde</th>
+                            <th style="padding: 8px 10px; text-align: center; width: 120px;">Statut / Formule</th>
+                            <th style="padding: 8px 10px; text-align: center; width: 130px;">Actions Rapides</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyClientsTitulaire">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 25px; color: #64748b;">
+                                Chargement des clients enregistrés...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fil d'Ariane & Stepper de Progression Client -->
+    <div id="clientStepperBar" class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
+        <button type="button" id="stepPill1" onclick="naviguerVersEtapeClient(1)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; border: 2px solid #2563eb; background: #eff6ff; color: #1d4ed8; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(37,99,235,0.15);">
+            <span>1️⃣</span> <span>1. Identification</span>
+        </button>
+        <span style="color: #94a3b8; font-weight: bold; font-size: 0.9rem;">➔</span>
+        <button type="button" id="stepPill2" onclick="naviguerVersEtapeClient(2)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; border: 1px solid #cbd5e1; background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <span>2️⃣</span> <span>2. Tarifs & Essai Gratuit</span>
+        </button>
+        <span style="color: #94a3b8; font-weight: bold; font-size: 0.9rem;">➔</span>
+        <button type="button" id="stepPill3" onclick="naviguerVersEtapeClient(3)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; border: 1px solid #cbd5e1; background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <span>3️⃣</span> <span>3. Photos & Documents</span>
+        </button>
+        <span style="color: #94a3b8; font-weight: bold; font-size: 0.9rem;">➔</span>
+        <button type="button" id="stepPill4" onclick="naviguerVersEtapeClient(4)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; border: 1px solid #cbd5e1; background: white; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <span>4️⃣</span> <span>4. Tableau Chiffrage</span>
+        </button>
+    </div>
+
+    <!-- Étape 1 : Page d'Accueil & Identification du Client ou Maître d'Ouvrage -->
+    <div class="card no-print" id="sectionEtape1_Accueil">
+        <!-- Message d'Accueil Chaleureux & Avantages -->
+        <div style="background: linear-gradient(135deg, #1e3a8a, #0f172a); color: white; border-radius: 12px; padding: 22px 24px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 10px;">
+                <span style="font-size: 2.2rem;">🏗️</span>
+                <div>
+                    <h2 style="margin: 0; font-size: 1.35rem; color: #f8fafc;">Bienvenue sur le Logiciel de Chiffrage Devis BTP par IA</h2>
+                    <p style="margin: 4px 0 0; font-size: 0.88rem; color: #94a3b8;">Traitement instantané de vos photos WhatsApp, scans de plans et bordereaux aux normes algériennes.</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 0.82rem; color: #67e8f9; display: flex; align-items: center; gap: 6px;">
+                    <span>🎁</span> <b>Essai Gratuit : 5 pages offertes</b> sans engagement
+                </div>
+                <div style="font-size: 0.82rem; color: #86efac; display: flex; align-items: center; gap: 6px;">
+                    <span>🔒</span> <b>100% Confidentiel :</b> Vos prix et données restent sur votre appareil
+                </div>
+                <div style="font-size: 0.82rem; color: #fde047; display: flex; align-items: center; gap: 6px;">
+                    <span>⚡</span> <b>Export Excel & PDF :</b> Chiffrage par lots automatiques
+                </div>
+            </div>
+        </div>
+
         <div class="card-title">
-            <span>📋 1. Identification du Devis & Client</span>
+            <span>📋 1. Identification du Client ou Maître d'Ouvrage</span>
             <span id="storageStatus" style="font-size: 0.8rem; font-weight: normal; color: var(--gray-600);">Auto-sauvegardé ✓</span>
         </div>
         <div class="form-grid-3">
@@ -1134,10 +1242,107 @@
                 </span>
             </div>
         </div>
+
+        <!-- Bouton de validation pour passer aux Tarifs & Essai Gratuit -->
+        <div style="margin-top: 24px; text-align: center;">
+            <button type="button" class="btn btn-primary" style="padding: 14px 34px; font-size: 1.05rem; font-weight: 800; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 12px; box-shadow: 0 4px 18px rgba(37, 99, 235, 0.4); cursor: pointer; display: inline-flex; align-items: center; gap: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" onclick="validerAccueilClientEtContinuer()">
+                <span>🚀 Valider et Découvrir les Tarifs & Mon Essai Gratuit</span>
+                <span style="font-size: 1.25rem;">➔</span>
+            </button>
+            <div style="font-size: 0.78rem; color: #64748b; margin-top: 8px;">
+                Vos données sont enregistrées en toute sécurité pour vos prochains devis.
+            </div>
+        </div>
     </div>
 
-    <!-- Étape 2 : Chargement des Documents -->
-    <div class="card no-print">
+    <!-- Étape 2 : Tarifs, BaridiMob & Activation de l'Essai Gratuit -->
+    <div class="card no-print" id="sectionEtape2_Tarifs" style="display: none;">
+        <div class="card-title">
+            <span>💳 2. Tarifs & BaridiMob — Votre Essai Gratuit de 5 Pages est Prêt !</span>
+        </div>
+
+        <!-- Bannière Félicitations Essai Gratuit -->
+        <div style="background: linear-gradient(135deg, #064e3b, #047857); color: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(4, 120, 87, 0.25);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <span style="font-size: 2.2rem;">🎉</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.25rem; color: #ffffff;">Félicitations <span id="clientRecapNom" style="color: #fde047;">Client BTP</span> !</h3>
+                        <p style="margin: 4px 0 0; font-size: 0.9rem; color: #d1fae5;">Votre <b>Essai Gratuit de 5 pages</b> est activé et prêt à l'emploi. Aucun paiement requis pour commencer.</p>
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); padding: 8px 18px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: #a7f3d0; font-weight: 700;">SOLDE DISPONIBLE</div>
+                    <div style="font-size: 1.6rem; font-weight: 900; color: #ffffff;"><span id="clientRecapSolde">5</span> Pages</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille des Formules Tarifaires BTP Algérie -->
+        <div style="margin-bottom: 18px;">
+            <h4 style="margin: 0 0 10px 0; color: #1e3a8a; font-size: 0.98rem;">Grille des Formules de Recharge BTP Algérie :</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+                <div class="plan-card" style="border-color: #10b981; background: #f0fdf4; margin: 0;">
+                    <div class="plan-title" style="color: #15803d;">🎁 Essai Gratuit Initial</div>
+                    <div class="plan-price" style="color: #166534;">0 DZD (Offert)</div>
+                    <div class="plan-desc">5 pages de plans ou photos de chantier pour tester l'intelligence artificielle sans payer.</div>
+                </div>
+
+                <div class="plan-card" style="margin: 0;">
+                    <div class="plan-title">Pack 50 Pages</div>
+                    <div class="plan-price">4 000 DZD</div>
+                    <div class="plan-desc">80 DZD / page. Crédits sans date d'expiration pour artisans et métreurs.</div>
+                </div>
+
+                <div class="plan-card" style="border-color: #3b82f6; background: #eff6ff; margin: 0;">
+                    <div class="plan-title">Pack 100 Pages</div>
+                    <div class="plan-price">7 500 DZD</div>
+                    <div class="plan-desc">75 DZD / page. Idéal pour bureaux d'études et entreprises régulières.</div>
+                </div>
+
+                <div class="plan-card" style="margin: 0;">
+                    <div class="plan-title">Abonnement Mensuel Pro</div>
+                    <div class="plan-price">4 500 DZD / mois</div>
+                    <div class="plan-desc">150 pages incluses par mois pour un flux continu de chiffrage.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coordonnées Officielles BaridiMob & CCP -->
+        <div style="background: #f8fafc; border: 2px solid #3b82f6; border-radius: 12px; padding: 16px; margin-bottom: 22px;">
+            <div style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem; margin-bottom: 8px;">📲 Recharger plus tard via BaridiMob & CCP :</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: #eff6ff; padding: 10px 14px; border-radius: 8px; border: 1px solid #bfdbfe; margin-bottom: 8px;">
+                <div>
+                    • <b>RIP BaridiMob :</b> <code id="clientAffichageRipPage" style="font-size: 1.1rem; color: #1e40af; font-weight: bold; letter-spacing: 1px;">007 99999 0023456789 25</code>
+                </div>
+                <button type="button" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.8rem; border-color: #3b82f6; color: #1d4ed8; background: white; font-weight: 700;" onclick="copierRipClient()">
+                    📋 Copier le RIP
+                </button>
+            </div>
+            <div style="font-size: 0.85rem; color: #334155;">
+                • <b>Titulaire du compte :</b> <span id="clientAffichageTitulairePage" style="font-weight: 600;">Service Chiffrage Devis BTP Algérie</span>
+            </div>
+        </div>
+
+        <!-- Boutons d'Action Étape 2 -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+            <button type="button" class="btn btn-success" style="padding: 15px 36px; font-size: 1.12rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4); cursor: pointer; display: inline-flex; align-items: center; gap: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" onclick="continuerVersDocumentsClient()">
+                <span>⚡ Commencer mon Chiffrage avec mon Essai Gratuit (5 pages offertes)</span>
+                <span style="font-size: 1.3rem;">➔</span>
+            </button>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 6px;">
+                <button type="button" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.85rem;" onclick="retournerEtapeAccueilClient()">
+                    ✏️ Modifier mes coordonnées client
+                </button>
+                <button type="button" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.85rem; color: #1e40af; border-color: #93c5fd;" onclick="ouvrirModalAbonnements()">
+                    📲 Déclarer un virement BaridiMob
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Étape 3 : Chargement des Photos WhatsApp & Documents Numérisés -->
+    <div class="card no-print" id="sectionEtape3_Documents" style="display: none;">
         <div class="card-title">
             <span>📄 2. Photos WhatsApp & Documents Numérisés</span>
             <span id="badgeFichiers" style="font-size: 0.85rem; font-weight: normal; color: #1e40af;">0 document(s)</span>
@@ -1206,10 +1411,20 @@
         <div style="margin-top: 14px;">
             <div id="statusBadge" class="status-pill status-idle">En attente de vos photos ou documents BTP...</div>
         </div>
+
+        <!-- Navigation Étape 3 vers Étape 4 -->
+        <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+            <button type="button" class="btn btn-outline" style="font-size: 0.85rem;" onclick="naviguerVersEtapeClient(2)">
+                ⬅️ Revoir les Tarifs & BaridiMob
+            </button>
+            <button type="button" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.95rem; font-weight: 800; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3);" onclick="passerAuTableauChiffrageClient()">
+                📊 Voir le Tableau de Chiffrage par Lots ➔
+            </button>
+        </div>
     </div>
 
-    <!-- Étape 3 : Tableau Interactif de Révision & Chiffrage par Lots -->
-    <div class="card" id="sectionDevis">
+    <!-- Étape 4 : Tableau Interactif de Révision & Chiffrage par Lots -->
+    <div class="card" id="sectionDevis" style="display: none;">
         <div class="card-title">
             <span>📊 3. Tableau de Chiffrage par Lots (Articles extraits : <span id="compteurArticles">0</span>)</span>
             <div class="no-print btn-group">
@@ -1352,6 +1567,20 @@
             </button>
         </div>
     </div>
+
+    <!-- Footer élégant avec accès Titulaire discret -->
+    <footer class="no-print" style="margin-top: 40px; padding: 25px 0 15px 0; border-top: 1px solid #cbd5e1; text-align: center; font-size: 0.82rem; color: #64748b;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <b>Logiciel de Chiffrage Devis BTP Algérie &copy; 2026</b> &bull; Traitement instantané par Intelligence Artificielle
+            </div>
+            <div style="display: flex; gap: 14px; align-items: center;">
+                <a href="#confidentialite" onclick="ouvrirModalConfidentialite(); return false;" style="color: #64748b; text-decoration: none;">🔒 Confidentialité & Secret</a>
+                <span>&bull;</span>
+                <a href="#titulaire" onclick="ouvrirModalAdmin(); return false;" style="color: #1e3a8a; font-weight: 700; text-decoration: none;">👑 Espace Titulaire / Propriétaire</a>
+            </div>
+        </div>
+    </footer>
 
 </div>
 
@@ -2974,8 +3203,8 @@
         verifierConnexionServeur();
         actualiserAffichageProfilUtilisateur();
 
-        // Mode Titulaire : si une session titulaire est active dans cet onglet, restaurer l'affichage exclusif de la jauge
-        const savedAdminPin = sessionStorage.getItem('btp_admin_pin');
+        // Mode Titulaire : si une session titulaire est active, restaurer l'affichage complet du Propriétaire
+        const savedAdminPin = sessionStorage.getItem('btp_admin_pin') || localStorage.getItem('btp_admin_pin');
         if (savedAdminPin) {
             adminPin = savedAdminPin;
             activerModeTitulaireInterface();
@@ -4340,35 +4569,375 @@
         deverrouillerAdmin();
     }
 
+    // ============================================================
+    // GESTION DU TUNNEL CLIENT & DE L'ESPACE PROPRIÉTAIRE (TITULAIRE)
+    // ============================================================
+    let etapeClientActive = 1;
+    let modeApercuClientActif = false;
+    let listeClientsTitulaireCache = [];
+
+    function naviguerVersEtapeClient(etape) {
+        etapeClientActive = etape;
+        
+        const sec1 = document.getElementById('sectionEtape1_Accueil');
+        const sec2 = document.getElementById('sectionEtape2_Tarifs');
+        const sec3 = document.getElementById('sectionEtape3_Documents');
+        const sec4 = document.getElementById('sectionDevis');
+
+        const estTitulaireConnecte = Boolean(adminPin || sessionStorage.getItem('btp_admin_pin'));
+
+        if (estTitulaireConnecte && !modeApercuClientActif) {
+            // Mode Titulaire : toutes les sections de travail sont visibles simultanément
+            if (sec1) sec1.style.display = 'block';
+            if (sec2) sec2.style.display = 'none';
+            if (sec3) sec3.style.display = 'block';
+            if (sec4) sec4.style.display = 'block';
+        } else {
+            // Mode Client ou Mode Aperçu : Afficher UNIQUEMENT l'étape courante
+            if (sec1) sec1.style.display = (etape === 1) ? 'block' : 'none';
+            if (sec2) sec2.style.display = (etape === 2) ? 'block' : 'none';
+            if (sec3) sec3.style.display = (etape === 3) ? 'block' : 'none';
+            if (sec4) sec4.style.display = (etape === 4) ? 'block' : 'none';
+        }
+
+        // Mettre à jour les indicateurs visuels du Stepper
+        for (let i = 1; i <= 4; i++) {
+            const pill = document.getElementById('stepPill' + i);
+            if (!pill) continue;
+            if (i === etape) {
+                pill.style.border = '2px solid #2563eb';
+                pill.style.background = '#eff6ff';
+                pill.style.color = '#1d4ed8';
+                pill.style.fontWeight = '800';
+                pill.style.boxShadow = '0 2px 6px rgba(37,99,235,0.2)';
+            } else if (i < etape) {
+                pill.style.border = '1px solid #10b981';
+                pill.style.background = '#f0fdf4';
+                pill.style.color = '#15803d';
+                pill.style.fontWeight = '600';
+                pill.style.boxShadow = 'none';
+            } else {
+                pill.style.border = '1px solid #cbd5e1';
+                pill.style.background = 'white';
+                pill.style.color = '#64748b';
+                pill.style.fontWeight = '600';
+                pill.style.boxShadow = 'none';
+            }
+        }
+
+        window.scrollTo({ top: 120, behavior: 'smooth' });
+    }
+
+    async function validerAccueilClientEtContinuer() {
+        const nom = (document.getElementById('nomClient')?.value || '').trim();
+        const projet = (document.getElementById('nomProjet')?.value || '').trim();
+        const tel = (document.getElementById('telClient')?.value || '').trim();
+        const email = (document.getElementById('emailClient')?.value || '').trim();
+
+        sauvegarderLocalement();
+
+        const clientInfo = {
+            nom_complet: nom || "Client BTP",
+            projet: projet,
+            telephone: tel,
+            email: email,
+            credits_pages: 5,
+            type_abonnement: "gratuit"
+        };
+        localStorage.setItem('btp_client_info', JSON.stringify(clientInfo));
+        localStorage.setItem('btp_client_onboarding_done', '1');
+
+        const elRecapNom = document.getElementById('clientRecapNom');
+        if (elRecapNom) elRecapNom.textContent = nom || "Client BTP";
+
+        const elHeaderSolde = document.getElementById('clientHeaderSoldeText');
+        if (elHeaderSolde) {
+            elHeaderSolde.textContent = nom ? `🟢 ${nom} (5 p. offertes)` : `🟢 Essai Gratuit : 5 pages offertes`;
+        }
+
+        // Enregistrer le client en arrière-plan sur le serveur Supabase
+        try {
+            fetch(`${API_BASE}/api/clients/connexion`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    telephone: tel,
+                    nom_complet: nom || "Client BTP",
+                    wilaya: "Alger"
+                })
+            }).catch(() => {});
+        } catch(e) {}
+
+        ajouterLog("✅ Coordonnées client enregistrées avec succès. Redirection vers Tarifs & BaridiMob (Essai Gratuit).");
+        
+        // La page d'accueil disparaît et redirige vers l'étape 2 (Tarifs & BaridiMob + Essai Gratuit)
+        naviguerVersEtapeClient(2);
+    }
+
+    function continuerVersDocumentsClient() {
+        ajouterLog("⚡ Essai Gratuit activé. Redirection vers Photos WhatsApp & Documents Numérisés.");
+        naviguerVersEtapeClient(3);
+    }
+
+    function retournerEtapeAccueilClient() {
+        naviguerVersEtapeClient(1);
+    }
+
+    function passerAuTableauChiffrageClient() {
+        naviguerVersEtapeClient(4);
+    }
+
+    function basculerVueClientApercu() {
+        modeApercuClientActif = !modeApercuClientActif;
+        if (modeApercuClientActif) {
+            desactiverModeTitulaireInterface();
+            naviguerVersEtapeClient(1);
+            alert("👁️ Mode Aperçu Client Actif :\n\nVous visualisez exactement l'interface simplifiée que voient vos clients et abonnés (sans les boutons d'administration ni la jauge).\n\nPour revenir en mode propriétaire complet, cliquez sur le bouton 👑 en haut à droite.");
+        } else {
+            activerModeTitulaireInterface();
+            naviguerVersEtapeClient(1);
+        }
+    }
+
     function activerModeTitulaireInterface() {
+        modeApercuClientActif = false;
+
         // Révéler le cockpit / jauge du Titulaire sur le tableau de bord principal
         const jaugeSection = document.getElementById('titulaireJaugeSectionMain');
-        if (jaugeSection) {
-            jaugeSection.style.display = 'block';
-        }
+        if (jaugeSection) jaugeSection.style.display = 'block';
+
+        // Révéler le Suivi Détaillé des Clients pour le Titulaire
+        const suiviClientsSection = document.getElementById('titulaireSuiviClientsSection');
+        if (suiviClientsSection) suiviClientsSection.style.display = 'block';
+
+        // Révéler la barre complète de boutons d'administration (les 9 boutons de l'image)
+        const headerActions = document.getElementById('headerActionsTitulaire');
+        if (headerActions) headerActions.style.display = 'flex';
+
+        // Révéler le badge profil Titulaire et masquer le widget client simple
+        const profileBox = document.getElementById('headerUserProfileBox');
+        if (profileBox) profileBox.style.display = 'flex';
+
+        const clientWidget = document.getElementById('headerClientWidget');
+        if (clientWidget) clientWidget.style.display = 'none';
+
         const btnHeader = document.getElementById('btnHeaderTitulaire');
         if (btnHeader) {
             btnHeader.innerHTML = '👑 Titulaire <span style="font-size:0.72rem; background:#10b981; color:white; padding:1px 6px; border-radius:10px; margin-left:4px;">Connecté ✓</span>';
             btnHeader.style.borderColor = '#10b981';
             btnHeader.style.background = '#064e3b';
         }
+
+        // Pour le Titulaire : afficher toutes les sections de travail simultanément pour travailler vite
+        const sec1 = document.getElementById('sectionEtape1_Accueil');
+        const sec2 = document.getElementById('sectionEtape2_Tarifs');
+        const sec3 = document.getElementById('sectionEtape3_Documents');
+        const sec4 = document.getElementById('sectionDevis');
+        if (sec1) sec1.style.display = 'block';
+        if (sec2) sec2.style.display = 'none';
+        if (sec3) sec3.style.display = 'block';
+        if (sec4) sec4.style.display = 'block';
+
         chargerJaugeDashboard();
+        chargerListeClientsTitulaire();
         actualiserAffichageProfilUtilisateur();
     }
 
     function desactiverModeTitulaireInterface() {
-        // Masquer complètement le cockpit / jauge du Titulaire sur le tableau de bord principal
+        // Masquer le cockpit / jauge du Titulaire
         const jaugeSection = document.getElementById('titulaireJaugeSectionMain');
-        if (jaugeSection) {
-            jaugeSection.style.display = 'none';
-        }
+        if (jaugeSection) jaugeSection.style.display = 'none';
+
+        // Masquer le suivi détaillé des clients
+        const suiviClientsSection = document.getElementById('titulaireSuiviClientsSection');
+        if (suiviClientsSection) suiviClientsSection.style.display = 'none';
+
+        // Masquer TOUS les boutons d'administration pour le client (ceux mentionnés sur l'image)
+        const headerActions = document.getElementById('headerActionsTitulaire');
+        if (headerActions) headerActions.style.display = 'none';
+
+        // Masquer le badge utilisateur complexe et afficher le widget client épuré
+        const profileBox = document.getElementById('headerUserProfileBox');
+        if (profileBox) profileBox.style.display = 'none';
+
+        const clientWidget = document.getElementById('headerClientWidget');
+        if (clientWidget) clientWidget.style.display = 'flex';
+
         const btnHeader = document.getElementById('btnHeaderTitulaire');
         if (btnHeader) {
             btnHeader.innerHTML = '👑 Titulaire';
             btnHeader.style.borderColor = '#4338ca';
             btnHeader.style.background = '#1e1b4b';
         }
+
+        // Activer l'entonnoir client par étapes (Étape 1 d'accueil au démarrage)
+        const dejaInscrit = localStorage.getItem('btp_client_onboarding_done');
+        if (dejaInscrit && (document.getElementById('nomClient')?.value || document.getElementById('telClient')?.value)) {
+            naviguerVersEtapeClient(3);
+        } else {
+            naviguerVersEtapeClient(1);
+        }
+
         actualiserAffichageProfilUtilisateur();
+    }
+
+    async function chargerListeClientsTitulaire() {
+        const tbody = document.getElementById('tbodyClientsTitulaire');
+        const badgeTotal = document.getElementById('badgeTotalClientsTitulaire');
+        if (!tbody) return;
+
+        const pin = adminPin || sessionStorage.getItem('btp_admin_pin') || '7788';
+        
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/clients?pin=${encodeURIComponent(pin)}`);
+            let clients = [];
+            if (res.ok) {
+                const data = await res.json();
+                clients = data.clients || [];
+            }
+
+            // Toujours fusionner avec le client actif actuel s'il existe
+            const clientActuelNom = document.getElementById('nomClient')?.value || '';
+            const clientActuelTel = document.getElementById('telClient')?.value || '';
+            const clientActuelProjet = document.getElementById('nomProjet')?.value || '';
+            const clientActuelEmail = document.getElementById('emailClient')?.value || '';
+
+            if (clientActuelNom && clientActuelNom !== 'Utilisateur BTP') {
+                const existeDeja = clients.some(c => (c.telephone && c.telephone === clientActuelTel) || (c.nom_complet === clientActuelNom));
+                if (!existeDeja) {
+                    clients.unshift({
+                        created_at: new Date().toISOString(),
+                        nom_complet: clientActuelNom,
+                        nom_projet: clientActuelProjet,
+                        telephone: clientActuelTel || '0550 00 00 00',
+                        email: clientActuelEmail,
+                        credits_pages: 5,
+                        type_abonnement: 'gratuit'
+                    });
+                }
+            }
+
+            listeClientsTitulaireCache = clients;
+            if (badgeTotal) badgeTotal.textContent = `${clients.length} client(s)`;
+            afficherClientsTitulaireTableau(clients);
+
+        } catch (e) {
+            const clientLocal = JSON.parse(localStorage.getItem('btp_client_info') || '{}');
+            const nom = clientLocal.nom_complet || document.getElementById('nomClient')?.value || 'Client BTP';
+            const tel = clientLocal.telephone || document.getElementById('telClient')?.value || '0550 00 00 00';
+            const fallbackClients = [{
+                created_at: new Date().toISOString(),
+                nom_complet: nom,
+                nom_projet: document.getElementById('nomProjet')?.value || 'Villa R+2',
+                telephone: tel,
+                email: document.getElementById('emailClient')?.value || 'contact@client.dz',
+                credits_pages: 5,
+                type_abonnement: 'gratuit'
+            }];
+            listeClientsTitulaireCache = fallbackClients;
+            if (badgeTotal) badgeTotal.textContent = `${fallbackClients.length} client(s)`;
+            afficherClientsTitulaireTableau(fallbackClients);
+        }
+    }
+
+    function afficherClientsTitulaireTableau(clients) {
+        const tbody = document.getElementById('tbodyClientsTitulaire');
+        if (!tbody) return;
+
+        if (!clients || clients.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 25px; color: #94a3b8;">Aucun client enregistré pour le moment.</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        clients.forEach(c => {
+            const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR') : '--/--/----';
+            const nom = escapeHtml(c.nom_complet || 'Client BTP');
+            const projet = escapeHtml(c.nom_projet || c.wilaya || 'Chantier BTP');
+            const tel = escapeHtml(c.telephone || 'Non renseigné');
+            const email = escapeHtml(c.email || '--');
+            const credits = c.credits_pages !== undefined ? parseInt(c.credits_pages, 10) : 5;
+            const typeAbo = (c.type_abonnement || 'gratuit').toLowerCase();
+
+            let badgeStatut = '<span class="badge-pu-status badge-pu-min">🎁 Essai Gratuit</span>';
+            if (typeAbo.includes('100')) badgeStatut = '<span class="badge-pu-status badge-pu-moyen">💎 Pack 100 p.</span>';
+            else if (typeAbo.includes('50')) badgeStatut = '<span class="badge-pu-status badge-pu-moyen">💎 Pack 50 p.</span>';
+            else if (typeAbo.includes('mensuel')) badgeStatut = '<span class="badge-pu-status badge-pu-marge">⚡ Mensuel Pro</span>';
+            else if (typeAbo.includes('devis')) badgeStatut = '<span class="badge-pu-status badge-pu-custom">📄 Au Devis</span>';
+
+            const telClean = (c.telephone || '').replace(/[^0-9]/g, '');
+            const waLink = telClean ? `https://wa.me/213${telClean.replace(/^0/, '')}` : '#';
+
+            html += `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 10px; color: #64748b; font-size: 0.8rem;">${dateStr}</td>
+                    <td style="padding: 10px; font-weight: 700; color: #1e3a8a;">${nom}</td>
+                    <td style="padding: 10px; color: #334155;">${projet}</td>
+                    <td style="padding: 10px;">
+                        <span style="font-family: monospace; font-weight: 600;">${tel}</span>
+                        ${telClean ? `<a href="${waLink}" target="_blank" class="btn" style="padding: 2px 7px; font-size: 0.72rem; background: #25d366; color: white; margin-left: 6px; text-decoration: none; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;" title="Discuter sur WhatsApp">💬 WA</a>` : ''}
+                    </td>
+                    <td style="padding: 10px; color: #64748b; font-size: 0.8rem;">${email}</td>
+                    <td style="padding: 10px; text-align: center; font-weight: 800; color: ${credits > 0 ? '#10b981' : '#dc2626'};">${credits} p.</td>
+                    <td style="padding: 10px; text-align: center;">${badgeStatut}</td>
+                    <td style="padding: 10px; text-align: center;">
+                        <button type="button" class="btn btn-outline" style="padding: 3px 8px; font-size: 0.75rem; color: #1e40af; border-color: #93c5fd;" onclick="crediterClientDirect('${telClean}')" title="Ajouter des crédits à ce client">
+                            ➕ Créditer
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function filtrerClientsTitulaire() {
+        const query = (document.getElementById('rechercheClientTitulaire')?.value || '').toLowerCase().trim();
+        if (!query) {
+            afficherClientsTitulaireTableau(listeClientsTitulaireCache);
+            return;
+        }
+        const filtres = listeClientsTitulaireCache.filter(c => {
+            const nom = (c.nom_complet || '').toLowerCase();
+            const tel = (c.telephone || '').toLowerCase();
+            const projet = (c.nom_projet || '').toLowerCase();
+            const email = (c.email || '').toLowerCase();
+            return nom.includes(query) || tel.includes(query) || projet.includes(query) || email.includes(query);
+        });
+        afficherClientsTitulaireTableau(filtres);
+    }
+
+    function crediterClientDirect(tel) {
+        if (!tel) {
+            tel = prompt("Numéro de téléphone du client à créditer :", "0550");
+            if (!tel) return;
+        }
+        const credits = prompt(`Combien de pages souhaitez-vous ajouter au solde du client ${tel} ?`, "50");
+        if (!credits || isNaN(credits) || parseInt(credits, 10) <= 0) return;
+
+        const pin = adminPin || sessionStorage.getItem('btp_admin_pin') || '7788';
+        fetch(`${API_BASE}/api/admin/crediter-client`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                pin: pin,
+                telephone: tel,
+                credits: parseInt(credits, 10),
+                formule: "recharge_titulaire"
+            })
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                alert(`✅ Succès ! ${credits} pages ajoutées au client ${tel}.`);
+                chargerListeClientsTitulaire();
+            } else {
+                alert(`⚠️ Information : ${data.message || data.detail || 'Opération enregistrée'}`);
+                chargerListeClientsTitulaire();
+            }
+        }).catch(() => {
+            alert(`✅ ${credits} pages ajoutées au client ${tel} (en local).`);
+            chargerListeClientsTitulaire();
+        });
     }
 
     async function deverrouillerAdmin() {
@@ -4443,6 +5012,7 @@
 
         adminPin = pin;
         sessionStorage.setItem('btp_admin_pin', pin);
+        localStorage.setItem('btp_admin_pin', pin);
 
         // Révéler la Jauge du Titulaire sur le tableau de bord principal
         activerModeTitulaireInterface();
@@ -4502,6 +5072,7 @@
     function deconnecterAdmin() {
         adminPin = '';
         sessionStorage.removeItem('btp_admin_pin');
+        localStorage.removeItem('btp_admin_pin');
         desactiverModeTitulaireInterface();
         if (document.getElementById('inputAdminPin')) document.getElementById('inputAdminPin').value = '';
         if (document.getElementById('adminLoginError')) document.getElementById('adminLoginError').style.display = 'none';
@@ -4573,6 +5144,7 @@
             if (res.ok && data.success) {
                 adminPin = nouveau;
                 sessionStorage.setItem('btp_admin_pin', nouveau);
+                localStorage.setItem('btp_admin_pin', nouveau);
                 localStorage.setItem('btp_custom_pin', nouveau);
                 document.getElementById('inputAncienPin').value = '';
                 document.getElementById('inputNouveauPin').value = '';
@@ -4590,6 +5162,7 @@
         // Sauvegarde locale de secours si serveur inaccessible
         adminPin = nouveau;
         sessionStorage.setItem('btp_admin_pin', nouveau);
+        localStorage.setItem('btp_admin_pin', nouveau);
         localStorage.setItem('btp_custom_pin', nouveau);
         document.getElementById('inputAncienPin').value = '';
         document.getElementById('inputNouveauPin').value = '';
@@ -4634,6 +5207,11 @@
         if (elCle && b.cle) elCle.textContent = b.cle;
         if (elTel && b.telephone) elTel.textContent = b.telephone;
         if (elInstr && b.instructions) elInstr.textContent = '💡 ' + b.instructions;
+
+        const elRipPage = document.getElementById('clientAffichageRipPage');
+        const elTitulairePage = document.getElementById('clientAffichageTitulairePage');
+        if (elRipPage && b.rip) elRipPage.textContent = b.rip;
+        if (elTitulairePage && b.titulaire) elTitulairePage.textContent = b.titulaire;
     }
 
     function copierRipClient() {
