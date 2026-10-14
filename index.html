@@ -807,10 +807,10 @@
     <!-- Header Interactif Application avec Nouveau Logo Moderne BTP & Profil Utilisateur -->
     <header class="app-header no-print">
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 16px;">
-            <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
                 <!-- Conteneur Logo Logiciel (Devis Vierge, Baguette Magique & Chiffres en Lévitation ou Logo Personnalisé) -->
                 <div id="appLogoWrapper" style="position: relative; cursor: pointer;" onclick="ouvrirDialogueChangementLogo()" title="Logo Officiel du Logiciel (Devis vierge, baguette magique & chiffres - Cliquez pour importer votre propre logo ou le modifier)">
-                    <svg id="appLogoSvg" width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+                    <svg id="appLogoSvg" width="64" height="64" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
                         <defs>
                             <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stop-color="#0b132b"/>
@@ -897,7 +897,7 @@
                             <circle cx="50" cy="36" r="4" fill="#fef08a" opacity="0.4"/>
                         </g>
                     </svg>
-                    <img id="appCustomLogoImg" src="" style="display: none; width: 48px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Logo">
+                    <img id="appCustomLogoImg" src="" style="display: none; width: 64px; height: 64px; border-radius: 14px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" alt="Logo">
                 </div>
                 <input type="file" id="inputCustomLogoFile" accept="image/*" style="display: none;" onchange="importerLogoPersonnalise(event)">
 
