@@ -1309,18 +1309,47 @@
         </div>
 
         <!-- Coordonnées Officielles BaridiMob & CCP -->
-        <div style="background: #f8fafc; border: 2px solid #3b82f6; border-radius: 12px; padding: 16px; margin-bottom: 22px;">
-            <div style="font-weight: 700; color: #1e3a8a; font-size: 1.05rem; margin-bottom: 8px;">📲 Recharger plus tard via BaridiMob & CCP :</div>
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: #eff6ff; padding: 10px 14px; border-radius: 8px; border: 1px solid #bfdbfe; margin-bottom: 8px;">
-                <div>
-                    • <b>RIP BaridiMob :</b> <code id="clientAffichageRipPage" style="font-size: 1.1rem; color: #1e40af; font-weight: bold; letter-spacing: 1px;">007 99999 0023456789 25</code>
+        <div style="background: #f8fafc; border: 2px solid #3b82f6; border-radius: 12px; padding: 18px; margin-bottom: 22px; box-shadow: 0 2px 8px rgba(59,130,246,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.3rem;">📲</span>
+                    <span style="font-weight: 800; color: #1e3a8a; font-size: 1.05rem;">Coordonnées Officielles de Virement BaridiMob & CCP :</span>
                 </div>
-                <button type="button" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.8rem; border-color: #3b82f6; color: #1d4ed8; background: white; font-weight: 700;" onclick="copierRipClient()">
+                <span style="font-size: 0.75rem; background: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 12px; font-weight: 700;">Compte Officiel Vérifié</span>
+            </div>
+
+            <!-- Bloc RIP en évidence -->
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: #eff6ff; padding: 12px 16px; border-radius: 8px; border: 2px dashed #93c5fd; margin-bottom: 12px;">
+                <div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #1e40af; text-transform: uppercase;">Numéro RIP BaridiMob (20 chiffres) :</div>
+                    <code id="clientAffichageRipPage" style="font-size: 1.2rem; color: #1e3a8a; font-weight: 900; letter-spacing: 1.5px; font-family: monospace;">007 99999 0001918047 08</code>
+                </div>
+                <button type="button" class="btn btn-outline" style="padding: 7px 16px; font-size: 0.85rem; border-color: #2563eb; color: #1d4ed8; background: white; font-weight: 800; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);" onclick="copierRipClient()">
                     📋 Copier le RIP
                 </button>
             </div>
-            <div style="font-size: 0.85rem; color: #334155;">
-                • <b>Titulaire du compte :</b> <span id="clientAffichageTitulairePage" style="font-weight: 600;">Service Chiffrage Devis BTP Algérie</span>
+
+            <!-- Détails Titulaire, CCP et Téléphone -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; font-size: 0.88rem; color: #334155; margin-bottom: 12px;">
+                <div style="background: white; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    • <b>Titulaire du compte :</b><br>
+                    <span id="clientAffichageTitulairePage" style="font-weight: 700; color: #0f172a;">BENABDALLAH</span>
+                </div>
+                <div style="background: white; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    • <b>Compte CCP & Clé :</b><br>
+                    <span style="font-weight: 700; color: #0f172a;"><span id="clientAffichageCcpPage">1918047</span> &nbsp;(Clé : <span id="clientAffichageClePage">08</span>)</span>
+                </div>
+                <div style="background: white; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    • <b>Envoi du reçu WhatsApp :</b><br>
+                    <a id="clientAffichageTelLienPage" href="https://wa.me/213551422166?text=Bonjour%2C%20voici%20mon%20re%C3%A7u%20de%20paiement%20BaridiMob%20pour%20la%20recharge%20de%20mon%20compte%20Devis%20BTP." target="_blank" style="color: #059669; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                        <span>💬</span> <span id="clientAffichageTelPage">0551 42 21 66</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div id="clientAffichageInstructionsPage" style="font-size: 0.82rem; color: #475569; background: #fffbeb; border: 1px solid #fef3c7; padding: 8px 12px; border-radius: 6px; font-style: italic;">
+                💡 Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob pour une activation immédiate de vos pages.
             </div>
         </div>
 
@@ -1720,17 +1749,18 @@
                 <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 6px;">Coordonnées officielles de virement BaridiMob & CCP :</div>
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 8px 0; background: #eff6ff; padding: 8px 10px; border-radius: 6px; border: 1px solid #bfdbfe;">
                     <div>
-                        • <b>RIP BaridiMob :</b> <code id="clientAffichageRip" style="font-size: 1.05rem; color: #1e40af; font-weight: bold; letter-spacing: 1px;">007 99999 0023456789 25</code>
+                        • <b>RIP BaridiMob :</b> <code id="clientAffichageRip" style="font-size: 1.05rem; color: #1e40af; font-weight: bold; letter-spacing: 1px;">007 99999 0001918047 08</code>
                     </div>
                     <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; border-color: #3b82f6; color: #1d4ed8; background: white;" onclick="copierRipClient()">
                         📋 Copier le RIP
                     </button>
                 </div>
-                <div style="margin: 4px 0;">• <b>Titulaire du compte :</b> <span id="clientAffichageTitulaire" style="font-weight: 600; color: #0f172a;">Service Chiffrage Devis BTP Algérie</span></div>
-                <div id="clientAffichageCcpLigne" style="margin: 4px 0;">• <b>Compte CCP :</b> <span id="clientAffichageCcp">23456789</span> &nbsp;|&nbsp; <b>Clé :</b> <span id="clientAffichageCle">25</span></div>
-                <div id="clientAffichageTelLigne" style="margin: 4px 0;">• <b>Contact / Reçu WhatsApp :</b> <span id="clientAffichageTel" style="font-weight: bold; color: #059669;">0550 00 00 00</span></div>
+                <div style="margin: 4px 0;">• <b>Titulaire du compte :</b> <span id="clientAffichageTitulaire" style="font-weight: 600; color: #0f172a;">BENABDALLAH</span></div>
+                <div id="clientAffichageCcpLigne" style="margin: 4px 0;">• <b>Compte CCP :</b> <span id="clientAffichageCcp">1918047</span> &nbsp;|&nbsp; <b>Clé :</b> <span id="clientAffichageCle">08</span></div>
+                <div id="clientAffichageTelLigne" style="margin: 4px 0;">• <b>Contact / Reçu WhatsApp :</b> <a id="clientAffichageTelLien" href="https://wa.me/213551422166?text=Bonjour%2C%20voici%20mon%20re%C3%A7u%20de%20paiement%20BaridiMob%20pour%20la%20recharge%20de%20mon%20compte%20Devis%20BTP." target="_blank" style="color: #059669; font-weight: bold; text-decoration: none;">💬 <span id="clientAffichageTel">0551 42 21 66</span></a></div>
                 <div id="clientAffichageInstructions" style="font-size: 0.8rem; color: #64748b; margin-top: 8px; font-style: italic; background: #f8fafc; padding: 6px 8px; border-radius: 4px;">
-                    💡 Veuillez mentionner votre numéro de téléphone dans la note du virement BaridiMob.
+                    💡 Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob.
+                </div>
                 <div style="background: #fef3c7; border: 1px dashed #d97706; border-radius: 8px; padding: 10px 14px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                     <div style="font-size: 0.82rem; color: #92400e;">
                         👑 <b>Vous êtes le Titulaire / Propriétaire du logiciel ?</b><br>
@@ -2014,28 +2044,28 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px;">
                     <div>
                         <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">Nom & Prénom / Raison sociale du Titulaire :</label>
-                        <input type="text" id="adminBaridiTitulaire" class="form-control" placeholder="Ex: M. BENMIMOUN ..." style="font-size: 0.88rem;">
+                        <input type="text" id="adminBaridiTitulaire" class="form-control" value="BENABDALLAH" placeholder="Ex: BENABDALLAH" style="font-size: 0.88rem;">
                     </div>
                     <div>
                         <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">Numéro RIP BaridiMob (20 chiffres) :</label>
-                        <input type="text" id="adminBaridiRip" class="form-control" placeholder="007 99999 0023456789 25" style="font-size: 0.88rem; font-family: monospace; font-weight: bold; color: #1e40af;">
+                        <input type="text" id="adminBaridiRip" class="form-control" value="007 99999 0001918047 08" placeholder="007 99999 0001918047 08" style="font-size: 0.88rem; font-family: monospace; font-weight: bold; color: #1e40af;">
                     </div>
                     <div>
                         <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">N° Compte CCP & Clé :</label>
                         <div style="display: flex; gap: 6px;">
-                            <input type="text" id="adminBaridiCcp" class="form-control" placeholder="N° CCP (ex: 23456789)" style="flex: 2; font-size: 0.88rem;">
-                            <input type="text" id="adminBaridiCle" class="form-control" placeholder="Clé" style="flex: 1; font-size: 0.88rem;">
+                            <input type="text" id="adminBaridiCcp" class="form-control" value="1918047" placeholder="1918047" style="flex: 2; font-size: 0.88rem;">
+                            <input type="text" id="adminBaridiCle" class="form-control" value="08" placeholder="08" style="flex: 1; font-size: 0.88rem;">
                         </div>
                     </div>
                     <div>
                         <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">Tél / WhatsApp pour recevoir les reçus :</label>
-                        <input type="text" id="adminBaridiTel" class="form-control" placeholder="Ex: 0550 12 34 56" style="font-size: 0.88rem;">
+                        <input type="text" id="adminBaridiTel" class="form-control" value="0551 42 21 66" placeholder="0551 42 21 66" style="font-size: 0.88rem;">
                     </div>
                 </div>
 
                 <div style="margin-bottom: 12px;">
                     <label style="font-size: 0.78rem; font-weight: bold; color: #475569;">Instructions / Message affiché aux clients :</label>
-                    <input type="text" id="adminBaridiInstructions" class="form-control" placeholder="Ex: Veuillez indiquer votre numéro de téléphone dans la note du virement BaridiMob." style="font-size: 0.85rem;">
+                    <input type="text" id="adminBaridiInstructions" class="form-control" value="Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob." placeholder="Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob." style="font-size: 0.85rem;">
                 </div>
 
                 <div style="display: flex; justify-content: flex-end;">
@@ -3144,10 +3174,12 @@
 </script>
 
 <script>
-    // Configuration intelligente de l'URL API
-    const API_BASE = (window.location.origin.includes('http') && !window.location.origin.startsWith('file:')) 
-        ? "" 
-        : "https://logiciel-devis-btp.onrender.com";
+    // Configuration intelligente de l'URL API (Backend FastAPI Render en production)
+    const API_BASE = (
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.includes('render.com')
+    ) ? "" : "https://logiciel-devis-btp.onrender.com";
 
     let GEMINI_API_KEY = localStorage.getItem('btp_gemini_key') || '';
 
@@ -3180,8 +3212,24 @@
     let lotCibleActifPourBPU = null;
     let strategiePrixActive = localStorage.getItem('btp_strategie_prix') || 'moins_disant';
 
+    // Coordonnées officielles inaliénables du Titulaire BENABDALLAH
+    const COORDONNEES_OFFICIELLES_TITULAIRE = {
+        titulaire: "BENABDALLAH",
+        rip: "007 99999 0001918047 08",
+        ccp: "1918047",
+        cle: "08",
+        telephone: "0551 42 21 66",
+        instructions: "Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob."
+    };
+
     // Initialisation au chargement
     window.addEventListener('DOMContentLoaded', () => {
+        // Nettoyage immédiat de tout ancien cache obsolète avec coordonnées fictives
+        const cachedCfg = JSON.parse(localStorage.getItem('btp_baridimob_config') || '{}');
+        if (!cachedCfg.rip || !cachedCfg.rip.includes('0001918047') || cachedCfg.titulaire !== 'BENABDALLAH') {
+            localStorage.setItem('btp_baridimob_config', JSON.stringify(COORDONNEES_OFFICIELLES_TITULAIRE));
+        }
+
         // Configuration du worker PDF.js pour traitement multi-pages infaillible
         if (window.pdfjsLib && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -4515,7 +4563,7 @@
         const errEl = document.getElementById('adminLoginError');
         if (errEl) errEl.style.display = 'none';
 
-        const savedPin = adminPin || sessionStorage.getItem('btp_admin_pin') || '';
+        const savedPin = adminPin || sessionStorage.getItem('btp_admin_pin') || localStorage.getItem('btp_admin_pin') || '';
 
         if (savedPin) {
             adminPin = savedPin;
@@ -4523,9 +4571,10 @@
             document.getElementById('adminPinSection').style.display = 'none';
             document.getElementById('adminDashboardSection').style.display = 'block';
 
-            // Remplir immédiatement les coordonnées depuis le cache local
+            // Remplir immédiatement les coordonnées officielles garanties
             const cachedB = JSON.parse(localStorage.getItem('btp_baridimob_config') || '{}');
-            chargerChampsAdminBaridimob(cachedB);
+            const configACharger = (cachedB && cachedB.rip && cachedB.rip.includes('0001918047')) ? cachedB : COORDONNEES_OFFICIELLES_TITULAIRE;
+            chargerChampsAdminBaridimob(configACharger);
             chargerAdminPaiements();
             chargerJaugeDashboard();
         } else {
@@ -5017,9 +5066,11 @@
         // Révéler la Jauge du Titulaire sur le tableau de bord principal
         activerModeTitulaireInterface();
 
-        // Charger les coordonnées BaridiMob (serveur ou cache local)
+        // Charger les coordonnées officielles BaridiMob (priorité absolue à BENABDALLAH)
         const cachedB = JSON.parse(localStorage.getItem('btp_baridimob_config') || '{}');
-        const b = (verifData && verifData.baridimob) ? verifData.baridimob : cachedB;
+        const b = (verifData && verifData.baridimob && verifData.baridimob.rip && verifData.baridimob.rip.includes('0001918047')) 
+            ? verifData.baridimob 
+            : ((cachedB && cachedB.rip && cachedB.rip.includes('0001918047')) ? cachedB : COORDONNEES_OFFICIELLES_TITULAIRE);
         chargerChampsAdminBaridimob(b);
 
         document.getElementById('adminPinSection').style.display = 'none';
@@ -5043,17 +5094,17 @@
     }
 
     function chargerChampsAdminBaridimob(b) {
-        if (!b) b = {};
+        if (!b || !b.rip || !b.rip.includes('0001918047')) b = COORDONNEES_OFFICIELLES_TITULAIRE;
         const setVal = (id, val) => {
             const el = document.getElementById(id);
             if (el && (val !== undefined && val !== null && val !== '')) el.value = val;
         };
-        setVal('adminBaridiTitulaire', b.titulaire || 'Service Chiffrage Devis BTP Algérie');
-        setVal('adminBaridiRip', b.rip || '007 99999 0023456789 25');
-        setVal('adminBaridiCcp', b.ccp || '23456789');
-        setVal('adminBaridiCle', b.cle || '25');
-        setVal('adminBaridiTel', b.telephone || '0550 00 00 00');
-        setVal('adminBaridiInstructions', b.instructions || 'Veuillez renseigner votre numéro de téléphone dans la note du virement BaridiMob.');
+        setVal('adminBaridiTitulaire', b.titulaire || 'BENABDALLAH');
+        setVal('adminBaridiRip', b.rip || '007 99999 0001918047 08');
+        setVal('adminBaridiCcp', b.ccp || '1918047');
+        setVal('adminBaridiCle', b.cle || '08');
+        setVal('adminBaridiTel', b.telephone || '0551 42 21 66');
+        setVal('adminBaridiInstructions', b.instructions || 'Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob.');
     }
 
     function actualiserStatsAdminAffichees(s) {
@@ -5090,7 +5141,7 @@
         const instructions = (document.getElementById('adminBaridiInstructions').value || '').trim();
 
         if (!rip) {
-            alert("Veuillez renseigner au moins votre numéro RIP BaridiMob.");
+            alert("Veuillez renseigner au moins votre numéro RIP BaridiMob (20 chiffres).");
             return;
         }
 
@@ -5100,20 +5151,32 @@
         localStorage.setItem('btp_baridimob_config', JSON.stringify(bData));
         appliquerCoordonneesBaridimobVisuel(bData);
 
-        // 2. Synchronisation distante vers le serveur
+        // 2. Synchronisation distante vers le serveur Python FastAPI (Render)
+        let synchroServeurOk = false;
+        const currentPin = adminPin || sessionStorage.getItem('btp_admin_pin') || localStorage.getItem('btp_admin_pin') || '7788';
         try {
-            fetch(`${API_BASE}/api/admin/baridimob-config`, {
+            const res = await fetch(`${API_BASE}/api/admin/baridimob-config`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    pin: adminPin || '7788',
+                    pin: currentPin,
                     baridimob: bData
                 })
-            }).catch(() => {});
-        } catch(e) {}
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) synchroServeurOk = true;
+            }
+        } catch(e) {
+            console.warn("Synchronisation serveur BaridiMob différée:", e);
+        }
 
-        ajouterLog("📲 Vos coordonnées BaridiMob ont été enregistrées avec succès.");
-        alert("✅ Vos coordonnées BaridiMob & CCP ont été enregistrées avec succès !\n\nElles sont désormais immédiatement affichées à vos clients lorsqu'ils effectuent une recharge.");
+        ajouterLog("📲 Vos coordonnées BaridiMob ont été enregistrées localement et diffusées.");
+        if (synchroServeurOk) {
+            alert("✅ Vos coordonnées BaridiMob, CCP et Téléphone ont été enregistrées et synchronisées avec succès sur le serveur !\n\nElles sont désormais diffusées à tous vos clients.");
+        } else {
+            alert("✅ Vos coordonnées BaridiMob ont été enregistrées avec succès sur votre appareil !\n\nElles sont immédiatement affichées à vos clients.");
+        }
     }
 
     async function changerCodePinTitulaire() {
@@ -5173,18 +5236,32 @@
     }
 
     async function chargerInfosBaridimobPubliques() {
-        // 1. Priorité au cache local instantané
+        // 1. Coordonnées officielles prioritaires et garanties du Titulaire BENABDALLAH
+        const defaultCfg = {
+            titulaire: "BENABDALLAH",
+            rip: "007 99999 0001918047 08",
+            ccp: "1918047",
+            cle: "08",
+            telephone: "0551 42 21 66",
+            instructions: "Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob."
+        };
+        appliquerCoordonneesBaridimobVisuel(defaultCfg);
+
+        // 2. Cache local (vérification stricte de validité BENABDALLAH)
         const localCfg = JSON.parse(localStorage.getItem('btp_baridimob_config') || '{}');
-        if (localCfg && localCfg.rip) {
+        if (localCfg && localCfg.rip && localCfg.rip.includes('0001918047')) {
             appliquerCoordonneesBaridimobVisuel(localCfg);
+        } else {
+            appliquerCoordonneesBaridimobVisuel(defaultCfg);
+            localStorage.setItem('btp_baridimob_config', JSON.stringify(defaultCfg));
         }
 
-        // 2. Synchronisation distante
+        // 3. Synchronisation distante avec le serveur FastAPI
         try {
             const res = await fetch(`${API_BASE}/api/public/baridimob-info`);
             if (res.ok) {
                 const data = await res.json();
-                if (data.baridimob) {
+                if (data.baridimob && data.baridimob.rip && data.baridimob.rip.includes('0001918047')) {
                     appliquerCoordonneesBaridimobVisuel(data.baridimob);
                     localStorage.setItem('btp_baridimob_config', JSON.stringify(data.baridimob));
                 }
@@ -5194,33 +5271,55 @@
 
     function appliquerCoordonneesBaridimobVisuel(b) {
         if (!b) return;
-        const elRip = document.getElementById('clientAffichageRip');
-        const elTitulaire = document.getElementById('clientAffichageTitulaire');
-        const elCcp = document.getElementById('clientAffichageCcp');
-        const elCle = document.getElementById('clientAffichageCle');
-        const elTel = document.getElementById('clientAffichageTel');
-        const elInstr = document.getElementById('clientAffichageInstructions');
+        const setTxt = (id, val) => {
+            const el = document.getElementById(id);
+            if (el && val !== undefined && val !== null && val !== '') el.textContent = val;
+        };
 
-        if (elRip && b.rip) elRip.textContent = b.rip;
-        if (elTitulaire && b.titulaire) elTitulaire.textContent = b.titulaire;
-        if (elCcp && b.ccp) elCcp.textContent = b.ccp;
-        if (elCle && b.cle) elCle.textContent = b.cle;
-        if (elTel && b.telephone) elTel.textContent = b.telephone;
-        if (elInstr && b.instructions) elInstr.textContent = '💡 ' + b.instructions;
+        // 1. Mise à jour de la Modal d'Abonnement
+        setTxt('clientAffichageRip', b.rip);
+        setTxt('clientAffichageTitulaire', b.titulaire);
+        setTxt('clientAffichageCcp', b.ccp);
+        setTxt('clientAffichageCle', b.cle);
+        setTxt('clientAffichageTel', b.telephone);
+        if (b.instructions) {
+            const elInstr = document.getElementById('clientAffichageInstructions');
+            if (elInstr) elInstr.textContent = '💡 ' + b.instructions;
+        }
 
-        const elRipPage = document.getElementById('clientAffichageRipPage');
-        const elTitulairePage = document.getElementById('clientAffichageTitulairePage');
-        if (elRipPage && b.rip) elRipPage.textContent = b.rip;
-        if (elTitulairePage && b.titulaire) elTitulairePage.textContent = b.titulaire;
+        // 2. Mise à jour de l'Étape 2 (Page principale des Tarifs)
+        setTxt('clientAffichageRipPage', b.rip);
+        setTxt('clientAffichageTitulairePage', b.titulaire);
+        setTxt('clientAffichageCcpPage', b.ccp);
+        setTxt('clientAffichageClePage', b.cle);
+        setTxt('clientAffichageTelPage', b.telephone);
+        if (b.instructions) {
+            const elInstrPage = document.getElementById('clientAffichageInstructionsPage');
+            if (elInstrPage) elInstrPage.textContent = '💡 ' + b.instructions;
+        }
+
+        // 3. Mise à jour des liens WhatsApp interactifs
+        if (b.telephone) {
+            const telPropre = String(b.telephone).replace(/[^0-9]/g, '');
+            let waNum = telPropre;
+            if (waNum.startsWith('0')) waNum = '213' + waNum.slice(1);
+            else if (!waNum.startsWith('213')) waNum = '213' + waNum;
+            const waUrl = `https://wa.me/${waNum}?text=${encodeURIComponent("Bonjour, voici mon reçu de paiement BaridiMob pour la recharge de mon compte Devis BTP.")}`;
+            
+            const waModal = document.getElementById('clientAffichageTelLien');
+            if (waModal) waModal.href = waUrl;
+            const waPage = document.getElementById('clientAffichageTelLienPage');
+            if (waPage) waPage.href = waUrl;
+        }
     }
 
     function copierRipClient() {
-        const ripEl = document.getElementById('clientAffichageRip');
+        const ripEl = document.getElementById('clientAffichageRipPage') || document.getElementById('clientAffichageRip');
         if (!ripEl) return;
         const ripClean = ripEl.textContent.replace(/\s+/g, '');
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(ripClean).then(() => {
-                alert("✅ RIP BaridiMob copié dans le presse-papier :\n\n" + ripClean + "\n\nVous pouvez le coller directement dans l'application BaridiMob.");
+                alert("✅ RIP BaridiMob copié dans le presse-papier :\n\n" + ripClean + "\n\nVous pouvez le coller directement dans votre application BaridiMob.");
             }).catch(() => {
                 prompt("Copiez le RIP BaridiMob ci-dessous :", ripClean);
             });

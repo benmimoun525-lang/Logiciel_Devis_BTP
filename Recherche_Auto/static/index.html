@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoCote & Recherche - Véhicules & Cote Marché Réel</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="resetAllFilters()">
+                <div class="w-12 h-12 bg-gradient-to-tr from-blue-700 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
+                    <i class="fa-solid fa-car-rear text-2xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-extrabold tracking-tight text-slate-900">Auto<span class="text-blue-600">Cote</span></span>
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Photos Réelles Vendeurs</span>
+                    </div>
+                    <p class="text-xs text-slate-500 hidden sm:block">Annonces réelles, cote du marché & contact direct vendeur</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Devise Switcher -->
+                <div class="flex items-center bg-slate-100 rounded-xl p-1 text-xs font-semibold text-slate-600">
+                    <button id="deviseDZD" onclick="setDevise('DZD')" class="px-2.5 py-1.5 rounded-lg bg-white text-blue-700 shadow-sm transition">DZD (DA)</button>
+                    <button id="deviseEUR" onclick="setDevise('EUR')" class="px-2.5 py-1.5 rounded-lg hover:text-slate-900 transition">EUR (€)</button>
+                </div>
+
+                <!-- Bouton Ma Sélection -->
+                <button onclick="ouvrirModalSelection()" class="relative flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition shadow-sm group">
+                    <i class="fa-solid fa-bookmark text-amber-400 group-hover:scale-110 transition-transform"></i>
+                    <span class="hidden md:inline">Ma Sélection</span>
+                    <span id="badgeSelectionCount" class="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                </button>
+
+                <!-- Bouton Ajouter Annonce avec Vraies Photos -->
+                <button onclick="ouvrirModalAjout()" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition shadow-sm shadow-blue-600/25">
+                    <i class="fa-solid fa-camera"></i>
+                    <span class="hidden sm:inline">Déposer une Annonce</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNIÈRE HERO AVEC ENTONNOIR GUIDÉ DE RECHERCHE -->
+    <section class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 text-white pt-9 pb-14 px-4 relative overflow-hidden no-print">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-6">
+                <span class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-400/30 mb-3">
+                    <i class="fa-solid fa-camera-retro text-amber-400"></i> Galerie de Photos Réelles & Baromètre des Prix du Marché
+                </span>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight text-white leading-tight">
+                    Trouvez un véhicule avec <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-300">photos réelles & vrai cours du marché</span>
+                </h1>
+                <p class="mt-2 text-slate-300 text-xs md:text-sm">
+                    Sélectionnez votre <strong class="text-white">Marque</strong> ➔ le <strong class="text-white">Modèle</strong> ➔ filtrez par <strong class="text-white">Année</strong> et <strong class="text-white">Budget</strong> pour voir les véhicules avec photos sous tous les angles.
+                </p>
+            </div>
+
+            <!-- LE STEPPER DE RECHERCHE EN CASCADE -->
+            <div class="bg-white rounded-3xl p-5 md:p-6 shadow-2xl text-slate-800 border border-slate-100">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    
+                    <!-- ÉTAPE 1: TYPE / MARQUE -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-car text-blue-600 mr-1.5"></i> 1. Marque</span>
+                            <span id="labelMarqueActive" class="text-blue-600 font-semibold text-[11px] hidden"></span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="inputMarque" placeholder="Ex: Renault, Peugeot, VW..." 
+                                oninput="onInputMarque(this.value)"
+                                onfocus="afficherDropdownMarques()"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 pl-4 pr-10 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition">
+                            <button type="button" onclick="toggleDropdownMarques()" class="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </button>
+                        </div>
+                        <div id="dropdownMarques" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 max-h-60 overflow-y-auto custom-scroll p-2">
+                            <div id="listeMarquesOptions" class="space-y-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- ÉTAPE 2: MODÈLE -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-layer-group text-blue-600 mr-1.5"></i> 2. Modèle</span>
+                            <span id="labelModeleActive" class="text-blue-600 font-semibold text-[11px] hidden"></span>
+                        </label>
+                        <select id="selectModele" onchange="onSelectionModele(this.value)" disabled
+                            class="w-full bg-slate-100 border border-slate-200 rounded-2xl py-3 px-4 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <option value="">Sélectionnez d'abord une marque</option>
+                        </select>
+                    </div>
+
+                    <!-- ÉTAPE 3: ANNÉES DISPONIBLES -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-calendar-days text-blue-600 mr-1.5"></i> 3. Année</span>
+                            <span id="labelAnneeActive" class="text-blue-600 font-semibold text-[11px] hidden"></span>
+                        </label>
+                        <select id="selectAnnee" onchange="onSelectionAnnee(this.value)" disabled
+                            class="w-full bg-slate-100 border border-slate-200 rounded-2xl py-3 px-4 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <option value="">Toutes les années</option>
+                        </select>
+                    </div>
+
+                    <!-- ÉTAPE 4: BOUTON DE RECHERCHE -->
+                    <div>
+                        <button onclick="lancerRecherchePrincipale()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 px-5 rounded-2xl font-bold text-sm shadow-lg shadow-blue-500/30 transition flex items-center justify-center gap-2 transform active:scale-95">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Filtrer les Véhicules</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- LIGNE DES MONTANTS (DU ... AU ...) & FILTRES RAPIDES -->
+                <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="text-xs font-bold text-slate-500 uppercase"><i class="fa-solid fa-tag text-emerald-600 mr-1"></i> Budget :</span>
+                        
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                            <span class="text-xs text-slate-500">Du:</span>
+                            <input type="number" id="inputPrixMin" placeholder="Min" step="50000" onchange="lancerRecherchePrincipale()"
+                                class="w-28 bg-transparent text-xs font-bold text-slate-900 focus:outline-none">
+                            <span class="text-[11px] font-semibold text-slate-400 uniteDevise">DA</span>
+                        </div>
+
+                        <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                            <span class="text-xs text-slate-500">Au:</span>
+                            <input type="number" id="inputPrixMax" placeholder="Max" step="50000" onchange="lancerRecherchePrincipale()"
+                                class="w-28 bg-transparent text-xs font-bold text-slate-900 focus:outline-none">
+                            <span class="text-[11px] font-semibold text-slate-400 uniteDevise">DA</span>
+                        </div>
+
+                        <!-- Filtre Carburant -->
+                        <select id="selectCarburant" onchange="lancerRecherchePrincipale()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700 focus:outline-none">
+                            <option value="">Tous carburants</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Essence">Essence</option>
+                            <option value="Hybride">Hybride</option>
+                            <option value="Electrique">Électrique</option>
+                        </select>
+
+                        <!-- Filtre Boîte -->
+                        <select id="selectBoite" onchange="lancerRecherchePrincipale()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700 focus:outline-none">
+                            <option value="">Toutes boîtes</option>
+                            <option value="Manuelle">Manuelle</option>
+                            <option value="Automatique">Automatique</option>
+                        </select>
+
+                        <!-- Filtre État de la tôle (Sbigha) -->
+                        <select id="selectSbigha" onchange="lancerRecherchePrincipale()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700 focus:outline-none">
+                            <option value="">Toute carrosserie</option>
+                            <option value="00 Peinture">00 Peinture (Tôle d'origine)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="resetAllFilters()" class="text-xs text-slate-400 hover:text-red-500 transition flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-rotate-left"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BADGES MARQUES POPULAIRES RAPIDES -->
+                <div class="mt-4 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                    <span class="text-slate-400 font-medium whitespace-nowrap">Marques rapides :</span>
+                    <div id="quickBrandsBadges" class="flex items-center gap-1.5"></div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ZONE PRINCIPALE DU MARCHÉ & RÉSULTATS -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+
+        <!-- BAROMÈTRE / COTE DU COURS ACTUEL DU MARCHÉ -->
+        <div id="barometreCote" class="hidden mb-8 bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-3xl p-6 shadow-xl border border-blue-800">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div>
+                    <div class="flex items-center gap-2 text-blue-300 text-xs font-bold uppercase tracking-wider">
+                        <i class="fa-solid fa-chart-pie"></i> Baromètre de la Cote Réelle
+                    </div>
+                    <h2 id="coteTitreVehicule" class="text-2xl font-black mt-1 text-white">Renault Clio 4</h2>
+                    <p class="text-slate-300 text-xs mt-1">Calculé en temps réel sur les transactions et annonces réelles du marché automobile.</p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white/10 p-4 rounded-2xl backdrop-blur border border-white/10">
+                    <div class="text-center px-3 border-r border-white/10">
+                        <span class="text-[11px] text-slate-300 block">Cote Marché (Moyenne)</span>
+                        <span id="coteMoyenne" class="text-lg font-black text-emerald-400">2 480 000 DA</span>
+                    </div>
+                    <div class="text-center px-3 border-r border-white/10">
+                        <span class="text-[11px] text-slate-300 block">Fourchette Basse</span>
+                        <span id="coteBasse" class="text-base font-bold text-sky-300">2 300 000 DA</span>
+                    </div>
+                    <div class="text-center px-3 border-r border-white/10">
+                        <span class="text-[11px] text-slate-300 block">Fourchette Haute</span>
+                        <span id="coteHaute" class="text-base font-bold text-amber-300">2 650 000 DA</span>
+                    </div>
+                    <div class="text-center px-3">
+                        <span class="text-[11px] text-slate-300 block">Annonces analysées</span>
+                        <span id="coteNbEchantillons" class="text-base font-bold text-white">12 véhicules</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRE DE GESTION DES RÉSULTATS & TRI -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <span id="nbResultatsTxt">Annonces avec photos réelles</span>
+                    <span id="badgeNbVehicules" class="bg-blue-100 text-blue-700 text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
+                </h3>
+                <p id="sousTitreFiltres" class="text-xs text-slate-500 mt-0.5">Cliquez sur les flèches ou les miniatures pour voir toutes les photos de chaque véhicule</p>
+            </div>
+
+            <!-- TRI DES RÉSULTATS -->
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-semibold text-slate-500 whitespace-nowrap">Trier par :</span>
+                <select id="selectTri" onchange="lancerRecherchePrincipale()" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="bonne_affaire">⭐ Meilleures affaires (sous la cote)</option>
+                    <option value="prix_asc">Prix croissant (du - cher au + cher)</option>
+                    <option value="prix_desc">Prix décroissant</option>
+                    <option value="annee_desc">Année la plus récente</option>
+                    <option value="km_asc">Kilométrage le plus bas</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- GRILLE DES VÉHICULES -->
+        <div id="grilleVehicules" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <!-- ÉTAT VIDE -->
+        <div id="aucunResultat" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+            <div class="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fa-solid fa-car-burst"></i>
+            </div>
+            <h4 class="text-lg font-bold text-slate-800">Aucun véhicule ne correspond à ces critères</h4>
+            <p class="text-sm text-slate-500 mt-1 max-w-md mx-auto">Essayez d'élargir votre fourchette de budget ou de changer de modèle pour voir d'autres opportunités.</p>
+            <button onclick="resetAllFilters()" class="mt-5 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">
+                Réinitialiser tous les filtres
+            </button>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-800">AutoCote</span> - Recherche avec photos réelles & baromètre de cours du marché
+            </div>
+            <p>© 2026 Tous droits réservés. Modèles et fiches vendeurs certifiées.</p>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- MODAL : MA SÉLECTION / PANIER D'ACHETEUR  -->
+    <!-- ========================================== -->
+    <div id="modalSelection" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+            <div class="p-6 bg-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-bookmark"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold">Ma Sélection de Véhicules Retenus</h3>
+                        <p class="text-xs text-slate-300">Votre liste pour comparer et contacter directement les vendeurs</p>
+                    </div>
+                </div>
+                <button onclick="fermerModalSelection()" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-1 custom-scroll" id="contenuModalSelection"></div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between flex-wrap gap-3">
+                <button onclick="viderSelection()" class="text-xs text-red-600 hover:text-red-700 font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i> Vider la sélection
+                </button>
+                <div class="flex items-center gap-3">
+                    <button onclick="window.print()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i> Imprimer / Exporter PDF
+                    </button>
+                    <button onclick="fermerModalSelection()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL : DÉTAILS COMPLETS DU VÉHICULE       -->
+    <!-- ========================================== -->
+    <div id="modalDetail" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100" id="detailVehiculeBody"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL : AJOUTER UNE VRAIE ANNONCE (UPLOAD) -->
+    <!-- ========================================== -->
+    <div id="modalAjout" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+            <div class="p-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-camera"></i> Déposer une Annonce (Photos Réelles)
+                    </h3>
+                    <p class="text-xs text-blue-100 mt-0.5">Uploadez les vraies photos de votre véhicule (Avant, Arrière, Intérieur)</p>
+                </div>
+                <button onclick="fermerModalAjout()" class="text-white/80 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="formAjoutVehicule" onsubmit="soumettreNouveauVehicule(event)" class="p-6 overflow-y-auto flex-1 custom-scroll space-y-4">
+                
+                <!-- Zone Upload Photos Réelles -->
+                <div class="bg-blue-50/70 border-2 border-dashed border-blue-200 rounded-2xl p-4 text-center">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-2 text-xl">
+                        <i class="fa-solid fa-images"></i>
+                    </div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1 cursor-pointer">
+                        <span class="text-blue-600 hover:underline">Sélectionnez des photos réelles</span> depuis votre ordinateur
+                        <input type="file" id="inputPhotoUpload" multiple accept="image/*" onchange="gererUploadFichiers(this.files)" class="hidden">
+                    </label>
+                    <p class="text-[11px] text-slate-400">Prenez plusieurs photos : face avant, arrière, compteur/tableau de bord, intérieur</p>
+                    
+                    <!-- Prévisualisation des photos uploadées -->
+                    <div id="apercuPhotosUpload" class="mt-3 flex items-center gap-2 overflow-x-auto pb-1 justify-center empty:hidden"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Marque *</label>
+                        <input type="text" name="marque" required placeholder="Ex: Renault" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Modèle *</label>
+                        <input type="text" name="modele" required placeholder="Ex: Clio 4" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-semibold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Finition / Version</label>
+                        <input type="text" name="version" placeholder="Ex: GT-Line dCi 85ch" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Année *</label>
+                        <input type="number" name="annee" required min="1995" max="2026" value="2021" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-semibold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Prix demandé (DA) *</label>
+                        <input type="number" name="prix" required min="100000" step="10000" placeholder="2450000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Kilométrage (km) *</label>
+                        <input type="number" name="kilometrage" required min="0" placeholder="85000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-semibold">
+                    </div>
+                </div>
+
+                <!-- Papiers et Tôle (Sbigha) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Papiers du véhicule</label>
+                        <select name="papiers" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                            <option value="Carte Grise (Safia)">Carte Grise (Safia)</option>
+                            <option value="Mémoire de vente">Mémoire de vente</option>
+                            <option value="Licence d'importation">Licence d'importation</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">État de la tôle (Sbigha)</label>
+                        <input type="text" name="sbigha" placeholder="Ex: 00 Peinture (Tôle d'origine)" value="00 Peinture (Tôle d'origine)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Carburant</label>
+                        <select name="carburant" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                            <option value="Diesel">Diesel</option>
+                            <option value="Essence">Essence</option>
+                            <option value="Hybride">Hybride</option>
+                            <option value="Electrique">Électrique</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Boîte</label>
+                        <select name="boite" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                            <option value="Manuelle">Manuelle</option>
+                            <option value="Automatique">Automatique</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Wilaya / Ville *</label>
+                        <input type="text" name="wilaya" required placeholder="Alger, Oran..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-semibold">
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-4">
+                    <span class="text-xs font-bold text-blue-600 block mb-2">Coordonnées du Vendeur</span>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nom / Garage *</label>
+                            <input type="text" name="vendeur_nom" required placeholder="Ex: Karim Bouzid" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Téléphone *</label>
+                            <input type="text" name="vendeur_tel" required placeholder="0550 12 34 56" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-semibold">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">WhatsApp (sans + ni 00, ex: 213550123456)</label>
+                        <input type="text" name="vendeur_whatsapp" placeholder="213550123456" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Description détaillée du véhicule</label>
+                    <textarea name="description" rows="3" placeholder="État du moteur, carnet d'entretien, retouches éventuelles, options..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm"></textarea>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="fermerModalAjout()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold">Annuler</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold">Publier l'Annonce</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT DE L'APPLICATION -->
+    <script>
+        let catalogueMarques = [];
+        let vehiculesCourants = [];
+        let selectionIds = JSON.parse(localStorage.getItem('auto_selection_ids') || '[]');
+        let deviseActive = 'DZD';
+        const TAUX_CHANGE_DZD_EUR = 240;
+        let photosUploadeesTemp = [];
+
+        // Dictionnaire pour gérer l'index de la photo active par véhicule
+        let photoActiveParVehicule = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            chargerMarques();
+            lancerRecherchePrincipale();
+            mettreAJourBadgeSelection();
+        });
+
+        function setDevise(devise) {
+            deviseActive = devise;
+            if (devise === 'DZD') {
+                document.getElementById('deviseDZD').className = "px-2.5 py-1.5 rounded-lg bg-white text-blue-700 shadow-sm transition";
+                document.getElementById('deviseEUR').className = "px-2.5 py-1.5 rounded-lg hover:text-slate-900 transition";
+                document.querySelectorAll('.uniteDevise').forEach(el => el.textContent = 'DA');
+            } else {
+                document.getElementById('deviseEUR').className = "px-2.5 py-1.5 rounded-lg bg-white text-blue-700 shadow-sm transition";
+                document.getElementById('deviseDZD').className = "px-2.5 py-1.5 rounded-lg hover:text-slate-900 transition";
+                document.querySelectorAll('.uniteDevise').forEach(el => el.textContent = '€');
+            }
+            afficherVehicules(vehiculesCourants);
+        }
+
+        function formaterPrix(montantDZD) {
+            if (!montantDZD) return "Non précisé";
+            if (deviseActive === 'EUR') {
+                const enEuro = Math.round(montantDZD / TAUX_CHANGE_DZD_EUR);
+                return enEuro.toLocaleString('fr-FR') + ' €';
+            }
+            return Number(montantDZD).toLocaleString('fr-FR') + ' DA';
+        }
+
+        // ==========================================
+        // GESTION DES MARQUES & MODÈLES
+        // ==========================================
+        async function chargerMarques() {
+            try {
+                const res = await fetch('/api/marques');
+                catalogueMarques = await res.json();
+                
+                const quickDiv = document.getElementById('quickBrandsBadges');
+                quickDiv.innerHTML = catalogueMarques.slice(0, 7).map(m => `
+                    <button onclick="selectionnerMarque('${m.marque}')" 
+                        class="px-3 py-1 rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white transition font-medium text-slate-700 flex items-center gap-1.5">
+                        <span>${m.marque}</span>
+                        <span class="opacity-60 text-[10px]">(${m.count})</span>
+                    </button>
+                `).join('');
+
+                renderDropdownMarques(catalogueMarques);
+            } catch (err) {
+                console.error("Erreur marques:", err);
+            }
+        }
+
+        function renderDropdownMarques(marques) {
+            const container = document.getElementById('listeMarquesOptions');
+            if (marques.length === 0) {
+                container.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center">Aucune marque trouvée</div>`;
+                return;
+            }
+            container.innerHTML = marques.map(m => `
+                <div onclick="selectionnerMarque('${m.marque}')" 
+                    class="p-2.5 hover:bg-blue-50 rounded-xl cursor-pointer flex items-center justify-between text-xs font-semibold text-slate-800 transition">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-car text-blue-500"></i> ${m.marque}
+                    </span>
+                    <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[11px]">${m.count} disp.</span>
+                </div>
+            `).join('');
+        }
+
+        function onInputMarque(val) {
+            const filtered = catalogueMarques.filter(m => m.marque.toLowerCase().includes(val.toLowerCase()));
+            renderDropdownMarques(filtered);
+            afficherDropdownMarques();
+            if (val.trim() === '') {
+                reinitialiserModeleEtAnnee();
+            }
+        }
+
+        function afficherDropdownMarques() {
+            document.getElementById('dropdownMarques').classList.remove('hidden');
+        }
+
+        function toggleDropdownMarques() {
+            document.getElementById('dropdownMarques').classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('dropdownMarques');
+            const input = document.getElementById('inputMarque');
+            if (!dropdown.contains(e.target) && e.target !== input) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        async function selectionnerMarque(marqueNom) {
+            document.getElementById('inputMarque').value = marqueNom;
+            document.getElementById('dropdownMarques').classList.add('hidden');
+            
+            const badge = document.getElementById('labelMarqueActive');
+            badge.textContent = `✓ ${marqueNom}`;
+            badge.classList.remove('hidden');
+
+            await chargerModeles(marqueNom);
+            lancerRecherchePrincipale();
+        }
+
+        async function chargerModeles(marque) {
+            const selectModele = document.getElementById('selectModele');
+            selectModele.innerHTML = '<option value="">Chargement...</option>';
+            selectModele.disabled = true;
+
+            try {
+                const res = await fetch(`/api/modeles?marque=${encodeURIComponent(marque)}`);
+                const modeles = await res.json();
+
+                if (modeles.length === 0) {
+                    selectModele.innerHTML = '<option value="">Aucun modèle disponible</option>';
+                    return;
+                }
+
+                selectModele.innerHTML = '<option value="">Tous les modèles de ' + marque + '</option>' +
+                    modeles.map(m => `<option value="${m.modele}">${m.modele} (${m.count} disp.)</option>`).join('');
+
+                selectModele.disabled = false;
+                selectModele.classList.remove('bg-slate-100');
+                selectModele.classList.add('bg-slate-50');
+            } catch (err) {
+                console.error("Erreur modèles:", err);
+            }
+        }
+
+        function onSelectionModele(modeleNom) {
+            const marque = document.getElementById('inputMarque').value;
+            const badge = document.getElementById('labelModeleActive');
+            
+            if (modeleNom) {
+                badge.textContent = `✓ ${modeleNom}`;
+                badge.classList.remove('hidden');
+                chargerAnnees(marque, modeleNom);
+            } else {
+                badge.classList.add('hidden');
+                reinitialiserAnnee();
+            }
+            lancerRecherchePrincipale();
+        }
+
+        async function chargerAnnees(marque, modele) {
+            const selectAnnee = document.getElementById('selectAnnee');
+            selectAnnee.innerHTML = '<option value="">Chargement années...</option>';
+            selectAnnee.disabled = true;
+
+            try {
+                const res = await fetch(`/api/annees?marque=${encodeURIComponent(marque)}&modele=${encodeURIComponent(modele)}`);
+                const annees = await res.json();
+
+                if (annees.length === 0) {
+                    selectAnnee.innerHTML = '<option value="">Toutes les années</option>';
+                    return;
+                }
+
+                selectAnnee.innerHTML = '<option value="">Toutes les années</option>' +
+                    annees.map(a => `<option value="${a.annee}">Année ${a.annee} (${a.count} annonces)</option>`).join('');
+
+                selectAnnee.disabled = false;
+                selectAnnee.classList.remove('bg-slate-100');
+                selectAnnee.classList.add('bg-slate-50');
+            } catch (err) {
+                console.error("Erreur années:", err);
+            }
+        }
+
+        function onSelectionAnnee(annee) {
+            const badge = document.getElementById('labelAnneeActive');
+            if (annee) {
+                badge.textContent = `✓ ${annee}`;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+            lancerRecherchePrincipale();
+        }
+
+        function reinitialiserModeleEtAnnee() {
+            const selectModele = document.getElementById('selectModele');
+            selectModele.innerHTML = '<option value="">Sélectionnez d\'abord une marque</option>';
+            selectModele.disabled = true;
+            selectModele.classList.add('bg-slate-100');
+            document.getElementById('labelModeleActive').classList.add('hidden');
+            reinitialiserAnnee();
+        }
+
+        function reinitialiserAnnee() {
+            const selectAnnee = document.getElementById('selectAnnee');
+            selectAnnee.innerHTML = '<option value="">Toutes les années</option>';
+            selectAnnee.disabled = true;
+            selectAnnee.classList.add('bg-slate-100');
+            document.getElementById('labelAnneeActive').classList.add('hidden');
+        }
+
+        function resetAllFilters() {
+            document.getElementById('inputMarque').value = '';
+            document.getElementById('labelMarqueActive').classList.add('hidden');
+            reinitialiserModeleEtAnnee();
+            document.getElementById('inputPrixMin').value = '';
+            document.getElementById('inputPrixMax').value = '';
+            document.getElementById('selectCarburant').value = '';
+            document.getElementById('selectBoite').value = '';
+            document.getElementById('selectSbigha').value = '';
+            document.getElementById('selectTri').value = 'bonne_affaire';
+            document.getElementById('barometreCote').classList.add('hidden');
+            lancerRecherchePrincipale();
+        }
+
+        // ==========================================
+        // COTE DU MARCHÉ
+        // ==========================================
+        async function mettreAJourCoteMarche(marque, modele, annee) {
+            if (!marque) {
+                document.getElementById('barometreCote').classList.add('hidden');
+                return;
+            }
+
+            try {
+                let url = `/api/cote-marche?marque=${encodeURIComponent(marque)}`;
+                if (modele) url += `&modele=${encodeURIComponent(modele)}`;
+                if (annee) url += `&annee=${encodeURIComponent(annee)}`;
+
+                const res = await fetch(url);
+                const cote = await res.json();
+
+                if (cote.trouve) {
+                    let titre = `${marque}`;
+                    if (modele) titre += ` ${modele}`;
+                    if (annee) titre += ` (${annee})`;
+
+                    document.getElementById('coteTitreVehicule').textContent = titre;
+                    document.getElementById('coteMoyenne').textContent = formaterPrix(cote.cote_marche);
+                    document.getElementById('coteBasse').textContent = formaterPrix(cote.fourchette_basse);
+                    document.getElementById('coteHaute').textContent = formaterPrix(cote.fourchette_haute);
+                    document.getElementById('coteNbEchantillons').textContent = `${cote.nb_echantillons} véhicule(s)`;
+                    
+                    document.getElementById('barometreCote').classList.remove('hidden');
+                } else {
+                    document.getElementById('barometreCote').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error("Erreur cote marché:", err);
+            }
+        }
+
+        // ==========================================
+        // RECHERCHE & GALERIE MULTI-PHOTOS
+        // ==========================================
+        async function lancerRecherchePrincipale() {
+            const marque = document.getElementById('inputMarque').value;
+            const modele = document.getElementById('selectModele').value;
+            const annee = document.getElementById('selectAnnee').value;
+            const prixMin = document.getElementById('inputPrixMin').value;
+            const prixMax = document.getElementById('inputPrixMax').value;
+            const carburant = document.getElementById('selectCarburant').value;
+            const boite = document.getElementById('selectBoite').value;
+            const sbigha = document.getElementById('selectSbigha').value;
+            const tri = document.getElementById('selectTri').value;
+
+            mettreAJourCoteMarche(marque, modele, annee);
+
+            let params = new URLSearchParams();
+            if (marque) params.append('marque', marque);
+            if (modele) params.append('modele', modele);
+            if (annee) params.append('annee', annee);
+            if (prixMin) params.append('prix_min', prixMin);
+            if (prixMax) params.append('prix_max', prixMax);
+            if (carburant) params.append('carburant', carburant);
+            if (boite) params.append('boite', boite);
+            if (sbigha) params.append('search', sbigha);
+            if (tri) params.append('tri', tri);
+
+            try {
+                const res = await fetch(`/api/vehicules?${params.toString()}`);
+                vehiculesCourants = await res.json();
+                afficherVehicules(vehiculesCourants);
+            } catch (err) {
+                console.error("Erreur recherche véhicules:", err);
+            }
+        }
+
+        // Changement de photo dans le slider de la carte
+        function changerPhotoCard(vehiculeId, direction, totalPhotos, event) {
+            if (event) event.stopPropagation();
+            if (!photoActiveParVehicule[vehiculeId]) photoActiveParVehicule[vehiculeId] = 0;
+            
+            photoActiveParVehicule[vehiculeId] = (photoActiveParVehicule[vehiculeId] + direction + totalPhotos) % totalPhotos;
+            
+            const imgElement = document.getElementById(`img-vehicule-${vehiculeId}`);
+            const counterElement = document.getElementById(`counter-vehicule-${vehiculeId}`);
+            const v = vehiculesCourants.find(item => item.id === vehiculeId);
+            
+            if (imgElement && v && v.photos) {
+                imgElement.src = v.photos[photoActiveParVehicule[vehiculeId]];
+            }
+            if (counterElement) {
+                counterElement.textContent = `${photoActiveParVehicule[vehiculeId] + 1}/${totalPhotos}`;
+            }
+        }
+
+        function afficherVehicules(liste) {
+            const grille = document.getElementById('grilleVehicules');
+            const aucun = document.getElementById('aucunResultat');
+            const badgeCount = document.getElementById('badgeNbVehicules');
+
+            badgeCount.textContent = liste.length;
+
+            if (liste.length === 0) {
+                grille.innerHTML = '';
+                aucun.classList.remove('hidden');
+                return;
+            }
+
+            aucun.classList.add('hidden');
+
+            grille.innerHTML = liste.map(v => {
+                const estSelectionne = selectionIds.includes(v.id);
+                const photos = v.photos && v.photos.length > 0 ? v.photos : [v.photo_principale];
+                const currentIndex = photoActiveParVehicule[v.id] || 0;
+                const activePhotoUrl = photos[currentIndex] || photos[0];
+                
+                const msgWhatsapp = encodeURIComponent(`Bonjour ${v.vendeur_nom}, je vous contacte concernant votre annonce ${v.marque} ${v.modele} (${v.annee}) réf ${v.reference_annonce} affichée à ${formaterPrix(v.prix)}. Est-elle toujours disponible ?`);
+                const whatsappUrl = v.vendeur_whatsapp ? `https://wa.me/${v.vendeur_whatsapp}?text=${msgWhatsapp}` : null;
+
+                return `
+                <div class="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
+                    
+                    <!-- GALERIE MULTI-PHOTOS DE L'ANNONCE -->
+                    <div class="relative h-56 overflow-hidden bg-slate-900 cursor-pointer" onclick="afficherDetails(${v.id})">
+                        <img id="img-vehicule-${v.id}" src="${activePhotoUrl}" alt="${v.marque} ${v.modele}" 
+                            class="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
+                            onerror="this.src='https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80'">
+
+                        <!-- Boutons Flèches Précédent / Suivant -->
+                        ${photos.length > 1 ? `
+                        <button onclick="changerPhotoCard(${v.id}, -1, ${photos.length}, event)" 
+                            class="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur shadow-md transition z-10">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button onclick="changerPhotoCard(${v.id}, 1, ${photos.length}, event)" 
+                            class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-900/70 hover:bg-slate-900 text-white flex items-center justify-center backdrop-blur shadow-md transition z-10">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                        ` : ''}
+
+                        <!-- Badge Compteur de Photos -->
+                        <div class="absolute bottom-2.5 left-2.5 bg-slate-900/80 text-white text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur flex items-center gap-1.5 z-10">
+                            <i class="fa-solid fa-camera text-amber-400"></i>
+                            <span id="counter-vehicule-${v.id}">${currentIndex + 1}/${photos.length} photos</span>
+                        </div>
+
+                        <!-- Badge Affaire / Cote -->
+                        <div class="absolute top-3 left-3 flex flex-col gap-1 z-10">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-md backdrop-blur ${v.statut_badge_class}">
+                                <i class="fa-solid ${v.statut_prix === 'Bonne Affaire' ? 'fa-fire' : 'fa-check'} text-xs"></i>
+                                ${v.statut_prix}
+                            </span>
+                        </div>
+
+                        <!-- Bouton Sauvegarder dans Ma Sélection -->
+                        <button onclick="event.stopPropagation(); toggleSelection(${v.id});" 
+                            class="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition shadow-md z-10 ${estSelectionne ? 'bg-amber-400 text-slate-900' : 'bg-white/90 hover:bg-white text-slate-700'}"
+                            title="${estSelectionne ? 'Retirer de ma sélection' : 'Sauvegarder dans ma sélection'}">
+                            <i class="fa-solid fa-bookmark ${estSelectionne ? 'text-slate-900' : 'text-slate-400'}"></i>
+                        </button>
+                    </div>
+
+                    <!-- MINIATURES RAPIDES CLICABLES -->
+                    ${photos.length > 1 ? `
+                    <div class="flex items-center gap-1.5 px-3 py-2 bg-slate-100/70 overflow-x-auto border-b border-slate-100">
+                        ${photos.map((p, pIdx) => `
+                            <img src="${p}" onclick="event.stopPropagation(); photoActiveParVehicule[${v.id}] = ${pIdx}; changerPhotoCard(${v.id}, 0, ${photos.length}, event);"
+                                class="w-12 h-9 rounded-lg object-cover cursor-pointer border-2 transition ${pIdx === currentIndex ? 'border-blue-600 scale-105' : 'border-transparent opacity-70 hover:opacity-100'}">
+                        `).join('')}
+                    </div>
+                    ` : ''}
+
+                    <!-- INFORMATIONS DU VÉHICULE -->
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div>
+                                    <h4 class="text-lg font-black text-slate-900 leading-snug group-hover:text-blue-600 transition cursor-pointer" onclick="afficherDetails(${v.id})">
+                                        ${v.marque} <span class="text-blue-600">${v.modele}</span>
+                                    </h4>
+                                    <div class="text-xs font-semibold text-slate-600 mt-0.5">${v.version || ''}</div>
+                                    <span class="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                                        <i class="fa-solid fa-location-dot text-slate-400"></i> ${v.wilaya || 'Non précisée'}
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xl font-black text-slate-900 block tracking-tight">
+                                        ${formaterPrix(v.prix)}
+                                    </span>
+                                    <span class="text-[11px] font-semibold text-slate-500">${v.statut_detail || ''}</span>
+                                </div>
+                            </div>
+
+                            <!-- BADGES MARCHÉ : PAPIERS & SBIGHA -->
+                            <div class="flex flex-wrap items-center gap-1.5 my-2.5">
+                                <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-blue-100">
+                                    <i class="fa-solid fa-file-contract mr-1"></i>${v.papiers || 'Carte Grise (Safia)'}
+                                </span>
+                                <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-slate-200">
+                                    <i class="fa-solid fa-shield mr-1"></i>${v.sbigha || '00 Peinture'}
+                                </span>
+                            </div>
+
+                            <!-- CARACTÉRISTIQUES CLÉS -->
+                            <div class="grid grid-cols-3 gap-2 py-3 my-2 border-y border-slate-100 text-center text-xs font-semibold text-slate-700">
+                                <div class="bg-slate-50 p-2 rounded-xl">
+                                    <i class="fa-solid fa-calendar text-blue-500 block mb-1"></i>
+                                    <span>${v.annee}</span>
+                                </div>
+                                <div class="bg-slate-50 p-2 rounded-xl">
+                                    <i class="fa-solid fa-gauge-high text-blue-500 block mb-1"></i>
+                                    <span>${Number(v.kilometrage).toLocaleString()} km</span>
+                                </div>
+                                <div class="bg-slate-50 p-2 rounded-xl">
+                                    <i class="fa-solid fa-gas-pump text-blue-500 block mb-1"></i>
+                                    <span class="truncate block">${v.carburant.split(' ')[0]}</span>
+                                </div>
+                            </div>
+
+                            <p class="text-xs text-slate-500 line-clamp-2 my-2 leading-relaxed">
+                                ${v.description || 'Véhicule en excellent état général, dossier et entretien complet.'}
+                            </p>
+                        </div>
+
+                        <!-- FICHE VENDEUR & BOUTONS CONTACT DIRECT -->
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <div class="flex items-center justify-between mb-3 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">
+                                        ${v.vendeur_nom.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <span class="font-bold text-slate-800 block">${v.vendeur_nom}</span>
+                                        <span class="text-[10px] text-slate-400 font-mono">${v.reference_annonce}</span>
+                                    </div>
+                                </div>
+                                <button onclick="afficherDetails(${v.id})" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                    Voir Fiche <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="tel:${v.vendeur_tel}" class="flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 rounded-xl text-xs font-bold transition">
+                                    <i class="fa-solid fa-phone text-xs"></i>
+                                    <span>${v.vendeur_tel}</span>
+                                </a>
+
+                                ${whatsappUrl ? `
+                                <a href="${whatsappUrl}" target="_blank" class="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 rounded-xl text-xs font-bold transition">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                                    <span>WhatsApp</span>
+                                </a>
+                                ` : `
+                                <button onclick="afficherDetails(${v.id})" class="flex items-center justify-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-3 rounded-xl text-xs font-bold transition">
+                                    <span>Détails</span>
+                                </button>
+                                `}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // ==========================================
+        // GESTION DE MA SÉLECTION (FAVORIS)
+        // ==========================================
+        function toggleSelection(vehiculeId) {
+            const index = selectionIds.indexOf(vehiculeId);
+            if (index > -1) {
+                selectionIds.splice(index, 1);
+            } else {
+                selectionIds.push(vehiculeId);
+            }
+            localStorage.setItem('auto_selection_ids', JSON.stringify(selectionIds));
+            mettreAJourBadgeSelection();
+            afficherVehicules(vehiculesCourants);
+        }
+
+        function mettreAJourBadgeSelection() {
+            document.getElementById('badgeSelectionCount').textContent = selectionIds.length;
+        }
+
+        async function ouvrirModalSelection() {
+            const modal = document.getElementById('modalSelection');
+            const contenu = document.getElementById('contenuModalSelection');
+
+            if (selectionIds.length === 0) {
+                contenu.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-2xl">
+                            <i class="fa-solid fa-bookmark"></i>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-800">Votre sélection est vide</h4>
+                        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                            Cliquez sur le marque-page sur les cartes des véhicules pour sauvegarder vos favoris et les comparer ici.
+                        </p>
+                    </div>
+                `;
+            } else {
+                contenu.innerHTML = `
+                    <div class="mb-4 flex items-center justify-between text-xs text-slate-500">
+                        <span>${selectionIds.length} véhicule(s) retenu(s) pour achat</span>
+                        <span class="text-blue-600 font-semibold">Prêt pour contact et négociation</span>
+                    </div>
+                    <div class="space-y-4">
+                        ${vehiculesCourants.filter(v => selectionIds.includes(v.id)).map(v => `
+                            <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200 gap-4">
+                                <div class="flex items-center gap-4 w-full sm:w-auto">
+                                    <img src="${(v.photos && v.photos[0]) || v.photo_principale}" class="w-20 h-16 rounded-xl object-cover" onerror="this.src='https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'">
+                                    <div>
+                                        <h4 class="font-bold text-slate-900 text-sm">${v.marque} ${v.modele} (${v.annee})</h4>
+                                        <span class="text-xs text-slate-500">${v.kilometrage.toLocaleString()} km • ${v.carburant} • ${v.wilaya}</span>
+                                        <span class="text-[11px] font-mono text-slate-400 block mt-0.5">Réf: ${v.reference_annonce}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between w-full sm:w-auto gap-4">
+                                    <div class="text-right">
+                                        <span class="text-base font-black text-slate-900 block">${formaterPrix(v.prix)}</span>
+                                        <span class="text-[10px] text-emerald-600 font-bold">${v.statut_prix}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <a href="tel:${v.vendeur_tel}" class="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition" title="Appeler">
+                                            <i class="fa-solid fa-phone text-xs"></i>
+                                        </a>
+                                        <button onclick="toggleSelection(${v.id}); ouvrirModalSelection();" class="text-red-500 hover:text-red-700 p-2.5 rounded-xl hover:bg-red-50 transition" title="Supprimer">
+                                            <i class="fa-solid fa-trash text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function fermerModalSelection() {
+            document.getElementById('modalSelection').classList.add('hidden');
+        }
+
+        function viderSelection() {
+            if (confirm("Voulez-vous vider votre liste de sélection ?")) {
+                selectionIds = [];
+                localStorage.removeItem('auto_selection_ids');
+                mettreAJourBadgeSelection();
+                ouvrirModalSelection();
+                afficherVehicules(vehiculesCourants);
+            }
+        }
+
+        // ==========================================
+        // DÉTAILS COMPLETS & GALERIE PLEIN ÉCRAN
+        // ==========================================
+        async function afficherDetails(id) {
+            try {
+                const res = await fetch(`/api/vehicules/${id}`);
+                const v = await res.json();
+                const modal = document.getElementById('modalDetail');
+                const body = document.getElementById('detailVehiculeBody');
+
+                const photos = v.photos && v.photos.length > 0 ? v.photos : [v.photo_principale];
+                const msgWhatsapp = encodeURIComponent(`Bonjour ${v.vendeur_nom}, je suis très intéressé par votre annonce ${v.marque} ${v.modele} (${v.annee}) réf ${v.reference_annonce} au prix de ${formaterPrix(v.prix)}.`);
+
+                body.innerHTML = `
+                    <div class="relative bg-slate-900">
+                        <div class="h-80 w-full overflow-hidden">
+                            <img id="detailGrandPhoto" src="${photos[0]}" class="w-full h-full object-cover">
+                        </div>
+                        <button onclick="fermerModalDetail()" class="absolute top-4 right-4 bg-slate-900/80 hover:bg-slate-900 text-white w-9 h-9 rounded-full flex items-center justify-center z-20">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                        
+                        <!-- Miniatures cliquables sous la photo -->
+                        <div class="p-3 bg-slate-900/90 flex items-center gap-2 overflow-x-auto">
+                            ${photos.map((p, idx) => `
+                                <img src="${p}" onclick="document.getElementById('detailGrandPhoto').src = '${p}'" 
+                                    class="w-16 h-12 rounded-lg object-cover cursor-pointer border-2 border-white/20 hover:border-amber-400 transition flex-shrink-0">
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="p-6 overflow-y-auto flex-1 custom-scroll space-y-5">
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                            <div>
+                                <span class="bg-blue-600 text-white text-[11px] font-mono px-2 py-0.5 rounded">Réf: ${v.reference_annonce}</span>
+                                <h2 class="text-2xl font-black text-slate-900 mt-1">${v.marque} ${v.modele}</h2>
+                                <p class="text-xs text-slate-500 font-semibold">${v.version || ''} • ${v.wilaya}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400 uppercase font-bold">Prix demandé</span>
+                                <div class="text-2xl font-black text-blue-600">${formaterPrix(v.prix)}</div>
+                                <span class="text-xs text-slate-500">Cote marché : ${formaterPrix(v.prix_marche_estime)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Badges Papiers & Tôle -->
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-50 border border-blue-200 px-3 py-2 rounded-xl text-xs">
+                                <strong class="text-blue-900 block">Papiers :</strong>
+                                <span class="text-blue-700">${v.papiers || 'Carte Grise (Safia)'}</span>
+                            </div>
+                            <div class="bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl text-xs">
+                                <strong class="text-emerald-900 block">État de la tôle (Sbigha) :</strong>
+                                <span class="text-emerald-700">${v.sbigha || '00 Peinture d\'origine'}</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
+                            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                <span class="text-slate-400 block">Année</span>
+                                <strong class="text-slate-900 text-sm">${v.annee}</strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                <span class="text-slate-400 block">Kilométrage</span>
+                                <strong class="text-slate-900 text-sm">${v.kilometrage.toLocaleString()} km</strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                <span class="text-slate-400 block">Carburant</span>
+                                <strong class="text-slate-900 text-sm">${v.carburant}</strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                                <span class="text-slate-400 block">Boîte</span>
+                                <strong class="text-slate-900 text-sm">${v.boite}</strong>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description du véhicule</h4>
+                            <p class="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                ${v.description || 'Véhicule soigné et vérifié.'}
+                            </p>
+                        </div>
+
+                        <!-- Fiche Vendeur -->
+                        <div class="bg-slate-900 text-white p-5 rounded-2xl">
+                            <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3">Coordonnées du Vendeur</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-4">
+                                <div><strong class="text-slate-400">Nom :</strong> ${v.vendeur_nom} (${v.vendeur_type})</div>
+                                <div><strong class="text-slate-400">Wilaya :</strong> ${v.wilaya}</div>
+                                <div><strong class="text-slate-400">Téléphone :</strong> ${v.vendeur_tel}</div>
+                                <div><strong class="text-slate-400">Email :</strong> ${v.vendeur_email || 'Non précisé'}</div>
+                            </div>
+                            <div class="flex gap-3">
+                                <a href="tel:${v.vendeur_tel}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold text-xs text-center transition">
+                                    <i class="fa-solid fa-phone mr-1"></i> Appeler le vendeur
+                                </a>
+                                ${v.vendeur_whatsapp ? `
+                                <a href="https://wa.me/${v.vendeur_whatsapp}?text=${msgWhatsapp}" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs text-center transition">
+                                    <i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp
+                                </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                modal.classList.remove('hidden');
+            } catch (err) {
+                console.error("Erreur fiche véhicule:", err);
+            }
+        }
+
+        function fermerModalDetail() {
+            document.getElementById('modalDetail').classList.add('hidden');
+        }
+
+        // ==========================================
+        // DÉPÔT D'ANNONCE & UPLOAD DE PHOTOS RÉELLES
+        // ==========================================
+        function ouvrirModalAjout() {
+            photosUploadeesTemp = [];
+            document.getElementById('apercuPhotosUpload').innerHTML = '';
+            document.getElementById('modalAjout').classList.remove('hidden');
+        }
+
+        function fermerModalAjout() {
+            document.getElementById('modalAjout').classList.add('hidden');
+        }
+
+        async function gererUploadFichiers(files) {
+            if (!files || files.length === 0) return;
+
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('fichiers', files[i]);
+            }
+
+            try {
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.urls && data.urls.length > 0) {
+                    photosUploadeesTemp.push(...data.urls);
+                    
+                    const apercuContainer = document.getElementById('apercuPhotosUpload');
+                    apercuContainer.innerHTML = photosUploadeesTemp.map(url => `
+                        <div class="relative w-16 h-12 rounded-lg overflow-hidden border border-blue-300 flex-shrink-0">
+                            <img src="${url}" class="w-full h-full object-cover">
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                alert("Erreur lors de l'upload des photos");
+            }
+        }
+
+        async function soumettreNouveauVehicule(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            const photoDefaut = photosUploadeesTemp.length > 0 
+                ? photosUploadeesTemp[0] 
+                : "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80";
+
+            const payload = {
+                marque: formData.get('marque'),
+                modele: formData.get('modele'),
+                version: formData.get('version') || '',
+                annee: parseInt(formData.get('annee')),
+                prix: parseFloat(formData.get('prix')),
+                kilometrage: parseInt(formData.get('kilometrage')),
+                carburant: formData.get('carburant'),
+                boite: formData.get('boite'),
+                wilaya: formData.get('wilaya'),
+                papiers: formData.get('papiers'),
+                sbigha: formData.get('sbigha'),
+                vendeur_nom: formData.get('vendeur_nom'),
+                vendeur_type: "Particulier",
+                vendeur_tel: formData.get('vendeur_tel'),
+                vendeur_whatsapp: formData.get('vendeur_whatsapp') || null,
+                photo_principale: photoDefaut,
+                photos_liste: photosUploadeesTemp.length > 0 ? photosUploadeesTemp : [photoDefaut],
+                description: formData.get('description') || ''
+            };
+
+            try {
+                const res = await fetch('/api/vehicules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert('Annonce enregistrée avec succès avec photos réelles !');
+                    fermerModalAjout();
+                    form.reset();
+                    await chargerMarques();
+                    lancerRecherchePrincipale();
+                } else {
+                    const err = await res.json();
+                    alert('Erreur: ' + (err.detail || 'Impossible d\'ajouter le véhicule'));
+                }
+            } catch (err) {
+                alert('Erreur réseau lors de l\'enregistrement');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1090,12 +1090,12 @@ def charger_admin_config() -> dict:
     cfg = {
         "pin_hash": None,
         "baridimob": {
-            "titulaire": "Service Chiffrage Devis BTP Algérie",
-            "rip": "007 99999 0023456789 25",
-            "ccp": "23456789",
-            "cle": "25",
-            "telephone": "0550 00 00 00",
-            "instructions": "Veuillez renseigner votre numéro de téléphone dans la note du virement BaridiMob."
+            "titulaire": "BENABDALLAH",
+            "rip": "007 99999 0001918047 08",
+            "ccp": "1918047",
+            "cle": "08",
+            "telephone": "0551 42 21 66",
+            "instructions": "Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob."
         }
     }
     if os.path.exists(ADMIN_CONFIG_FILE):
@@ -1173,12 +1173,12 @@ async def public_baridimob_info():
     return {
         "success": True,
         "baridimob": {
-            "titulaire": b.get("titulaire") or "Service Chiffrage Devis BTP Algérie",
-            "rip": b.get("rip") or "007 99999 0023456789 25",
-            "ccp": b.get("ccp") or "23456789",
-            "cle": b.get("cle") or "25",
-            "telephone": b.get("telephone") or "0550 00 00 00",
-            "instructions": b.get("instructions") or "Veuillez renseigner votre numéro de téléphone dans la note du virement BaridiMob."
+            "titulaire": b.get("titulaire") or "BENABDALLAH",
+            "rip": b.get("rip") or "007 99999 0001918047 08",
+            "ccp": b.get("ccp") or "1918047",
+            "cle": b.get("cle") or "08",
+            "telephone": b.get("telephone") or "0551 42 21 66",
+            "instructions": b.get("instructions") or "Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob."
         }
     }
 
