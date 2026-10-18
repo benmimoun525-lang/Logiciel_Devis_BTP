@@ -3665,15 +3665,17 @@
 </script>
 
 <script>
-    // Configuration intelligente de l'URL API (Backend FastAPI Render en production)
-    const API_BASE = (
-        window.location.hostname === 'localhost' ||
-        window.location.hostname === '127.0.0.1' ||
-        window.location.hostname.startsWith('192.168.') ||
-        window.location.hostname.startsWith('10.') ||
-        window.location.port === '8000' ||
-        window.location.hostname.includes('render.com')
-    ) ? "" : "https://logiciel-devis-btp.onrender.com";
+    // Configuration intelligente de l'URL API (Backend FastAPI Render en production ou local)
+    const API_BASE = (window.location.protocol === 'file:')
+        ? "http://127.0.0.1:8000"
+        : (
+            window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname.startsWith('192.168.') ||
+            window.location.hostname.startsWith('10.') ||
+            window.location.port === '8000' ||
+            window.location.hostname.includes('render.com')
+        ) ? "" : "https://logiciel-devis-btp.onrender.com";
 
     let GEMINI_API_KEY = localStorage.getItem('btp_gemini_key') || '';
 
