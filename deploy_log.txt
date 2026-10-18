@@ -1,0 +1,44 @@
+====================================================================== 
+  PUBLICATION EN LIGNE DU LOGICIEL DEVIS BTP 
+  TITULAIRE OFFICIEL : BOUFELDJA BENABDALLAH 
+  RIP BARIDIMOB      : 00799999000191804708 
+  COMPTE CCP         : 0001918047 (Cle 08) 
+  WHATSAPP           : 0551 42 21 66 
+  Date et Heure      : Mon 10/19/2026  0:18:49.47 
+====================================================================== 
+ 
+[*] Repertoire de travail : C:\Users\hp\Logiciel_Devis_BTP 
+C:\Program Files\Git\cmd\git.exe
+ 
+[*] Version de Git detectee : 
+git version 2.55.0.windows.5
+ 
+[*] Configuration des identifiants Git : 
+Nom configure : BOUFELDJA BENABDALLAH 
+ 
+[*] Statut du depot Git avant synchronisation : 
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   index.html
+	modified:   main.py
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	4
+	METTRE_A_JOUR_EN_LIGNE.bat
+	deploy_log.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+ 
+[*] Serveurs distants configures (git remote -v) : 
+origin	https://github.com/benmimoun525-lang/Logiciel_Devis_BTP.git (fetch)
+origin	https://github.com/benmimoun525-lang/Logiciel_Devis_BTP.git (push)
+ 
+[*] Liste des branches (git branch -a) : 
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/main
+ 
+[*] Indexation des fichiers modifies (git add -A) : 
