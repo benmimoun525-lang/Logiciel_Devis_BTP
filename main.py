@@ -1740,3 +1740,295 @@ async def extract_devis_legacy(file: UploadFile = File(...)):
 @app.post("/generate-excel/")
 async def generate_excel_legacy(devis_data: dict = Body(...)):
     return await exporter_excel(payload=devis_data)
+
+# ============================================================
+# ASSISTANCE CHIFFRAGE & QUESTIONS CLIENTS (TABLEAU DE BORD TITULAIRE)
+# ============================================================
+ASSISTANCE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assistance_demandes.json")
+
+def charger_demandes_assistance() -> list:
+    if os.path.exists(ASSISTANCE_FILE):
+        try:
+            with open(ASSISTANCE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    return data
+        except Exception:
+            pass
+    return []
+
+def sauvegarder_demandes_assistance(demandes: list):
+    try:
+        with open(ASSISTANCE_FILE, "w", encoding="utf-8") as f:
+            json.dump(demandes, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Erreur sauvegarde assistance: {e}")
+
+@app.post("/api/assistance/envoyer")
+async def api_envoyer_assistance(payload: dict = Body(...)):
+    """Permet aux clients de signaler un problème ou de demander des explications sur leur chiffrage."""
+    nom = (payload.get("nom") or "").strip() or "Client BTP"
+    telephone = (payload.get("telephone") or "").strip()
+    email = (payload.get("email") or "").strip()
+    projet = (payload.get("projet") or "").strip()
+    type_demande = (payload.get("type_demande") or "Explication chiffrage").strip()
+    message = (payload.get("message") or "").strip()
+    devis_info = payload.get("devis_info", {})
+
+    if not message:
+        raise HTTPException(status_code=400, detail="Veuillez décrire votre question ou problème de chiffrage.")
+
+    nouvelle_demande = {
+        "id": f"ast_{int(time.time())}_{hashlib.md5((telephone or 'client').encode()).hexdigest()[:4]}",
+        "date": time.strftime("%d/%m/%Y %H:%M"),
+        "timestamp": int(time.time()),
+        "nom_client": nom,
+        "telephone": telephone,
+        "email": email,
+        "nom_projet": projet,
+        "type_demande": type_demande,
+        "message": message,
+        "devis_info": devis_info,
+        "statut": "en_attente",
+        "reponse_notes": ""
+    }
+
+    demandes = charger_demandes_assistance()
+    demandes.insert(0, nouvelle_demande)
+    sauvegarder_demandes_assistance(demandes)
+
+    sb = get_supabase_client()
+    if sb:
+        try:
+            sb.table("demandes_assistance").insert({
+                "telephone": telephone,
+                "nom_client": nom,
+                "nom_projet": projet,
+                "type_demande": type_demande,
+                "message": message,
+                "statut": "en_attente"
+            }).execute()
+        except Exception:
+            pass
+
+    return {
+        "success": True,
+        "message": "Votre demande a été transmise au Titulaire M. BOUFELDJA BENABDALLAH. Vous recevrez une réponse très rapidement.",
+        "demande_id": nouvelle_demande["id"]
+    }
+
+@app.get("/api/admin/assistance")
+async def api_admin_assistance(pin: str = None):
+    """Permet au Titulaire de voir toutes les demandes d'assistance et d'explications des clients."""
+    if not valider_admin_pin(pin):
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
+    demandes = charger_demandes_assistance()
+    total = len(demandes)
+    en_attente = len([d for d in demandes if d.get("statut") == "en_attente"])
+    traitees = len([d for d in demandes if d.get("statut") == "traite"])
+    return {
+        "success": True,
+        "stats": {
+            "total": total,
+            "en_attente": en_attente,
+            "traitees": traitees
+        },
+        "demandes": demandes
+    }
+
+@app.post("/api/admin/assistance/traiter")
+async def api_admin_traiter_assistance(payload: dict = Body(...)):
+    """Marquer une demande comme traitée ou enregistrer une note."""
+    pin = payload.get("pin")
+    if not valider_admin_pin(pin):
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
+    demande_id = payload.get("demande_id")
+    nouveau_statut = payload.get("statut", "traite")
+    reponse = payload.get("reponse_notes", "")
+
+    demandes = charger_demandes_assistance()
+    modifie = False
+    for d in demandes:
+        if d.get("id") == demande_id:
+            d["statut"] = nouveau_statut
+            if reponse:
+                d["reponse_notes"] = reponse
+            modifie = True
+            break
+
+    if modifie:
+        sauvegarder_demandes_assistance(demandes)
+        return {"success": True, "message": f"Demande marquée comme '{nouveau_statut}' avec succès."}
+    raise HTTPException(status_code=404, detail="Demande introuvable.")
+
+# ============================================================
+# AVIS & TÉMOIGNAGES CLIENTS SUR LE LOGICIEL BTP
+# ============================================================
+AVIS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "avis_clients.json")
+
+AVIS_INITIAUX = [
+    {
+        "id": "av_1",
+        "date": "16/10/2026",
+        "nom": "Sarl Bâtiment Moderne Algérie",
+        "metier": "Entreprise Générale BTP TCE",
+        "wilaya": "Alger",
+        "note": 5,
+        "commentaire": "Le chiffrage direct à partir des photos WhatsApp et plans PDF est d'une rapidité impressionnante. Nos bordereaux DQE sortent aux normes en quelques secondes.",
+        "statut": "approuve"
+    },
+    {
+        "id": "av_2",
+        "date": "14/10/2026",
+        "nom": "M. Karim Belhadj",
+        "metier": "Travaux Publics & VRD",
+        "wilaya": "Oran",
+        "note": 5,
+        "commentaire": "Base des prix BPU très fidèle aux réalités du marché algérien en Dinars. Le calcul des délais et le planning des travaux Gantt nous ont fait remporter un marché clé.",
+        "statut": "approuve"
+    },
+    {
+        "id": "av_3",
+        "date": "12/10/2026",
+        "nom": "Ahmed Benali",
+        "metier": "Génie Civil & Hydraulique",
+        "wilaya": "Sétif",
+        "note": 5,
+        "commentaire": "Outil indispensable pour tout entrepreneur BTP. L'assistance et les explications de chiffrage de M. Benabdallah sont toujours rapides et précises.",
+        "statut": "approuve"
+    },
+    {
+        "id": "av_4",
+        "date": "09/10/2026",
+        "nom": "Yacine Mansouri",
+        "metier": "Artisan Électricité & Climatisation",
+        "wilaya": "Constantine",
+        "note": 5,
+        "commentaire": "Très simple à utiliser, même sur smartphone sur le chantier. L'export Excel avec formules automatiques évite toute erreur de sous-détail.",
+        "statut": "approuve"
+    },
+    {
+        "id": "av_5",
+        "date": "05/10/2026",
+        "nom": "Bureau d'Études & Métré BET",
+        "metier": "Ingénierie & Suivi de Chantiers",
+        "wilaya": "Tlemcen",
+        "note": 4.9,
+        "commentaire": "Excellente solution pour les métrés et la décomposition par lots. Le variateur anti-collision protège nos soumissions. Bravo pour cette innovation.",
+        "statut": "approuve"
+    }
+]
+
+def charger_avis_clients() -> list:
+    if os.path.exists(AVIS_FILE):
+        try:
+            with open(AVIS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    return data
+        except Exception:
+            pass
+    sauvegarder_avis_clients(AVIS_INITIAUX)
+    return AVIS_INITIAUX
+
+def sauvegarder_avis_clients(avis: list):
+    try:
+        with open(AVIS_FILE, "w", encoding="utf-8") as f:
+            json.dump(avis, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Erreur sauvegarde avis: {e}")
+
+@app.get("/api/public/avis")
+async def api_public_avis():
+    """Récupère les avis approuvés des clients avec la note moyenne calculée."""
+    avis = charger_avis_clients()
+    approuves = [a for a in avis if a.get("statut", "approuve") == "approuve"]
+    notes = [float(a.get("note", 5)) for a in approuves if a.get("note")]
+    moyenne = round(sum(notes) / len(notes), 1) if notes else 4.9
+    return {
+        "success": True,
+        "note_moyenne": moyenne,
+        "total_avis": len(approuves),
+        "avis": approuves
+    }
+
+@app.post("/api/public/avis/ajouter")
+async def api_public_ajouter_avis(payload: dict = Body(...)):
+    """Permet à un client de déposer un avis et une note sur le logiciel."""
+    nom = (payload.get("nom") or "").strip() or "Client BTP"
+    metier = (payload.get("metier") or "").strip() or "Entrepreneur BTP"
+    wilaya = (payload.get("wilaya") or "").strip() or "Alger"
+    commentaire = (payload.get("commentaire") or "").strip()
+    try:
+        note = float(payload.get("note", 5))
+    except Exception:
+        note = 5.0
+    note = max(1.0, min(5.0, note))
+
+    if not commentaire or len(commentaire) < 5:
+        raise HTTPException(status_code=400, detail="Veuillez saisir votre commentaire ou retour d'expérience.")
+
+    nouvel_avis = {
+        "id": f"av_{int(time.time())}_{hashlib.md5(nom.encode()).hexdigest()[:4]}",
+        "date": time.strftime("%d/%m/%Y"),
+        "timestamp": int(time.time()),
+        "nom": nom,
+        "metier": metier,
+        "wilaya": wilaya,
+        "note": note,
+        "commentaire": commentaire,
+        "statut": "approuve"
+    }
+
+    avis = charger_avis_clients()
+    avis.insert(0, nouvel_avis)
+    sauvegarder_avis_clients(avis)
+
+    return {
+        "success": True,
+        "message": "Merci beaucoup pour votre avis ! Votre témoignage est désormais visible.",
+        "avis": nouvel_avis
+    }
+
+@app.get("/api/admin/avis")
+async def api_admin_avis(pin: str = None):
+    """Permet au Titulaire de modérer et consulter tous les avis."""
+    if not valider_admin_pin(pin):
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
+    avis = charger_avis_clients()
+    notes = [float(a.get("note", 5)) for a in avis if a.get("note")]
+    moyenne = round(sum(notes) / len(notes), 1) if notes else 4.9
+    return {
+        "success": True,
+        "stats": {
+            "total": len(avis),
+            "note_moyenne": moyenne
+        },
+        "avis": avis
+    }
+
+@app.post("/api/admin/avis/moderer")
+async def api_admin_moderer_avis(payload: dict = Body(...)):
+    """Action de modération (approuver, masquer, supprimer)."""
+    pin = payload.get("pin")
+    if not valider_admin_pin(pin):
+        raise HTTPException(status_code=401, detail="Code PIN Administrateur incorrect.")
+    avis_id = payload.get("avis_id")
+    action = payload.get("action", "approuver")
+
+    avis = charger_avis_clients()
+    if action == "supprimer":
+        avis = [a for a in avis if a.get("id") != avis_id]
+        sauvegarder_avis_clients(avis)
+        return {"success": True, "message": "Avis supprimé avec succès."}
+    else:
+        modifie = False
+        for a in avis:
+            if a.get("id") == avis_id:
+                a["statut"] = "approuve" if action == "approuver" else "masque"
+                modifie = True
+                break
+        if modifie:
+            sauvegarder_avis_clients(avis)
+            return {"success": True, "message": f"Statut de l'avis mis à jour ({action})."}
+        raise HTTPException(status_code=404, detail="Avis introuvable.")

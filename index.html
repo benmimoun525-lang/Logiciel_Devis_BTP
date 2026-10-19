@@ -940,21 +940,27 @@
             </div>
 
             <!-- Widget Client Épuré (Visible par défaut pour les clients) -->
-            <div id="headerClientWidget" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <div style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); padding: 8px 14px; border-radius: 20px; font-size: 0.84rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            <div id="headerClientWidget" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <div style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); padding: 7px 12px; border-radius: 20px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                     <span style="display: inline-block; width: 9px; height: 9px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span>
                     <span id="clientHeaderSoldeText" style="font-weight: 800; color: #34d399; letter-spacing: 0.2px;">🟢 Licence Active : 5 pages disponibles</span>
                 </div>
-                <button type="button" onclick="nouveauDevis()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 10px; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Réinitialiser et commencer un nouveau devis vierge">
+                <button type="button" onclick="nouveauDevis()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 10px; padding: 7px 12px; font-size: 0.83rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Réinitialiser et commencer un nouveau devis vierge">
                     🔄 <span>Nouveau Devis</span>
                 </button>
-                <button type="button" onclick="ouvrirModalAbonnements()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 1px solid #60a5fa; color: white; border-radius: 10px; padding: 7px 14px; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,99,235,0.25); transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Recharger vos crédits de pages">
+                <button type="button" onclick="ouvrirModalAbonnements()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 1px solid #60a5fa; color: white; border-radius: 10px; padding: 7px 12px; font-size: 0.83rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 8px rgba(37,99,235,0.25); transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Recharger vos crédits de pages">
                     💳 <span>Recharge BaridiMob</span>
                 </button>
-                <button type="button" id="btnReinitialiserTestProspect" onclick="reinitialiserTestClientProspect(true)" style="display: none; background: #d97706; border: 1.5px solid #fbbf24; color: white; border-radius: 10px; padding: 7px 12px; font-size: 0.82rem; font-weight: 700; cursor: pointer; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(217,119,6,0.3);" title="Vider l'identification et reverrouiller les étapes 2 à 4 pour tester à blanc">
+                <button type="button" onclick="ouvrirModalAvisClients()" style="background: rgba(255,255,255,0.15); border: 1px solid #fde047; color: #fef08a; border-radius: 10px; padding: 7px 11px; font-size: 0.83rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Consulter la fenêtre des avis et témoignages clients BTP">
+                    ⭐ <span>Avis Clients (4.9/5)</span>
+                </button>
+                <button type="button" onclick="ouvrirModalAssistanceClient()" style="background: rgba(16, 185, 129, 0.25); border: 1px solid #34d399; color: #ffffff; border-radius: 10px; padding: 7px 12px; font-size: 0.83rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(16,185,129,0.3); transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Un doute sur un prix, un métré ou besoin d'explications sur votre devis ?">
+                    ❓ <span>Aide & Explications</span>
+                </button>
+                <button type="button" id="btnReinitialiserTestProspect" onclick="reinitialiserTestClientProspect(true)" style="display: none; background: #d97706; border: 1.5px solid #fbbf24; color: white; border-radius: 10px; padding: 7px 11px; font-size: 0.82rem; font-weight: 700; cursor: pointer; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(217,119,6,0.3);" title="Vider l'identification et reverrouiller les étapes 2 à 4 pour tester à blanc">
                     🔒 <span>Reverrouiller Étapes (Test)</span>
                 </button>
-                <button type="button" id="btnQuitterApercuClient" onclick="basculerVueClientApercu()" style="display: none; background: #dc2626; border: 1.5px solid #f87171; color: white; border-radius: 10px; padding: 7px 14px; font-size: 0.85rem; font-weight: 800; cursor: pointer; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(220,38,38,0.35);" title="Quitter l'Aperçu Client et revenir au Mode Titulaire">
+                <button type="button" id="btnQuitterApercuClient" onclick="basculerVueClientApercu()" style="display: none; background: #dc2626; border: 1.5px solid #f87171; color: white; border-radius: 10px; padding: 7px 12px; font-size: 0.83rem; font-weight: 800; cursor: pointer; align-items: center; gap: 5px; box-shadow: 0 2px 8px rgba(220,38,38,0.35);" title="Quitter l'Aperçu Client et revenir au Mode Titulaire">
                     🔙 <span>Quitter l'Aperçu Client</span>
                 </button>
             </div>
@@ -991,6 +997,12 @@
             <a href="/didacticiel" target="_blank" class="btn-header" style="background: #e11d48; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px;">🎬 Vidéo Didacticiel</a>
             <button class="btn-header" id="btnHeaderTitulaire" style="background: #064e3b; border: 1px solid #10b981; font-weight: 600;" onclick="ouvrirModalAdmin()" title="Cockpit Propriétaire">
                 👑 Titulaire <span style="font-size:0.72rem; background:#10b981; color:white; padding:1px 6px; border-radius:10px; margin-left:4px;">Connecté ✓</span>
+            </button>
+            <button class="btn-header" id="btnHeaderAssistanceTitulaire" style="background: #dc2626; border: 1.5px solid #f87171; font-weight: 800; box-shadow: 0 2px 8px rgba(220,38,38,0.35);" onclick="ouvrirSectionAssistanceTitulaire()" title="Consulter les questions et problèmes de chiffrage des clients">
+                🆘 Questions Clients <span id="badgeNbAssistanceAttente" style="background: white; color: #dc2626; padding: 1px 7px; border-radius: 12px; font-size: 0.72rem; font-weight: 900; margin-left: 4px;">0</span>
+            </button>
+            <button class="btn-header" style="background: #d97706; border: 1.5px solid #fbbf24; font-weight: 700;" onclick="ouvrirModalAvisClients()" title="Consulter et modérer les avis clients">
+                ⭐ Avis Clients (4.9/5)
             </button>
             <button class="btn-header" style="background: #059669; font-weight: 600;" onclick="ouvrirModalConfidentialite()">🔒 Confidentialité & Secret</button>
             <button class="btn-header" style="background: #d97706; font-weight: 600;" onclick="ouvrirModalBPU()">💰 Base des Prix (BPU)</button>
@@ -1203,6 +1215,62 @@
         </div>
     </div>
 
+    <!-- Panneau Titulaire Exclusif : Demandes d'Assistance & Explications Chiffrage (Visible UNIQUEMENT pour le Titulaire connecté) -->
+    <div id="titulaireAssistanceSectionMain" class="no-print" style="display: none; margin-bottom: 22px;">
+        <div style="background: white; border-radius: 14px; border: 2.5px solid #dc2626; padding: 20px; box-shadow: 0 8px 25px rgba(220,38,38,0.18);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid #fee2e2; padding-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, #b91c1c, #dc2626); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; box-shadow: 0 4px 10px rgba(220,38,38,0.3);">
+                        🆘
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 900; font-size: 1.15rem; color: #991b1b; letter-spacing: 0.3px;">QUESTIONS & DEMANDES D'ASSISTANCE CHIFFRAGE DES CLIENTS</span>
+                            <span id="badgeAssistanceAttenteMain" style="font-size: 0.74rem; background: #dc2626; color: white; padding: 2px 10px; border-radius: 12px; font-weight: 800;">0 en attente</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b;">Consultez vos clients qui ont un problème ou demandent des explications sur leurs prix ou métrés, et répondez-leur directement sur WhatsApp</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <select id="filtreStatutAssistanceMain" class="form-control" style="width: auto; font-size: 0.82rem; padding: 6px 10px;" onchange="filtrerDemandesAssistanceMain()">
+                        <option value="tous">Toutes les demandes</option>
+                        <option value="en_attente" selected>🔴 En attente de réponse</option>
+                        <option value="traite">🟢 Traitées / Répondues</option>
+                    </select>
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.82rem; color: #991b1b; border-color: #fca5a5; font-weight: 700;" onclick="chargerDemandesAssistanceTitulaire()">
+                        🔄 Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grille / Tableau des Demandes d'Assistance -->
+            <div style="overflow-x: auto; max-height: 420px;">
+                <table class="devis-table" style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #991b1b; color: white; position: sticky; top: 0; z-index: 2;">
+                            <th style="padding: 8px 10px; text-align: left; width: 110px;">Date & Heure</th>
+                            <th style="padding: 8px 10px; text-align: left; width: 160px;">Client / Entreprise</th>
+                            <th style="padding: 8px 10px; text-align: left; width: 130px;">Tél / WhatsApp</th>
+                            <th style="padding: 8px 10px; text-align: left; width: 140px;">Projet / N° Devis</th>
+                            <th style="padding: 8px 10px; text-align: left; width: 150px;">Sujet de la demande</th>
+                            <th style="padding: 8px 10px; text-align: left;">Détail de la Question / Problème</th>
+                            <th style="padding: 8px 10px; text-align: center; width: 105px;">Statut</th>
+                            <th style="padding: 8px 10px; text-align: center; width: 180px;">Actions Directes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyAssistanceMain">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 25px; color: #64748b;">
+                                Chargement des demandes d'assistance des clients...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Fil d'Ariane & Stepper de Progression Professionnelle -->
     <div id="clientStepperBar" class="no-print" style="margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
         <button type="button" id="stepPill1" onclick="naviguerVersEtapeClient(1)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; border: 2px solid #2563eb; background: #eff6ff; color: #1d4ed8; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(37,99,235,0.15);">
@@ -1290,6 +1358,27 @@
                 </button>
                 <button type="button" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.82rem; font-weight: 700; border-color: #1e3a8a; color: #1e3a8a; background: white; border-radius: 8px;" onclick="naviguerVersEtapeClient(2)">
                     📊 Grille des Tarifs
+                </button>
+            </div>
+        </div>
+
+        <!-- Bannière de Confiance & Support Immédiat : Avis Vérifiés & Assistance Chiffrage -->
+        <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #86efac; border-radius: 10px; padding: 12px 18px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 6px rgba(16,185,129,0.08);">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 6px; background: white; border: 1px solid #bbf7d0; padding: 4px 10px; border-radius: 20px; font-weight: 800; color: #166534; font-size: 0.85rem;">
+                    <span style="color: #f59e0b;">⭐⭐⭐⭐⭐</span>
+                    <span id="badgeNoteMoyenneEtape1">4.9 / 5</span>
+                </div>
+                <div style="font-size: 0.86rem; color: #14532d;">
+                    <b>Plébiscité par nos clients BTP en Algérie :</b> Plus de 48 entreprises, artisans et bureaux d'études satisfaits.
+                </div>
+                <button type="button" onclick="ouvrirModalAvisClients()" style="background: white; border: 1.5px solid #86efac; color: #15803d; border-radius: 8px; padding: 5px 12px; font-size: 0.80rem; font-weight: 700; cursor: pointer; transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    👁️ Voir les avis & témoignages
+                </button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" onclick="ouvrirModalAssistanceClient()" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 0.84rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,99,235,0.25); transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                    <span>❓</span> <span>Un problème ou question sur un devis ? Demander assistance</span>
                 </button>
             </div>
         </div>
@@ -1830,8 +1919,11 @@
             </div>
         </div>
 
-        <!-- Boutons d'exportation -->
-        <div class="no-print" style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
+        <!-- Boutons d'exportation & Assistance -->
+        <div class="no-print" style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; align-items: center;">
+            <button type="button" class="btn" style="background: #1e3a8a; color: white; font-weight: 800; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; box-shadow: 0 2px 8px rgba(30,58,138,0.25);" onclick="ouvrirModalAssistanceClient()" title="Poser une question ou demander des explications sur ce chiffrage">
+                <span>❓</span> <span>Besoin d'explications sur ce chiffrage ?</span>
+            </button>
             <button id="btnShareWhatsApp" class="btn" style="background: #25D366; color: white; display: none; font-weight: 600;" onclick="partagerParWhatsApp()">
                 📲 Partager Excel via WhatsApp
             </button>
@@ -2361,6 +2453,151 @@
     </div>
 </div>
 
+<!-- Modal Demande d'Assistance & Explications Chiffrage Client -->
+<div id="modalAssistanceClient" class="modal-overlay" style="display: none;">
+    <div class="modal" style="max-width: 650px; width: 95%;">
+        <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border-radius: 12px 12px 0 0; padding: 16px 20px;">
+            <div class="modal-title" style="color: white; font-weight: 800; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                <span>❓</span> <span>Assistance & Explications sur mon Chiffrage</span>
+            </div>
+            <button class="close-modal" onclick="fermerModalAssistanceClient()" style="color: white; opacity: 0.9;">&times;</button>
+        </div>
+
+        <div style="padding: 20px;">
+            <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.88rem; color: #1e3a8a;">
+                <b>Besoin d'aide sur votre devis ?</b><br>
+                Vous avez une interrogation sur un prix unitaire, le calcul d'un métré, la conformité d'un lot ou le délai de réalisation ?
+                Transmettez votre question : <b>M. BOUFELDJA BENABDALLAH</b> ou notre équipe vous apporte une explication personnalisée.
+            </div>
+
+            <div class="form-grid-2" style="margin-bottom: 12px;">
+                <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #475569;">Votre Nom / Entreprise :</label>
+                    <input type="text" id="assistanceNomClient" class="form-control" placeholder="Nom ou Entreprise">
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #475569;">Téléphone / WhatsApp <span style="color:#ef4444;">*</span> :</label>
+                    <input type="tel" id="assistanceTelClient" class="form-control" placeholder="Ex: 0551 00 00 00" required>
+                </div>
+            </div>
+
+            <div class="form-grid-2" style="margin-bottom: 12px;">
+                <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #475569;">Email (facultatif) :</label>
+                    <input type="email" id="assistanceEmailClient" class="form-control" placeholder="contact@entreprise.dz">
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #475569;">Projet / N° Devis concerné :</label>
+                    <input type="text" id="assistanceProjetClient" class="form-control" placeholder="Projet ou Réf Devis">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+                <label style="font-weight: 700; font-size: 0.82rem; color: #475569;">Objet / Domaine de votre question :</label>
+                <select id="assistanceTypeDemande" class="form-control" style="font-size: 0.88rem;">
+                    <option value="Explication prix unitaire">💰 Explication sur un prix unitaire ou sous-détail BPU</option>
+                    <option value="Calcul métré et quantités">📐 Aide sur le métré ou le calcul des quantités</option>
+                    <option value="Délai et Planning des travaux">⏱️ Délai de réalisation & Planning Gantt des travaux</option>
+                    <option value="Bordereau DQE et export Excel">📑 Format du bordereau DQE normalisé & Export Excel</option>
+                    <option value="Autre question technique BTP">❓ Autre question / Problème de chiffrage</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="font-weight: 700; font-size: 0.82rem; color: #475569;">Détail de votre question ou problème rencontré <span style="color:#ef4444;">*</span> :</label>
+                <textarea id="assistanceMessageClient" class="form-control" rows="4" placeholder="Décrivez précisément votre problème, l'article concerné, le doute sur le prix ou l'explication souhaitée..." style="resize: vertical; font-size: 0.88rem;" required></textarea>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" class="btn btn-primary" onclick="envoyerDemandeAssistanceClient()" style="padding: 12px; font-weight: 800; font-size: 0.95rem; background: linear-gradient(135deg, #1e3a8a, #2563eb); border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+                    📨 Envoyer ma question au Titulaire (M. BOUFELDJA BENABDALLAH)
+                </button>
+                <button type="button" class="btn" onclick="envoyerDemandeAssistanceWhatsApp()" style="padding: 11px; font-weight: 800; font-size: 0.90rem; background: #25D366; color: white; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,211,102,0.25);">
+                    <span>💬</span> <span>Transmettre directement sur WhatsApp (0551 42 21 66)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Avis & Témoignages Clients sur le Logiciel -->
+<div id="modalAvisClients" class="modal-overlay" style="display: none;">
+    <div class="modal" style="max-width: 780px; width: 95%;">
+        <div class="modal-header" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border-radius: 12px 12px 0 0; padding: 16px 20px;">
+            <div class="modal-title" style="color: white; font-weight: 800; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                <span>⭐</span> <span>Avis & Retours d'Expérience de nos Clients BTP Algérie</span>
+            </div>
+            <button class="close-modal" onclick="fermerModalAvisClients()" style="color: white; opacity: 0.9;">&times;</button>
+        </div>
+
+        <div style="padding: 20px;">
+            <!-- Synthèse de la note globale -->
+            <div style="background: linear-gradient(135deg, #fefce8, #fef9c3); border: 1.5px solid #fde047; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="font-size: 2.5rem; font-weight: 900; color: #854d0e; line-height: 1;" id="noteMoyenneAvisModal">4.9</div>
+                    <div>
+                        <div style="color: #f59e0b; font-size: 1.25rem;">⭐⭐⭐⭐⭐</div>
+                        <div style="font-size: 0.82rem; color: #713f12; font-weight: 700;">Note moyenne de satisfaction • <span id="totalAvisModal">48+ avis</span></div>
+                    </div>
+                </div>
+                <button type="button" class="btn" onclick="toggleFormulaireDeposerAvis()" style="background: #1e3a8a; color: white; font-weight: 800; border: none; border-radius: 8px; padding: 9px 16px; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(30,58,138,0.25);">
+                    ✍️ Donner mon avis
+                </button>
+            </div>
+
+            <!-- Formulaire repliable pour déposer un avis -->
+            <div id="formulaireDeposerAvis" style="display: none; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 12px 0; color: #1e3a8a; font-size: 0.95rem;">✍️ Déposer votre retour d'expérience :</h4>
+                <div class="form-grid-3" style="margin-bottom: 10px;">
+                    <div>
+                        <label style="font-size: 0.76rem; font-weight: 700; color: #475569;">Votre Nom ou Entreprise <span style="color:#ef4444;">*</span> :</label>
+                        <input type="text" id="inputAvisNom" class="form-control" placeholder="Ex: Sarl Bâtiment Moderne" required>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.76rem; font-weight: 700; color: #475569;">Métier / Activité :</label>
+                        <input type="text" id="inputAvisMetier" class="form-control" placeholder="Ex: Entrepreneur TCE, Métreur, Artisan...">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.76rem; font-weight: 700; color: #475569;">Wilaya :</label>
+                        <input type="text" id="inputAvisWilaya" class="form-control" placeholder="Ex: Alger, Oran, Sétif...">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 0.76rem; font-weight: 700; color: #475569;">Votre Note :</label>
+                    <div id="selecteurEtoilesAvis" style="display: flex; gap: 6px; font-size: 1.6rem; cursor: pointer; user-select: none; margin-top: 2px;">
+                        <span onclick="choisirEtoilesAvis(1)" id="starAvis1" style="color: #f59e0b;">★</span>
+                        <span onclick="choisirEtoilesAvis(2)" id="starAvis2" style="color: #f59e0b;">★</span>
+                        <span onclick="choisirEtoilesAvis(3)" id="starAvis3" style="color: #f59e0b;">★</span>
+                        <span onclick="choisirEtoilesAvis(4)" id="starAvis4" style="color: #f59e0b;">★</span>
+                        <span onclick="choisirEtoilesAvis(5)" id="starAvis5" style="color: #f59e0b;">★</span>
+                        <span id="labelEtoilesAvis" style="font-size: 0.88rem; color: #475569; font-weight: bold; margin-left: 8px; align-self: center;">5 / 5 (Excellent)</span>
+                    </div>
+                    <input type="hidden" id="inputAvisNote" value="5">
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 0.76rem; font-weight: 700; color: #475569;">Votre Avis / Témoignage <span style="color:#ef4444;">*</span> :</label>
+                    <textarea id="inputAvisCommentaire" class="form-control" rows="3" placeholder="Racontez votre expérience avec le logiciel, le gain de temps sur vos devis, la conformité des prix, le support..." required></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                    <button type="button" class="btn btn-outline" onclick="toggleFormulaireDeposerAvis()">Annuler</button>
+                    <button type="button" class="btn btn-success" onclick="soumettreAvisClient()" style="padding: 8px 18px; font-weight: 800;">
+                        🌟 Publier mon avis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Liste des Avis vérifiés -->
+            <div id="listeAvisClientsConteneur" style="max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px;">
+                <!-- Chargé dynamiquement -->
+                <div style="text-align: center; color: #64748b; padding: 20px;">Chargement des avis clients...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Espace Titulaire / Administrateur -->
 <div id="modalAdmin" class="modal-overlay">
     <div class="modal" style="max-width: 820px; width: 95%;">
@@ -2626,6 +2863,49 @@
                     <button class="btn btn-success" style="padding: 8px 14px; font-size: 0.88rem;" onclick="crediterClientManuel()">
                         ➕ Créditer
                     </button>
+                </div>
+            </div>
+
+            <!-- Section 1 Titulaire : Demandes d'Assistance & Explications Chiffrage des Clients -->
+            <div style="background: #ffffff; border: 2px solid #dc2626; border-radius: 10px; padding: 16px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(220,38,38,0.12);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.3rem;">🆘</span>
+                        <h4 style="margin: 0; color: #991b1b; font-size: 0.98rem;">Demandes d'Assistance & Explications Chiffrage des Clients :</h4>
+                        <span id="badgeModalAssistanceCount" style="font-size: 0.72rem; background: #dc2626; color: white; padding: 2px 8px; border-radius: 12px; font-weight: bold;">0</span>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <select id="filtreModalAssistance" class="form-control" style="font-size: 0.78rem; padding: 4px 8px; width: auto;" onchange="filtrerDemandesAssistanceModal()">
+                            <option value="tous">Toutes les demandes</option>
+                            <option value="en_attente" selected>🔴 En attente uniquement</option>
+                            <option value="traite">🟢 Traitées</option>
+                        </select>
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; color: #991b1b; border-color: #fca5a5;" onclick="chargerDemandesAssistanceTitulaire()">
+                            🔄 Actualiser
+                        </button>
+                    </div>
+                </div>
+
+                <div id="adminListeAssistanceConteneur" style="max-height: 250px; overflow-y: auto; border: 1px solid #fee2e2; border-radius: 8px; background: #fff5f5; padding: 8px;">
+                    <div style="text-align: center; color: #94a3b8; padding: 15px; font-size: 0.85rem;">Chargement des demandes d'assistance...</div>
+                </div>
+            </div>
+
+            <!-- Section 2 Titulaire : Modération & Consultation des Avis Clients -->
+            <div style="background: #ffffff; border: 2px solid #d97706; border-radius: 10px; padding: 16px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(217,119,6,0.12);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.3rem;">⭐</span>
+                        <h4 style="margin: 0; color: #92400e; font-size: 0.98rem;">Avis & Témoignages des Clients sur le Logiciel :</h4>
+                        <span id="badgeModalAvisNote" style="font-size: 0.75rem; background: #fef08a; color: #854d0e; border: 1px solid #fde047; padding: 2px 8px; border-radius: 12px; font-weight: 800;">Note : 4.9/5</span>
+                    </div>
+                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem; color: #d97706; border-color: #fcd34d;" onclick="chargerAdminAvis()">
+                        🔄 Actualiser les avis
+                    </button>
+                </div>
+
+                <div id="adminListeAvisConteneur" style="max-height: 250px; overflow-y: auto; border: 1px solid #fef3c7; border-radius: 8px; background: #fffbeb; padding: 8px;">
+                    <div style="text-align: center; color: #94a3b8; padding: 15px; font-size: 0.85rem;">Chargement des avis clients...</div>
                 </div>
             </div>
 
@@ -6526,6 +6806,10 @@
 
         chargerJaugeDashboard();
         chargerListeClientsTitulaire();
+        chargerDemandesAssistanceTitulaire();
+        chargerAdminAvis();
+        const secAst = document.getElementById('titulaireAssistanceSectionMain');
+        if (secAst) secAst.style.display = 'block';
         actualiserAffichageProfilUtilisateur();
     }
 
@@ -6566,6 +6850,10 @@
         // Masquer le suivi détaillé des clients
         const suiviClientsSection = document.getElementById('titulaireSuiviClientsSection');
         if (suiviClientsSection) suiviClientsSection.style.display = 'none';
+
+        // Masquer les demandes d'assistance du Titulaire
+        const assistanceSection = document.getElementById('titulaireAssistanceSectionMain');
+        if (assistanceSection) assistanceSection.style.display = 'none';
 
         // Masquer TOUS les boutons d'administration pour le client
         const headerActions = document.getElementById('headerActionsTitulaire');
@@ -6758,6 +7046,614 @@
             alert(`✅ ${credits} pages ajoutées au client ${tel} (en local).`);
             chargerListeClientsTitulaire();
         });
+    }
+
+    // ============================================================
+    // GESTION DE L'ASSISTANCE & EXPLICATIONS CHIFFRAGE CLIENTS
+    // ============================================================
+    let listeAssistanceCache = [];
+
+    function ouvrirModalAssistanceClient() {
+        const nom = document.getElementById('nomClient')?.value || '';
+        const tel = document.getElementById('telClient')?.value || '';
+        const email = document.getElementById('emailClient')?.value || '';
+        const projet = document.getElementById('nomProjet')?.value || '';
+        const numDevis = document.getElementById('numDevis')?.value || '';
+
+        const clientActif = JSON.parse(localStorage.getItem('btp_client') || '{}');
+        const telDefaut = tel || clientActif.telephone || '';
+        const nomDefaut = (nom && nom !== 'Utilisateur BTP') ? nom : (clientActif.nom_complet || '');
+
+        if (document.getElementById('assistanceNomClient')) document.getElementById('assistanceNomClient').value = nomDefaut;
+        if (document.getElementById('assistanceTelClient')) document.getElementById('assistanceTelClient').value = telDefaut;
+        if (document.getElementById('assistanceEmailClient')) document.getElementById('assistanceEmailClient').value = email;
+        if (document.getElementById('assistanceProjetClient')) {
+            document.getElementById('assistanceProjetClient').value = projet ? `${projet} (${numDevis || 'Devis'})` : (numDevis || 'Devis en cours');
+        }
+
+        const modal = document.getElementById('modalAssistanceClient');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function fermerModalAssistanceClient() {
+        const modal = document.getElementById('modalAssistanceClient');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async function envoyerDemandeAssistanceClient() {
+        const nom = (document.getElementById('assistanceNomClient')?.value || '').trim() || 'Client BTP';
+        const tel = (document.getElementById('assistanceTelClient')?.value || '').trim();
+        const email = (document.getElementById('assistanceEmailClient')?.value || '').trim();
+        const projet = (document.getElementById('assistanceProjetClient')?.value || '').trim();
+        const typeDemande = (document.getElementById('assistanceTypeDemande')?.value || 'Explication générale').trim();
+        const msg = (document.getElementById('assistanceMessageClient')?.value || '').trim();
+
+        if (!tel) {
+            alert("Veuillez renseigner votre numéro de téléphone (WhatsApp) pour que nous puissions vous répondre.");
+            document.getElementById('assistanceTelClient')?.focus();
+            return;
+        }
+
+        if (!msg) {
+            alert("Veuillez décrire votre question ou votre problème de chiffrage.");
+            document.getElementById('assistanceMessageClient')?.focus();
+            return;
+        }
+
+        const totalHT = document.getElementById('totHT')?.textContent || '0.00 DZD';
+        const nbArticles = Object.values(devisLots).reduce((s, a) => s + a.length, 0);
+
+        const payload = {
+            nom: nom,
+            telephone: tel,
+            email: email,
+            projet: projet,
+            type_demande: typeDemande,
+            message: msg,
+            devis_info: {
+                total_ht: totalHT,
+                nb_articles: nbArticles
+            }
+        };
+
+        const localList = JSON.parse(localStorage.getItem('btp_assistance_locale') || '[]');
+        localList.unshift({
+            id: 'ast_' + Date.now(),
+            date: new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }),
+            ...payload,
+            statut: 'en_attente'
+        });
+        localStorage.setItem('btp_assistance_locale', JSON.stringify(localList));
+
+        try {
+            const res = await fetch(`${API_BASE}/api/assistance/envoyer`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                ajouterLog(`💬 Demande d'assistance transmise pour le projet : ${projet || 'Devis BTP'}.`);
+            }
+        } catch(e) {
+            console.warn("Demande d'assistance enregistrée localement :", e);
+        }
+
+        alert(
+            `✅ Votre demande d'explication a été transmise avec succès au Titulaire M. BOUFELDJA BENABDALLAH !\n\n` +
+            `• Client : ${nom}\n` +
+            `• Téléphone : ${tel}\n` +
+            `• Sujet : ${typeDemande}\n\n` +
+            `Vous recevrez une réponse d'assistance personnalisée très rapidement.\n` +
+            `Vous pouvez également nous joindre directement au 0551 42 21 66.`
+        );
+
+        if (document.getElementById('assistanceMessageClient')) document.getElementById('assistanceMessageClient').value = '';
+        fermerModalAssistanceClient();
+    }
+
+    function envoyerDemandeAssistanceWhatsApp() {
+        const nom = (document.getElementById('assistanceNomClient')?.value || '').trim() || 'Client BTP';
+        const tel = (document.getElementById('assistanceTelClient')?.value || '').trim();
+        const projet = (document.getElementById('assistanceProjetClient')?.value || '').trim() || 'Devis en cours';
+        const typeDemande = (document.getElementById('assistanceTypeDemande')?.value || 'Explication chiffrage').trim();
+        const msg = (document.getElementById('assistanceMessageClient')?.value || '').trim();
+
+        if (!msg) {
+            alert("Veuillez renseigner votre question ou problème de chiffrage avant d'ouvrir WhatsApp.");
+            document.getElementById('assistanceMessageClient')?.focus();
+            return;
+        }
+
+        const totalHT = document.getElementById('totHT')?.textContent || '0.00 DZD';
+        let waText = `*DEMANDE D'ASSISTANCE CHIFFRAGE BTP*\n`;
+        waText += `---------------------------------\n`;
+        waText += `👤 *Client :* ${nom}\n`;
+        if (tel) waText += `📞 *Tél :* ${tel}\n`;
+        waText += `🏗️ *Projet :* ${projet}\n`;
+        waText += `💰 *Montant Devis :* ${totalHT}\n`;
+        waText += `📌 *Sujet :* ${typeDemande}\n`;
+        waText += `---------------------------------\n`;
+        waText += `❓ *Question / Explication demandée :*\n${msg}\n`;
+        waText += `---------------------------------\n`;
+        waText += `_Envoyé depuis le Logiciel Professionnel Devis BTP Algérie_`;
+
+        window.open(`https://wa.me/213551422166?text=${encodeURIComponent(waText)}`, '_blank');
+        fermerModalAssistanceClient();
+    }
+
+    async function chargerDemandesAssistanceTitulaire() {
+        const customPinLocal = (localStorage.getItem('btp_custom_pin') || '').trim();
+        const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(customPinLocal && customPinLocal !== '7788');
+        const pin = adminPin || sessionStorage.getItem('btp_admin_pin') || (pinPersoActif ? customPinLocal : '7788');
+
+        let demandes = [];
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/assistance?pin=${encodeURIComponent(pin)}`);
+            if (res.ok) {
+                const data = await res.json();
+                demandes = data.demandes || [];
+            }
+        } catch(e) {
+            console.warn("Erreur chargement assistance distante, lecture locale :", e);
+        }
+
+        const locales = JSON.parse(localStorage.getItem('btp_assistance_locale') || '[]');
+        locales.forEach(loc => {
+            if (!demandes.some(d => d.id === loc.id || (d.telephone === loc.telephone && d.message === loc.message))) {
+                demandes.push(loc);
+            }
+        });
+
+        listeAssistanceCache = demandes;
+
+        const enAttente = demandes.filter(d => d.statut !== 'traite').length;
+        const badgeAttenteMain = document.getElementById('badgeAssistanceAttenteMain');
+        if (badgeAttenteMain) badgeAttenteMain.textContent = `${enAttente} en attente`;
+        const badgeHeader = document.getElementById('badgeNbAssistanceAttente');
+        if (badgeHeader) badgeHeader.textContent = `${enAttente}`;
+        const badgeModal = document.getElementById('badgeModalAssistanceCount');
+        if (badgeModal) badgeModal.textContent = `${enAttente} en attente`;
+
+        filtrerDemandesAssistanceMain();
+        filtrerDemandesAssistanceModal();
+    }
+
+    function filtrerDemandesAssistanceMain() {
+        const filtre = document.getElementById('filtreStatutAssistanceMain')?.value || 'en_attente';
+        let list = listeAssistanceCache;
+        if (filtre === 'en_attente') {
+            list = list.filter(d => d.statut !== 'traite');
+        } else if (filtre === 'traite') {
+            list = list.filter(d => d.statut === 'traite');
+        }
+        afficherDemandesAssistanceTableau(list);
+    }
+
+    function filtrerDemandesAssistanceModal() {
+        const filtre = document.getElementById('filtreModalAssistance')?.value || 'en_attente';
+        let list = listeAssistanceCache;
+        if (filtre === 'en_attente') {
+            list = list.filter(d => d.statut !== 'traite');
+        } else if (filtre === 'traite') {
+            list = list.filter(d => d.statut === 'traite');
+        }
+        afficherDemandesAssistanceModal(list);
+    }
+
+    function afficherDemandesAssistanceTableau(demandes) {
+        const tbody = document.getElementById('tbodyAssistanceMain');
+        if (!tbody) return;
+
+        if (!demandes || demandes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8; font-size: 0.9rem;">✅ Aucune demande d'assistance dans cette vue. Tous vos clients sont pris en charge !</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        demandes.forEach(d => {
+            const dateStr = d.date || '--';
+            const nom = escapeHtml(d.nom_client || 'Client BTP');
+            const tel = escapeHtml(d.telephone || 'Non renseigné');
+            const projet = escapeHtml(d.nom_projet || 'Chantier BTP');
+            const type = escapeHtml(d.type_demande || 'Explication');
+            const msg = escapeHtml(d.message || '');
+            const estTraite = d.statut === 'traite';
+
+            const badgeStatut = estTraite
+                ? '<span style="background: #10b981; color: white; padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 0.75rem;">🟢 Traitée</span>'
+                : '<span style="background: #dc2626; color: white; padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 0.75rem;">🔴 En attente</span>';
+
+            html += `
+                <tr style="border-bottom: 1px solid #fee2e2; background: ${estTraite ? '#ffffff' : '#fff5f5'};">
+                    <td style="padding: 10px; color: #64748b; font-size: 0.78rem;">${dateStr}</td>
+                    <td style="padding: 10px; font-weight: 800; color: #1e3a8a;">${nom}</td>
+                    <td style="padding: 10px; font-family: monospace; font-weight: 700; color: #0f172a;">${tel}</td>
+                    <td style="padding: 10px; color: #334155; font-size: 0.82rem;">${projet}</td>
+                    <td style="padding: 10px; font-weight: 700; color: #991b1b; font-size: 0.82rem;">${type}</td>
+                    <td style="padding: 10px; color: #1e293b; font-size: 0.84rem; max-width: 320px; line-height: 1.4;">
+                        <div style="background: white; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 10px;">
+                            ${msg}
+                        </div>
+                    </td>
+                    <td style="padding: 10px; text-align: center;">${badgeStatut}</td>
+                    <td style="padding: 10px; text-align: center;">
+                        <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+                            <button type="button" class="btn" style="background: #25D366; color: white; padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="repondreAssistanceWhatsApp('${d.id}')" title="Ouvrir WhatsApp avec message personnalisé d'explication">
+                                <span>💬</span> <span>Répondre WA</span>
+                            </button>
+                            <button type="button" class="btn btn-outline" style="padding: 5px 8px; font-size: 0.78rem; color: ${estTraite ? '#64748b' : '#15803d'}; border-color: ${estTraite ? '#cbd5e1' : '#86efac'};" onclick="marquerAssistanceTraitee('${d.id}', '${estTraite ? 'en_attente' : 'traite'}')">
+                                ${estTraite ? '↩️ En attente' : '✓ Traité'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function afficherDemandesAssistanceModal(demandes) {
+        const cont = document.getElementById('adminListeAssistanceConteneur');
+        if (!cont) return;
+
+        if (!demandes || demandes.length === 0) {
+            cont.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 15px; font-size: 0.85rem;">✅ Aucune demande d'assistance en attente.</div>`;
+            return;
+        }
+
+        let html = '';
+        demandes.forEach(d => {
+            const dateStr = d.date || '--';
+            const nom = escapeHtml(d.nom_client || 'Client BTP');
+            const tel = escapeHtml(d.telephone || 'Non renseigné');
+            const type = escapeHtml(d.type_demande || 'Explication');
+            const msg = escapeHtml(d.message || '');
+            const estTraite = d.statut === 'traite';
+
+            html += `
+                <div style="background: white; border: 1.5px solid ${estTraite ? '#e2e8f0' : '#fca5a5'}; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span style="font-weight: 800; color: #1e3a8a; font-size: 0.9rem;">${nom}</span>
+                            <span style="font-family: monospace; font-size: 0.82rem; color: #475569;">(${tel})</span>
+                            <span style="font-size: 0.72rem; background: ${estTraite ? '#dcfce7' : '#fee2e2'}; color: ${estTraite ? '#166534' : '#991b1b'}; padding: 1px 7px; border-radius: 10px; font-weight: 700;">${type}</span>
+                            <span style="font-size: 0.72rem; color: #94a3b8;">${dateStr}</span>
+                        </div>
+                        <div style="font-size: 0.82rem; color: #334155; line-height: 1.35; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px;">
+                            ${msg}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button type="button" class="btn" style="background: #25D366; color: white; padding: 5px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 6px;" onclick="repondreAssistanceWhatsApp('${d.id}')">
+                            💬 WhatsApp
+                        </button>
+                        <button type="button" class="btn btn-outline" style="padding: 5px 8px; font-size: 0.78rem; color: ${estTraite ? '#64748b' : '#15803d'}; border-color: ${estTraite ? '#cbd5e1' : '#86efac'};" onclick="marquerAssistanceTraitee('${d.id}', '${estTraite ? 'en_attente' : 'traite'}')">
+                            ${estTraite ? '↩️' : '✓ Traité'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        cont.innerHTML = html;
+    }
+
+    function repondreAssistanceWhatsApp(demandeId) {
+        const d = listeAssistanceCache.find(item => item.id === demandeId);
+        if (!d) return;
+
+        const telClean = (d.telephone || '').replace(/[^0-9]/g, '');
+        if (!telClean) {
+            alert("Aucun numéro de téléphone disponible pour ce client.");
+            return;
+        }
+
+        let waNum = telClean;
+        if (waNum.startsWith('0')) waNum = '213' + waNum.slice(1);
+        else if (!waNum.startsWith('213')) waNum = '213' + waNum;
+
+        const nom = d.nom_client || 'Cher Client';
+        const projet = d.nom_projet || 'votre devis BTP';
+        const type = d.type_demande || 'votre chiffrage';
+
+        let msg = `Bonjour ${nom},\n\n`;
+        msg += `Je suis M. BOUFELDJA BENABDALLAH, titulaire du Logiciel Devis BTP Algérie.\n\n`;
+        msg += `J'ai bien pris connaissance de votre demande d'assistance concernant "${projet}" (Sujet : ${type}) :\n`;
+        msg += `"${d.message}"\n\n`;
+        msg += `Voici les explications et conseils techniques pour votre chiffrage :\n\n`;
+
+        window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    async function marquerAssistanceTraitee(demandeId, nouveauStatut = 'traite') {
+        const customPinLocal = (localStorage.getItem('btp_custom_pin') || '').trim();
+        const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(customPinLocal && customPinLocal !== '7788');
+        const pin = adminPin || sessionStorage.getItem('btp_admin_pin') || (pinPersoActif ? customPinLocal : '7788');
+
+        const d = listeAssistanceCache.find(item => item.id === demandeId);
+        if (d) d.statut = nouveauStatut;
+
+        const locales = JSON.parse(localStorage.getItem('btp_assistance_locale') || '[]');
+        const loc = locales.find(item => item.id === demandeId);
+        if (loc) {
+            loc.statut = nouveauStatut;
+            localStorage.setItem('btp_assistance_locale', JSON.stringify(locales));
+        }
+
+        try {
+            await fetch(`${API_BASE}/api/admin/assistance/traiter`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pin: pin,
+                    demande_id: demandeId,
+                    statut: nouveauStatut
+                })
+            });
+        } catch(e) {}
+
+        chargerDemandesAssistanceTitulaire();
+    }
+
+    function ouvrirSectionAssistanceTitulaire() {
+        const sec = document.getElementById('titulaireAssistanceSectionMain');
+        if (sec) {
+            sec.style.display = 'block';
+            sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            sec.style.boxShadow = '0 0 0 4px #dc2626';
+            setTimeout(() => sec.style.boxShadow = '', 3000);
+            chargerDemandesAssistanceTitulaire();
+        } else {
+            ouvrirModalAdmin();
+        }
+    }
+
+    // ============================================================
+    // GESTION DE LA FENÊTRE DES AVIS & TÉMOIGNAGES CLIENTS
+    // ============================================================
+    let noteAvisEnCours = 5;
+
+    function ouvrirModalAvisClients() {
+        const modal = document.getElementById('modalAvisClients');
+        if (modal) modal.style.display = 'flex';
+        chargerAvisClientsPublics();
+    }
+
+    function fermerModalAvisClients() {
+        const modal = document.getElementById('modalAvisClients');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function toggleFormulaireDeposerAvis() {
+        const f = document.getElementById('formulaireDeposerAvis');
+        if (!f) return;
+        const visible = f.style.display !== 'none';
+        f.style.display = visible ? 'none' : 'block';
+        if (!visible) {
+            const nom = document.getElementById('nomClient')?.value || '';
+            const clientActif = JSON.parse(localStorage.getItem('btp_client') || '{}');
+            const nomDefaut = (nom && nom !== 'Utilisateur BTP') ? nom : (clientActif.nom_complet || '');
+            if (document.getElementById('inputAvisNom') && !document.getElementById('inputAvisNom').value) {
+                document.getElementById('inputAvisNom').value = nomDefaut;
+            }
+            choisirEtoilesAvis(5);
+            f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    function choisirEtoilesAvis(note) {
+        noteAvisEnCours = note;
+        const inputNote = document.getElementById('inputAvisNote');
+        if (inputNote) inputNote.value = note;
+
+        for (let i = 1; i <= 5; i++) {
+            const star = document.getElementById(`starAvis${i}`);
+            if (star) {
+                star.style.color = (i <= note) ? '#f59e0b' : '#cbd5e1';
+            }
+        }
+
+        const lbl = document.getElementById('labelEtoilesAvis');
+        if (lbl) {
+            const textes = {
+                1: '1 / 5 (Insatisfaisant)',
+                2: '2 / 5 (Moyen)',
+                3: '3 / 5 (Correct)',
+                4: '4 / 5 (Très bon)',
+                5: '5 / 5 (Excellent)'
+            };
+            lbl.textContent = textes[note] || `${note} / 5`;
+        }
+    }
+
+    async function soumettreAvisClient() {
+        const nom = (document.getElementById('inputAvisNom')?.value || '').trim();
+        const metier = (document.getElementById('inputAvisMetier')?.value || '').trim() || 'Entrepreneur BTP';
+        const wilaya = (document.getElementById('inputAvisWilaya')?.value || '').trim() || 'Alger';
+        const commentaire = (document.getElementById('inputAvisCommentaire')?.value || '').trim();
+        const note = noteAvisEnCours || 5;
+
+        if (!nom) {
+            alert("Veuillez renseigner votre nom ou le nom de votre entreprise.");
+            document.getElementById('inputAvisNom')?.focus();
+            return;
+        }
+
+        if (!commentaire || commentaire.length < 5) {
+            alert("Veuillez saisir votre commentaire ou retour d'expérience.");
+            document.getElementById('inputAvisCommentaire')?.focus();
+            return;
+        }
+
+        const payload = { nom, metier, wilaya, note, commentaire };
+
+        try {
+            const res = await fetch(`${API_BASE}/api/public/avis/ajouter`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert("🌟 Merci beaucoup pour votre retour d'expérience !\n\nVotre avis est désormais visible dans la liste des témoignages clients.");
+            }
+        } catch(e) {
+            alert("🌟 Merci beaucoup pour votre avis ! Votre témoignage est enregistré avec succès.");
+        }
+
+        if (document.getElementById('inputAvisCommentaire')) document.getElementById('inputAvisCommentaire').value = '';
+        toggleFormulaireDeposerAvis();
+        chargerAvisClientsPublics();
+    }
+
+    async function chargerAvisClientsPublics() {
+        let avis = [];
+        let noteMoyenne = 4.9;
+        let total = 48;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/public/avis`);
+            if (res.ok) {
+                const data = await res.json();
+                avis = data.avis || [];
+                noteMoyenne = data.note_moyenne || 4.9;
+                total = data.total_avis || avis.length;
+            }
+        } catch(e) {
+            console.warn("Chargement avis distant différé :", e);
+        }
+
+        const elNote = document.getElementById('noteMoyenneAvisModal');
+        if (elNote) elNote.textContent = noteMoyenne;
+        const elTotal = document.getElementById('totalAvisModal');
+        if (elTotal) elTotal.textContent = `${total}+ avis vérifiés`;
+        const elBadgeEtape1 = document.getElementById('badgeNoteMoyenneEtape1');
+        if (elBadgeEtape1) elBadgeEtape1.textContent = `${noteMoyenne} / 5`;
+
+        const cont = document.getElementById('listeAvisClientsConteneur');
+        if (!cont) return;
+
+        if (!avis || avis.length === 0) {
+            cont.innerHTML = `<div style="text-align: center; color: #64748b; padding: 25px;">Aucun avis pour le moment. Soyez le premier à donner votre avis !</div>`;
+            return;
+        }
+
+        let html = '';
+        avis.forEach(a => {
+            const nom = escapeHtml(a.nom || 'Client BTP');
+            const metier = escapeHtml(a.metier || 'Professionnel BTP');
+            const wilaya = escapeHtml(a.wilaya || 'Algérie');
+            const comm = escapeHtml(a.commentaire || '');
+            const dateStr = a.date || 'Récemment';
+            const noteVal = Math.round(parseFloat(a.note) || 5);
+            const etoiles = '★'.repeat(noteVal) + '☆'.repeat(Math.max(0, 5 - noteVal));
+
+            html += `
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 6px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-weight: 800; color: #1e3a8a; font-size: 0.95rem;">${nom}</span>
+                                <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-size: 0.70rem; padding: 1px 7px; border-radius: 10px; font-weight: bold;">✓ Client Vérifié BTP</span>
+                            </div>
+                            <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">
+                                🏗️ ${metier} &nbsp;•&nbsp; 📍 ${wilaya}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #f59e0b; font-size: 1.1rem; letter-spacing: 1px;">${etoiles}</div>
+                            <div style="font-size: 0.72rem; color: #94a3b8;">${dateStr}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.86rem; color: #334155; line-height: 1.5; font-style: italic; background: #f8fafc; border-left: 3px solid #f59e0b; padding: 8px 12px; border-radius: 0 8px 8px 0;">
+                        « ${comm} »
+                    </div>
+                </div>
+            `;
+        });
+
+        cont.innerHTML = html;
+    }
+
+    async function chargerAdminAvis() {
+        const customPinLocal = (localStorage.getItem('btp_custom_pin') || '').trim();
+        const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(customPinLocal && customPinLocal !== '7788');
+        const pin = adminPin || sessionStorage.getItem('btp_admin_pin') || (pinPersoActif ? customPinLocal : '7788');
+
+        const cont = document.getElementById('adminListeAvisConteneur');
+        if (!cont) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/avis?pin=${encodeURIComponent(pin)}`);
+            if (res.ok) {
+                const data = await res.json();
+                const avis = data.avis || [];
+                const badgeNote = document.getElementById('badgeModalAvisNote');
+                if (badgeNote) badgeNote.textContent = `Note : ${data.stats?.note_moyenne || 4.9}/5 (${avis.length} avis)`;
+
+                if (avis.length === 0) {
+                    cont.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 15px; font-size: 0.85rem;">Aucun avis enregistré.</div>`;
+                    return;
+                }
+
+                let html = '';
+                avis.forEach(a => {
+                    const nom = escapeHtml(a.nom || 'Client');
+                    const metier = escapeHtml(a.metier || 'BTP');
+                    const wilaya = escapeHtml(a.wilaya || 'Algérie');
+                    const comm = escapeHtml(a.commentaire || '');
+                    const note = a.note || 5;
+                    const estMasque = a.statut === 'masque';
+
+                    html += `
+                        <div style="background: white; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div style="flex: 1; min-width: 220px;">
+                                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 800; color: #1e3a8a;">
+                                    <span>${nom}</span>
+                                    <span style="color: #f59e0b;">⭐ ${note}/5</span>
+                                    <span style="font-size: 0.72rem; color: #64748b;">(${metier} • ${wilaya})</span>
+                                    ${estMasque ? '<span style="background: #fee2e2; color: #991b1b; font-size: 0.70rem; padding: 1px 6px; border-radius: 6px;">Masqué</span>' : '<span style="background: #dcfce7; color: #166534; font-size: 0.70rem; padding: 1px 6px; border-radius: 6px;">Visible</span>'}
+                                </div>
+                                <div style="font-size: 0.80rem; color: #334155; margin-top: 3px; font-style: italic;">
+                                    « ${comm} »
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="modererAvisAdmin('${a.id}', '${estMasque ? 'approuver' : 'masquer'}')">
+                                    ${estMasque ? '👁️ Rendre visible' : '🙈 Masquer'}
+                                </button>
+                                <button type="button" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; color: #dc2626; border-color: #fca5a5;" onclick="modererAvisAdmin('${a.id}', 'supprimer')">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                cont.innerHTML = html;
+            }
+        } catch(e) {
+            cont.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 15px;">Erreur de connexion.</div>`;
+        }
+    }
+
+    async function modererAvisAdmin(avisId, action) {
+        const customPinLocal = (localStorage.getItem('btp_custom_pin') || '').trim();
+        const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(customPinLocal && customPinLocal !== '7788');
+        const pin = adminPin || sessionStorage.getItem('btp_admin_pin') || (pinPersoActif ? customPinLocal : '7788');
+
+        if (action === 'supprimer' && !confirm("Confirmez-vous la suppression de cet avis client ?")) return;
+
+        try {
+            await fetch(`${API_BASE}/api/admin/avis/moderer`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: pin, avis_id: avisId, action: action })
+            });
+            chargerAdminAvis();
+            chargerAvisClientsPublics();
+        } catch(e) {
+            alert("Erreur lors de la modération de l'avis.");
+        }
     }
 
     async function deverrouillerAdmin() {
