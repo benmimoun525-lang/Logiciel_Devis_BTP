@@ -3945,17 +3945,12 @@
 </script>
 
 <script>
-    // Configuration intelligente de l'URL API (Backend FastAPI Render en production ou local)
+    // Configuration intelligente de l'URL API (Koyeb, Hugging Face, Render, Local ou Réseau)
     const API_BASE = (window.location.protocol === 'file:')
         ? "http://127.0.0.1:8000"
         : (
-            window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            window.location.hostname.startsWith('192.168.') ||
-            window.location.hostname.startsWith('10.') ||
-            window.location.port === '8000' ||
-            window.location.hostname.includes('render.com')
-        ) ? "" : "https://logiciel-devis-btp.onrender.com";
+            window.location.protocol.startsWith('http')
+        ) ? "" : "http://127.0.0.1:8000";
 
     let GEMINI_API_KEY = localStorage.getItem('btp_gemini_key') || '';
 
@@ -4750,7 +4745,6 @@
 
         const promptText = `Tu es un expert métreur-vérificateur senior BTP Algérie. Analyse scrupuleusement ce document (devis, bordereau des prix unitaires BPU, DQE). Transcris fidèlement chaque article sans fusionner. Détecte les lots BTP. Format JSON strict: {"client":"","projet":"","articles":[{"lot":"LOT ...","n":1,"d":"...","u":"m2","q":1,"pu":1500,"total":1500}]}`;
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cleApi}`;
         const payload = {
             contents: [
                 {
@@ -4771,25 +4765,37 @@
             }
         };
 
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+        const modeles = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+        let lastErr = null;
 
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err.error?.message || `HTTP ${res.status}`);
-        }
+        for (const mod of modeles) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${cleApi}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-        const data = await res.json();
-        const textResp = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-        const start = textResp.indexOf('{');
-        const end = textResp.lastIndexOf('}');
-        if (start !== -1 && end !== -1 && end > start) {
-            try { return JSON.parse(textResp.substring(start, end + 1)); } catch(e) {}
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    lastErr = err.error?.message || `HTTP ${res.status}`;
+                    continue;
+                }
+
+                const data = await res.json();
+                const textResp = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+                const start = textResp.indexOf('{');
+                const end = textResp.lastIndexOf('}');
+                if (start !== -1 && end !== -1 && end > start) {
+                    try { return JSON.parse(textResp.substring(start, end + 1)); } catch(e) {}
+                }
+                return { articles: [] };
+            } catch(e) {
+                lastErr = e.message;
+            }
         }
-        return { articles: [] };
+        throw new Error(lastErr || "Échec de l'appel direct Gemini.");
     }
 
     async function executerTraitementPage(idx) {
@@ -4938,7 +4944,7 @@
                 if (err.name === 'AbortError') {
                     lastErreurMessage = "Délai d'attente dépassé (90s). Le serveur ne répond pas.";
                 } else if (isFetchErr) {
-                    lastErreurMessage = "Le serveur Render était en veille. Il est maintenant réveillé.";
+                    lastErreurMessage = "Serveur en ligne indisponible (Service Render suspendu ou hors ligne).";
                 } else {
                     lastErreurMessage = err.message;
                 }
@@ -4946,9 +4952,9 @@
                 ajouterLog(`⚠️ Tentative ${retries}/${MAX_RETRIES} : ${lastErreurMessage}`);
 
                 if (retries < MAX_RETRIES) {
-                    const delai = retries === 1 ? 10000 : 15000;
-                    statusBadge.textContent = `⏳ Réveil du serveur Render en cours (${retries + 1}/${MAX_RETRIES})... reprise dans ${delai / 1000}s`;
-                    ajouterLog(`⏳ Réveil du serveur Render... nouvelle tentative automatique dans ${delai / 1000}s`);
+                    const delai = retries === 1 ? 8000 : 12000;
+                    statusBadge.textContent = `⏳ Vérification du serveur en cours (${retries + 1}/${MAX_RETRIES})... reprise dans ${delai / 1000}s`;
+                    ajouterLog(`⏳ Vérification du serveur... nouvelle tentative automatique dans ${delai / 1000}s`);
                     // Ping léger en parallèle pour stimuler le réveil
                     fetch(`${API_BASE}/status`).catch(() => {});
                     await new Promise(r => setTimeout(r, delai));
@@ -4960,10 +4966,14 @@
             page.status = 'erreur';
             statusBadge.className = 'status-pill status-err';
             const detailPropre = (lastErreurMessage || 'Erreur de connexion').replace(/[\r\n]+/g, ' ').slice(0, 150);
-            statusBadge.innerHTML = `<span>❌ Échec sur "${escapeHtml(page.name)}" : <b>${escapeHtml(detailPropre)}</b></span> ` +
-                `<button type="button" class="btn btn-outline" style="margin-left: 8px; padding: 4px 12px; font-size: 0.82rem; background: #fee2e2; color: #991b1b; border: 1.5px solid #f87171; border-radius: 6px; cursor: pointer; font-weight: 800;" onclick="executerTraitementPage(${idx})">🔄 Réessayer maintenant</button>` +
-                `<button type="button" class="btn btn-outline" style="margin-left: 6px; padding: 4px 12px; font-size: 0.82rem; background: #fef3c7; color: #92400e; border: 1.5px solid #f59e0b; border-radius: 6px; cursor: pointer; font-weight: 800;" onclick="ouvrirModalCleAPI()">🔑 Clé Gemini</button>`;
-            ajouterLog(`❌ Échec sur "${page.name}". Le serveur Render est désormais actif. Cliquez sur "Réessayer maintenant".`);
+            statusBadge.innerHTML = `<div style="display: flex; flex-direction: column; gap: 8px; width: 100%; text-align: left;">` +
+                `<div>❌ <b>Échec sur "${escapeHtml(page.name)}"</b> : ${escapeHtml(detailPropre)}</div>` +
+                `<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">` +
+                    `<button type="button" class="btn" style="padding: 6px 14px; font-size: 0.85rem; background: #fef3c7; color: #92400e; border: 1.5px solid #f59e0b; border-radius: 8px; cursor: pointer; font-weight: 800;" onclick="ouvrirModalCleAPI()">🔑 Clé Gemini (Chiffrage direct sans serveur)</button>` +
+                    `<button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem; background: #fee2e2; color: #991b1b; border: 1.5px solid #f87171; border-radius: 8px; cursor: pointer; font-weight: 700;" onclick="executerTraitementPage(${idx})">🔄 Réessayer</button>` +
+                `</div>` +
+            `</div>`;
+            ajouterLog(`❌ Échec sur "${page.name}". Si Render est suspendu, cliquez sur "🔑 Clé Gemini" pour chiffrer directement ou lancez "lancer.bat" en local.`);
         }
 
         rafraichirGrilleVignettes();
