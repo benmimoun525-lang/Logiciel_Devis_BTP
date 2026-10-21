@@ -4049,6 +4049,7 @@
         const urlPin = urlParams.get('pin') || urlParams.get('cle') || urlParams.get('pass');
         const customPinLocal = localStorage.getItem('btp_custom_pin');
         const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(customPinLocal && customPinLocal !== '7788');
+        const aDemandeHashTitulaire = window.location.hash.includes('titulaire') || window.location.hash.includes('admin') || window.location.hash.includes('cockpit') || urlParams.get('cockpit') === '1' || urlParams.get('dashboard') === '1';
 
         // 1. Validation de l'URL avec code PIN éventuel
         let isConnexionPinDirecte = false;
@@ -4065,16 +4066,36 @@
             adminPin = urlPin;
             sessionStorage.setItem('btp_session_titulaire_active', '1');
             sessionStorage.setItem('btp_admin_pin', urlPin);
+            localStorage.setItem('btp_admin_pin', urlPin);
+            localStorage.setItem('btp_mode_titulaire_permanent', '1');
             localStorage.removeItem('btp_mode_client_apercu');
-            // Nettoyer discrètement l'URL pour ne jamais laisser le code PIN visible dans la barre d'adresse
+
+            // Profil Titulaire avec 9 999 crédits permanents
+            const titClient = {
+                id: 'titulaire_benabdallah',
+                nom_complet: 'BENABDALLAH (Titulaire)',
+                telephone: '0551422166',
+                email: 'contact@devis-btp.dz',
+                credits_pages: 9999,
+                pages_consommees: 0,
+                type_abonnement: 'titulaire_illimite'
+            };
+            localStorage.setItem('btp_client', JSON.stringify(titClient));
+            localStorage.setItem('btp_device_pages_consommees', '0');
+            localStorage.setItem('btp_etape1_validee', '1');
+            localStorage.setItem('btp_etape2_validee', '1');
+            localStorage.setItem('btp_etape3_validee', '1');
+
+            // Nettoyer discrètement l'URL tout en préservant le hash si présent
             if (window.history && window.history.replaceState) {
-                window.history.replaceState({}, document.title, window.location.pathname);
+                const urlPropre = window.location.pathname + (aDemandeHashTitulaire ? '#titulaire' : '');
+                window.history.replaceState({}, document.title, urlPropre);
             }
         }
 
-        // 2. Vérification de la session Titulaire
-        const sessionTitulaireActive = sessionStorage.getItem('btp_session_titulaire_active') === '1';
-        const sessionPin = sessionStorage.getItem('btp_admin_pin');
+        // 2. Vérification de la session Titulaire (session active ou accès permanent mémorisé)
+        const sessionTitulaireActive = sessionStorage.getItem('btp_session_titulaire_active') === '1' || localStorage.getItem('btp_mode_titulaire_permanent') === '1';
+        const sessionPin = sessionStorage.getItem('btp_admin_pin') || localStorage.getItem('btp_admin_pin');
         let estTitulaireAuthentifie = false;
         if (sessionTitulaireActive && sessionPin) {
             if (pinPersoActif) {
@@ -4087,6 +4108,8 @@
 
         if (estTitulaireAuthentifie && !modeClientForce) {
             adminPin = sessionPin || (pinPersoActif ? customPinLocal : '7788');
+            sessionStorage.setItem('btp_session_titulaire_active', '1');
+            sessionStorage.setItem('btp_admin_pin', adminPin);
             activerModeTitulaireInterface();
             actualiserAffichageCredits(9999);
         } else {
@@ -4098,12 +4121,13 @@
             desactiverModeTitulaireInterface();
         }
 
-        // Accès direct si l'URL contient /titulaire, /admin ou #titulaire
-        if (window.location.pathname.includes('/titulaire') || window.location.pathname.includes('/admin') || window.location.hash.includes('titulaire') || window.location.hash.includes('admin')) {
+        // Accès direct si l'URL contient #titulaire, #cockpit, /titulaire ou /admin
+        if (aDemandeHashTitulaire || window.location.pathname.includes('/titulaire') || window.location.pathname.includes('/admin')) {
             if (estTitulaireConnecte()) {
                 setTimeout(() => {
                     const sec = document.getElementById('titulaireSuiviClientsSection') || document.getElementById('titulaireJaugeSectionMain');
                     if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    ouvrirModalAdmin();
                 }, 300);
             } else {
                 setTimeout(() => ouvrirModalAdmin(), 300);
@@ -6259,8 +6283,8 @@
 
     function estTitulaireConnecte() {
         if (modeApercuClientActif) return false;
-        const sessionActive = sessionStorage.getItem('btp_session_titulaire_active') === '1';
-        const pin = (adminPin || sessionStorage.getItem('btp_admin_pin') || '').trim();
+        const sessionActive = sessionStorage.getItem('btp_session_titulaire_active') === '1' || localStorage.getItem('btp_mode_titulaire_permanent') === '1';
+        const pin = (adminPin || sessionStorage.getItem('btp_admin_pin') || localStorage.getItem('btp_admin_pin') || '').trim();
         const customPinLocal = (localStorage.getItem('btp_custom_pin') || '').trim();
         const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(customPinLocal && customPinLocal !== '7788');
         if (pinPersoActif) {
