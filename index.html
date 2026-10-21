@@ -10,6 +10,8 @@
     
     <!-- PDF.js pour extraction visuelle multi-pages instantanée -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- SheetJS pour génération Excel .xlsx instantanée 100% autonome sans serveur -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         :root {
@@ -5815,64 +5817,419 @@
         if (secDevis) secDevis.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    async function genererBlobExcelDevis() {
-        const nomClient = (document.getElementById('nomClient').value || "Client").trim();
-        const nomProjet = (document.getElementById('nomProjet').value || "").trim();
-        const numDevis = (document.getElementById('numDevis').value || "DEV-01").trim();
-        const dateDevis = (document.getElementById('dateDevis').value || "").trim();
-        const tauxTVA = parseFloat(document.getElementById('tauxTVA').value) || 19;
-        const remisePct = parseFloat(document.getElementById('remisePct').value) || 0;
-        const delaiMois = parseInt(document.getElementById('inputDelaiMois')?.value || '4', 10);
-        const dateDemarrage = document.getElementById('inputDateDemarrageOS')?.value || dateDevis;
+    function chargerSheetJSSiNecessaire() {
+        return new Promise((resolve) => {
+            if (window.XLSX) return resolve(true);
+            const script = document.createElement('script');
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => {
+                const script2 = document.createElement('script');
+                script2.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+                script2.onload = () => resolve(true);
+                script2.onerror = () => resolve(false);
+                document.head.appendChild(script2);
+            };
+            document.head.appendChild(script);
+        });
+    }
 
-        const articlesAExporter = [];
-        Object.keys(devisLots).forEach(lotNom => {
-            devisLots[lotNom].forEach(a => {
-                articlesAExporter.push({
-                    lot: lotNom,
-                    n: a.n,
-                    d: a.d,
-                    u: a.u,
-                    q: a.q,
-                    pu: a.pu
-                });
+    function genererClasseurExcelClientSide(nomClient, nomProjet, numDevis, dateDevis, tauxTVA, remisePct, delaiMois, dateDemarrage, entreprise, devisLots) {
+        const wb = XLSX.utils.book_new();
+
+        // -------------------------------------------------------------
+        // FEUILLE 1 : BORDEREAU DQE & DEVIS ESTIMATIF
+        // -------------------------------------------------------------
+        const wsData = [];
+
+        // Cartouche Entreprise BTP
+        const entNom = (entreprise && entreprise.nom) ? entreprise.nom.trim() : "BOUFELDJA BENABDALLAH (ENTREPRISE BTP)";
+        const entAdr = (entreprise && entreprise.adresse) ? entreprise.adresse.trim() : "";
+        const entTel = (entreprise && entreprise.tel) ? `Tél : ${entreprise.tel}` : "Tél : 0551 42 21 66";
+        const entEmail = (entreprise && entreprise.email) ? `Email : ${entreprise.email}` : "Email : contact@devis-btp.dz";
+        const entFiscal = ((entreprise && (entreprise.nif || entreprise.rc))) ? `NIF : ${entreprise.nif || ''}  |  RC : ${entreprise.rc || ''}` : "RIP BaridiMob : 00799999000191804708 (CCP : 0001918047 Clé 08)";
+
+        wsData.push([entNom.toUpperCase()]);
+        if (entAdr) wsData.push([entAdr]);
+        wsData.push([`${entTel}   •   ${entEmail}`]);
+        wsData.push([entFiscal]);
+        wsData.push([]);
+
+        // Titre Principal du Bordereau
+        wsData.push(["BORDEREAU DES PRIX UNITAIRES & DEVIS QUANTITATIF ESTIMATIF (D.Q.E)"]);
+        wsData.push(["Conforme aux normes et pratiques du bâtiment et des travaux publics en Algérie"]);
+        wsData.push([]);
+
+        // Données du Projet & Client
+        wsData.push([`Client : ${nomClient}`, "", "", `Devis N° : ${numDevis}`]);
+        wsData.push([`Projet : ${nomProjet || 'Travaux de Construction BTP'}`, "", "", `Date : ${dateDevis}`]);
+        wsData.push([]);
+
+        // En-têtes du Tableau DQE
+        wsData.push(["N°", "Désignation des Travaux & Ouvrages", "Unité", "Quantité", "Prix Unitaire (DZD)", "Montant H.T (DZD)"]);
+
+        let grandTotalHT = 0;
+        const lotsNoms = Object.keys(devisLots || {});
+
+        lotsNoms.forEach((lotNom) => {
+            const articles = devisLots[lotNom] || [];
+            if (articles.length === 0) return;
+
+            // Titre du Lot BTP
+            wsData.push(["", `--- ${lotNom.toUpperCase()} ---`, "", "", "", ""]);
+
+            let sousTotalLot = 0;
+            articles.forEach((a, idx) => {
+                const n = a.n || (idx + 1);
+                const d = a.d || "";
+                const u = a.u || "U";
+                const q = parseFloat(a.q) || 0;
+                const pu = parseFloat(a.pu) || 0;
+                const total = q * pu;
+                sousTotalLot += total;
+                wsData.push([n, d, u, q, pu, total]);
             });
+
+            grandTotalHT += sousTotalLot;
+            wsData.push(["", `Sous-Total ${lotNom} :`, "", "", "", sousTotalLot]);
+            wsData.push([]);
         });
 
-        if (articlesAExporter.length === 0) {
+        // Totaux Généraux
+        wsData.push(["", "TOTAL GÉNÉRAL H.T :", "", "", "", grandTotalHT]);
+
+        let baseHTNet = grandTotalHT;
+        if (remisePct > 0) {
+            const montantRemise = grandTotalHT * (remisePct / 100);
+            baseHTNet = grandTotalHT - montantRemise;
+            wsData.push(["", `REMISE (${remisePct}%) :`, "", "", "", -montantRemise]);
+            wsData.push(["", "TOTAL H.T NET :", "", "", "", baseHTNet]);
+        }
+
+        const montantTVA = baseHTNet * (tauxTVA / 100);
+        const grandTotalTTC = baseHTNet + montantTVA;
+
+        wsData.push(["", `T.V.A (${tauxTVA}%) :`, "", "", "", montantTVA]);
+        wsData.push(["", "TOTAL GÉNÉRAL T.T.C :", "", "", "", grandTotalTTC]);
+        wsData.push([]);
+
+        // Arrêté en toutes lettres
+        const montantLettres = (typeof convertirNombreEnLettres === 'function') 
+            ? convertirNombreEnLettres(grandTotalTTC) 
+            : `${grandTotalTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} Dinars Algériens`;
+        wsData.push([`Arrêté le présent devis estimatif à la somme de : ${montantLettres} Toutes Taxes Comprises.`]);
+        wsData.push([]);
+        wsData.push([]);
+
+        // Cadre Signatures
+        wsData.push(["Pour l'Entreprise (Cachet et Signature)", "", "", "", "Pour le Client (Bon pour accord)"]);
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        // Dimensions de colonnes
+        ws['!cols'] = [
+            { wch: 8 },  // N°
+            { wch: 55 }, // Désignation
+            { wch: 10 }, // Unité
+            { wch: 12 }, // Quantité
+            { wch: 20 }, // Prix Unitaire
+            { wch: 24 }  // Montant HT
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, "Devis Estimatif BTP");
+
+        // -------------------------------------------------------------
+        // FEUILLE 2 : PLANNING PRÉVISIONNEL GANTT & DÉLAI D'EXÉCUTION
+        // -------------------------------------------------------------
+        const wsPlanData = [];
+        wsPlanData.push(["⭐ DOSSIER COMPLET BTP — PLANNING PRÉVISIONNEL & DÉLAI D'EXÉCUTION"]);
+        wsPlanData.push(["Conforme aux règles de l'art et au Décret présidentiel n° 15-247 (Marchés Publics)"]);
+        wsPlanData.push([]);
+        wsPlanData.push([`Client : ${nomClient}`, "", `Date Notification OS : ${dateDemarrage}`]);
+        wsPlanData.push([`Projet : ${nomProjet || 'Chantier BTP'}`, "", `Délai Global Contractuel : ${delaiMois} Mois (${delaiMois * 30} Jours)`]);
+        wsPlanData.push([`Réf. Devis : ${numDevis}`, "", "Régime hebdomadaire : 6 Jours / Semaine (Vendredi chômé)"]);
+        wsPlanData.push([]);
+
+        const nbSemaines = Math.max(8, Math.min(24, delaiMois * 4));
+        const headerPlan = ["Phase", "Corps d'État / Lot BTP", "Montant HT (DZD)", "Durée Estimée", "Début Estimé", "Fin Estimée"];
+        for (let s = 1; s <= nbSemaines; s++) {
+            headerPlan.push(`S${s}`);
+        }
+        wsPlanData.push(headerPlan);
+
+        lotsNoms.forEach((lotNom, idx) => {
+            const articles = devisLots[lotNom] || [];
+            let st = 0;
+            articles.forEach(a => st += (parseFloat(a.q) || 0) * (parseFloat(a.pu) || 0));
+
+            const sStart = Math.max(1, Math.round(1 + (idx * (nbSemaines - 3)) / Math.max(1, lotsNoms.length)));
+            const sSpan = Math.max(2, Math.min(6, Math.round(nbSemaines / 2.6)));
+            const sEnd = Math.min(nbSemaines, sStart + sSpan - 1);
+            const dureeJours = Math.max(7, sSpan * 7);
+
+            const row = [
+                `PH-${String(idx + 1).padStart(2, '0')}`,
+                lotNom,
+                st,
+                `${dureeJours} jours`,
+                `Semaine ${sStart}`,
+                `Semaine ${sEnd}`
+            ];
+
+            for (let s = 1; s <= nbSemaines; s++) {
+                row.push((s >= sStart && s <= sEnd) ? "■■■■" : "");
+            }
+            wsPlanData.push(row);
+        });
+
+        const wsPlan = XLSX.utils.aoa_to_sheet(wsPlanData);
+        wsPlan['!cols'] = [
+            { wch: 10 },
+            { wch: 45 },
+            { wch: 18 },
+            { wch: 14 },
+            { wch: 14 },
+            { wch: 14 }
+        ];
+        XLSX.utils.book_append_sheet(wb, wsPlan, "Planning & Gantt Travaux");
+
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        return new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    }
+
+    function genererExcelXmlFallback(nomClient, nomProjet, numDevis, dateDevis, tauxTVA, remisePct, delaiMois, dateDemarrage, entreprise, devisLots) {
+        const entNom = (entreprise && entreprise.nom) ? entreprise.nom : "BOUFELDJA BENABDALLAH";
+        const entTel = (entreprise && entreprise.tel) ? entreprise.tel : "0551 42 21 66";
+
+        let grandTotalHT = 0;
+        let rowsHtml = '';
+
+        Object.keys(devisLots || {}).forEach(lotNom => {
+            const articles = devisLots[lotNom] || [];
+            if (articles.length === 0) return;
+
+            rowsHtml += `
+            <Row>
+                <Cell ss:StyleID="LotHeader"><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="LotHeader"><Data ss:Type="String">${escapeHtml(lotNom.toUpperCase())}</Data></Cell>
+                <Cell ss:StyleID="LotHeader"><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="LotHeader"><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="LotHeader"><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="LotHeader"><Data ss:Type="String"></Data></Cell>
+            </Row>`;
+
+            let sousTotal = 0;
+            articles.forEach((a, idx) => {
+                const q = parseFloat(a.q) || 0;
+                const pu = parseFloat(a.pu) || 0;
+                const total = q * pu;
+                sousTotal += total;
+                rowsHtml += `
+                <Row>
+                    <Cell ss:StyleID="Default"><Data ss:Type="Number">${a.n || (idx + 1)}</Data></Cell>
+                    <Cell ss:StyleID="Default"><Data ss:Type="String">${escapeHtml(a.d || '')}</Data></Cell>
+                    <Cell ss:StyleID="Center"><Data ss:Type="String">${escapeHtml(a.u || 'U')}</Data></Cell>
+                    <Cell ss:StyleID="Number"><Data ss:Type="Number">${q}</Data></Cell>
+                    <Cell ss:StyleID="Money"><Data ss:Type="Number">${pu}</Data></Cell>
+                    <Cell ss:StyleID="Money"><Data ss:Type="Number">${total}</Data></Cell>
+                </Row>`;
+            });
+
+            grandTotalHT += sousTotal;
+            rowsHtml += `
+            <Row>
+                <Cell><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="Bold"><Data ss:Type="String">Sous-Total ${escapeHtml(lotNom)} :</Data></Cell>
+                <Cell><Data ss:Type="String"></Data></Cell>
+                <Cell><Data ss:Type="String"></Data></Cell>
+                <Cell><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="MoneyBold"><Data ss:Type="Number">${sousTotal}</Data></Cell>
+            </Row><Row></Row>`;
+        });
+
+        let baseNet = grandTotalHT;
+        let remiseHtml = '';
+        if (remisePct > 0) {
+            const remVal = grandTotalHT * (remisePct / 100);
+            baseNet = grandTotalHT - remVal;
+            remiseHtml = `
+            <Row>
+                <Cell><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="Bold"><Data ss:Type="String">REMISE (${remisePct}%) :</Data></Cell>
+                <Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="Money"><Data ss:Type="Number">-${remVal}</Data></Cell>
+            </Row>
+            <Row>
+                <Cell><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="Bold"><Data ss:Type="String">TOTAL H.T NET :</Data></Cell>
+                <Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell>
+                <Cell ss:StyleID="MoneyBold"><Data ss:Type="Number">${baseNet}</Data></Cell>
+            </Row>`;
+        }
+
+        const tvaVal = baseNet * (tauxTVA / 100);
+        const ttcVal = baseNet + tvaVal;
+        const lettres = (typeof convertirNombreEnLettres === 'function') ? convertirNombreEnLettres(ttcVal) : `${ttcVal.toFixed(2)} DZD`;
+
+        const xmlString = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="10"/></Style>
+  <Style ss:ID="Title"><Font ss:FontName="Calibri" ss:Size="14" ss:Bold="1" ss:Color="#1E3A8A"/><Alignment ss:Vertical="Center"/></Style>
+  <Style ss:ID="Bold"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1"/><Alignment ss:Vertical="Center"/></Style>
+  <Style ss:ID="Center"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="10"/></Style>
+  <Style ss:ID="Header"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#1E3A8A" ss:Pattern="Solid"/></Style>
+  <Style ss:ID="LotHeader"><Alignment ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#1E3A8A"/><Interior ss:Color="#EFF6FF" ss:Pattern="Solid"/></Style>
+  <Style ss:ID="Number"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><NumberFormat ss:Format="#,##0.00"/></Style>
+  <Style ss:ID="Money"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><NumberFormat ss:Format="#,##0.00\ &quot;DZD&quot;"/></Style>
+  <Style ss:ID="MoneyBold"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1"/><NumberFormat ss:Format="#,##0.00\ &quot;DZD&quot;"/></Style>
+  <Style ss:ID="TotalFinal"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="12" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#15803D" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0.00\ &quot;DZD&quot;"/></Style>
+ </Styles>
+ <Worksheet ss:Name="Devis Estimatif BTP">
+  <Table ss:DefaultColumnWidth="60" ss:DefaultRowHeight="20">
+   <Column ss:Index="1" ss:Width="35"/>
+   <Column ss:Index="2" ss:Width="260"/>
+   <Column ss:Index="3" ss:Width="45"/>
+   <Column ss:Index="4" ss:Width="65"/>
+   <Column ss:Index="5" ss:Width="110"/>
+   <Column ss:Index="6" ss:Width="130"/>
+   <Row><Cell ss:StyleID="Title"><Data ss:Type="String">${escapeHtml(entNom)}</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Bold"><Data ss:Type="String">Tél : ${escapeHtml(entTel)}</Data></Cell></Row>
+   <Row></Row>
+   <Row><Cell ss:StyleID="Title"><Data ss:Type="String">BORDEREAU DES PRIX UNITAIRES &amp; DEVIS ESTIMATIF DQE</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Bold"><Data ss:Type="String">Client : ${escapeHtml(nomClient)}</Data></Cell><Cell ss:Index="4" ss:StyleID="Bold"><Data ss:Type="String">Devis N° : ${escapeHtml(numDevis)}</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Bold"><Data ss:Type="String">Projet : ${escapeHtml(nomProjet || 'Chantier BTP')}</Data></Cell><Cell ss:Index="4" ss:StyleID="Bold"><Data ss:Type="String">Date : ${escapeHtml(dateDevis)}</Data></Cell></Row>
+   <Row></Row>
+   <Row>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">N°</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Désignation des Travaux &amp; Ouvrages</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Unité</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Quantité</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Prix Unitaire (DZD)</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Montant H.T (DZD)</Data></Cell>
+   </Row>
+   ${rowsHtml}
+   <Row>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell ss:StyleID="Bold"><Data ss:Type="String">TOTAL GÉNÉRAL H.T :</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell>
+    <Cell ss:StyleID="MoneyBold"><Data ss:Type="Number">${grandTotalHT}</Data></Cell>
+   </Row>
+   ${remiseHtml}
+   <Row>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell ss:StyleID="Bold"><Data ss:Type="String">T.V.A (${tauxTVA}%) :</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell>
+    <Cell ss:StyleID="MoneyBold"><Data ss:Type="Number">${tvaVal}</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell ss:StyleID="TotalFinal"><Data ss:Type="String">TOTAL GÉNÉRAL T.T.C :</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell>
+    <Cell ss:StyleID="TotalFinal"><Data ss:Type="Number">${ttcVal}</Data></Cell>
+   </Row>
+   <Row></Row>
+   <Row><Cell ss:StyleID="Bold"><Data ss:Type="String">Arrêté le présent devis à la somme de : ${escapeHtml(lettres)} Toutes Taxes Comprises.</Data></Cell></Row>
+  </Table>
+ </Worksheet>
+</Workbook>`;
+
+        return new Blob([xmlString], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    }
+
+    async function genererBlobExcelDevis() {
+        const nomClient = (document.getElementById('nomClient')?.value || "Client").trim();
+        const nomProjet = (document.getElementById('nomProjet')?.value || "").trim();
+        const numDevis = (document.getElementById('numDevis')?.value || "DEV-01").trim();
+        const dateDevis = (document.getElementById('dateDevis')?.value || "").trim();
+        const tauxTVA = parseFloat(document.getElementById('tauxTVA')?.value) || 19;
+        const remisePct = parseFloat(document.getElementById('remisePct')?.value) || 0;
+        const delaiMois = parseInt(document.getElementById('inputDelaiMois')?.value || '4', 10);
+        const dateDemarrage = document.getElementById('inputDateDemarrageOS')?.value || dateDevis;
+        const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
+
+        // Vérification de la présence d'articles
+        const totalArticles = Object.values(devisLots || {}).reduce((s, l) => s + (l ? l.length : 0), 0);
+        if (totalArticles === 0) {
             throw new Error("Aucun article à exporter. Votre devis est vide.");
         }
 
-        const entreprise = JSON.parse(localStorage.getItem('btp_entreprise') || '{}');
-        const response = await fetch(`${API_BASE}/exporter-excel`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                nom_client: nomClient,
-                nom_projet: nomProjet,
-                num_devis: numDevis,
-                date_devis: dateDevis,
-                delai_mois: delaiMois,
-                date_demarrage: dateDemarrage,
-                email_client: (document.getElementById('emailClient')?.value || '').trim(),
-                tel_client: (document.getElementById('telClient')?.value || '').trim(),
-                taux_tva: tauxTVA,
-                remise_pct: remisePct,
-                entreprise: entreprise,
-                articles: articlesAExporter
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error("Erreur serveur lors de la création du fichier Excel.");
-        }
-
-        const blob = await response.blob();
         const nomPropreClient = nomClient.replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_');
         const nomPropreDevis = numDevis.replace(/[^a-zA-Z0-9_-]/g, '_');
         const nomFichier = `Devis_BTP_${nomPropreClient}_${nomPropreDevis}.xlsx`;
 
-        return { blob, nomFichier, nomClient, nomProjet, numDevis, dateDevis };
+        // 1. TENTATIVE 1 : GÉNÉRATION DIRECTE CLIENT-SIDE AVEC SHEETJS (INFAILLIBLE, SANS SERVEUR)
+        try {
+            await chargerSheetJSSiNecessaire();
+            if (window.XLSX) {
+                ajouterLog("⚡ Génération instantanée du classeur Excel .xlsx (Moteur Client Autonome)...");
+                const blob = genererClasseurExcelClientSide(
+                    nomClient, nomProjet, numDevis, dateDevis, tauxTVA, remisePct, delaiMois, dateDemarrage, entreprise, devisLots
+                );
+                ajouterLog(`✅ Fichier Excel "${nomFichier}" créé avec succès en direct (2 feuilles : DQE + Planning Gantt).`);
+                return { blob, nomFichier, nomClient, nomProjet, numDevis, dateDevis };
+            }
+        } catch(sheetErr) {
+            console.warn("SheetJS direct indisponible, essai serveur ou XML fallback :", sheetErr);
+        }
+
+        // 2. TENTATIVE 2 : SERVEUR PYTHON SI DISPONIBLE
+        if (API_BASE && API_BASE.startsWith('http')) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+                const articlesAExporter = [];
+                Object.keys(devisLots).forEach(lotNom => {
+                    devisLots[lotNom].forEach(a => {
+                        articlesAExporter.push({
+                            lot: lotNom, n: a.n, d: a.d, u: a.u, q: a.q, pu: a.pu
+                        });
+                    });
+                });
+
+                const response = await fetch(`${API_BASE}/exporter-excel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nom_client: nomClient,
+                        nom_projet: nomProjet,
+                        num_devis: numDevis,
+                        date_devis: dateDevis,
+                        delai_mois: delaiMois,
+                        date_demarrage: dateDemarrage,
+                        email_client: (document.getElementById('emailClient')?.value || '').trim(),
+                        tel_client: (document.getElementById('telClient')?.value || '').trim(),
+                        taux_tva: tauxTVA,
+                        remise_pct: remisePct,
+                        entreprise: entreprise,
+                        articles: articlesAExporter
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    ajouterLog("✅ Fichier Excel généré par le serveur avec succès.");
+                    return { blob, nomFichier, nomClient, nomProjet, numDevis, dateDevis };
+                }
+            } catch(srvErr) {
+                console.warn("Serveur non joignable pour Excel, bascule vers moteur de secours XML :", srvErr);
+            }
+        }
+
+        // 3. TENTATIVE 3 : GÉNÉRATEUR PUR JAVASCRIPT XML SPREADSHEET (SANS DÉPENDANCE, 100% FONCTIONNEL)
+        ajouterLog("📑 Génération du classeur Excel via le moteur de secours 100% autonome...");
+        const blobXml = genererExcelXmlFallback(
+            nomClient, nomProjet, numDevis, dateDevis, tauxTVA, remisePct, delaiMois, dateDemarrage, entreprise, devisLots
+        );
+        return { blob: blobXml, nomFichier, nomClient, nomProjet, numDevis, dateDevis };
     }
 
     let telechargementEnCours = false;

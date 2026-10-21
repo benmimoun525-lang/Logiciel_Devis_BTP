@@ -128,53 +128,57 @@ if "!PUSH_OK!"=="1" (
 echo ====================================================================== >> "%~dp0deploy_log.txt" 2>&1
 
 cls
-if "!PUSH_OK!"=="1" (
-    color 0a
-    echo.
-    echo ======================================================================
-    echo   [SUCCES] SYNCHRONISATION TERMINEE AVEC SUCCES !
-    echo ======================================================================
-    echo.
-    echo   TITULAIRE OFFICIEL : BOUFELDJA BENABDALLAH
-    echo   RIP BARIDIMOB      : 00799999000191804708
-    echo   COMPTE CCP         : 0001918047 (Cle 08)
-    echo   WHATSAPP           : 0551 42 21 66
-    echo.
-    echo   Render met a jour automatiquement votre site en ligne :
-    echo   https://logiciel-devis-btp.onrender.com
-    echo.
-    echo   Dans 1 a 2 minutes, ouvrez le lien ci-dessus et faites Ctrl + F5
-    echo   pour voir apparaitre les nouvelles fonctionnalites :
-    echo   - Questions et Assistance Chiffrage des clients
-    echo   - Fenetre des Avis & Temoignages clients (4.9/5)
-    echo   - Reponse WhatsApp en 1 clic direct pour le Titulaire
-    echo ======================================================================
-) else (
-    color 0c
-    echo.
-    echo ======================================================================
-    echo   [ATTENTION] LA SYNCHRONISATION DISTANTE A ECHOUE
-    echo ======================================================================
-    echo.
-    echo   Message Git : Connexion vers github.com:443 impossible ou expiree.
-    echo.
-    echo   CAUSE FREQUENTE :
-    echo   Votre modem Internet (ADSL/Fibre Algerie Telecom) bloque ou
-    echo   ralentit temporairement l'acces aux serveurs GitHub.
-    echo.
-    echo   SOLUTION IMMEDIATE :
-    echo   1. Activez le PARTAGE DE CONNEXION 4G sur votre smartphone
-    echo      (Mobilis, Djezzy ou Ooredoo) et connectez votre PC en Wi-Fi.
-    echo   2. Relancez "METTRE_A_JOUR_EN_LIGNE.bat".
-    echo      La synchronisation passera alors sans aucun blocage !
-    echo.
-    echo   FONCTIONNEMENT LOCAL 100%% OPERATIONNEL :
-    echo   Toutes vos modifications sont DEJA actives sur ce PC !
-    echo   Double-cliquez sur "lancer.bat" et ouvrez :
-    echo   http://127.0.0.1:8000
-    echo ======================================================================
-)
+if "!PUSH_OK!"=="1" goto SUCCES_AFFICHAGE
+goto ECHEC_AFFICHAGE
 
+:SUCCES_AFFICHAGE
+color 0a
+echo.
+echo ======================================================================
+echo   [SUCCES] SYNCHRONISATION TERMINEE AVEC SUCCES !
+echo ======================================================================
+echo.
+echo   TITULAIRE OFFICIEL : BOUFELDJA BENABDALLAH
+echo   RIP BARIDIMOB      : 00799999000191804708
+echo   COMPTE CCP         : 0001918047 (Cle 08)
+echo   WHATSAPP           : 0551 42 21 66
+echo.
+echo   Vos liens publics et personnels sont a jour :
+echo   - Lien Client Public     : https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/
+echo   - Votre Lien Titulaire   : https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/?pin=7788#titulaire
+echo   - Serveur Render         : https://logiciel-devis-btp.onrender.com
+echo.
+echo   Dans 1 a 2 minutes, ouvrez votre lien Titulaire ci-dessus et faites
+echo   Ctrl + F5 pour acceder directement a votre tableau de bord complet !
+echo ======================================================================
+goto FIN_AFFICHAGE
+
+:ECHEC_AFFICHAGE
+color 0c
+echo.
+echo ======================================================================
+echo   [ATTENTION] LA SYNCHRONISATION DISTANTE A ECHOUE
+echo ======================================================================
+echo.
+echo   Message Git : Connexion vers github.com:443 impossible ou expiree.
+echo.
+echo   CAUSE FREQUENTE :
+echo   Votre modem Internet (ADSL/Fibre Algerie Telecom) bloque ou
+echo   ralentit temporairement l'acces aux serveurs GitHub.
+echo.
+echo   SOLUTION IMMEDIATE :
+echo   1. Activez le PARTAGE DE CONNEXION 4G sur votre smartphone
+echo      (Mobilis, Djezzy ou Ooredoo) et connectez votre PC en Wi-Fi.
+echo   2. Relancez "METTRE_A_JOUR_EN_LIGNE.bat".
+echo      La synchronisation passera alors sans aucun blocage !
+echo.
+echo   FONCTIONNEMENT LOCAL 100%% OPERATIONNEL :
+echo   Toutes vos modifications sont DEJA actives sur ce PC !
+echo   Double-cliquez sur "lancer.bat" et ouvrez :
+echo   http://127.0.0.1:8000
+echo ======================================================================
+
+:FIN_AFFICHAGE
 echo.
 echo Le rapport detaille a ete enregistre dans :
 echo %CD%\deploy_log.txt
