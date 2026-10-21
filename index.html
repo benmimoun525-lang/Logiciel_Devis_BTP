@@ -1432,7 +1432,10 @@
         <div class="form-grid-3" style="margin-bottom: 0;">
             <div class="form-group">
                 <label>📧 Email Professionnel de l'Entreprise <span style="color: #ef4444; font-weight: 800;">* (obligatoire)</span> :</label>
-                <input type="email" id="emailClient" class="form-control" placeholder="Ex: direction@entreprise-btp.dz" oninput="reinitialiserErreurChamp(this); sauvegarderLocalement(); actualiserIndicateursStepper(etapeClientActive);" required>
+                <input type="email" id="emailClient" class="form-control" placeholder="Ex: direction@entreprise-btp.dz ou nom@gmail.com" oninput="reinitialiserErreurChamp(this); validerEmailEnTempsReel(this); sauvegarderLocalement(); actualiserIndicateursStepper(etapeClientActive);" required>
+                <div id="emailFeedbackMsg" style="font-size: 0.74rem; color: #dc2626; margin-top: 4px; display: none; font-weight: 700;">
+                    ⛔ Les emails temporaires ou jetables (yopmail, temp-mail...) sont strictement interdits.
+                </div>
             </div>
             <div class="form-group">
                 <label>📱 Téléphone / WhatsApp Professionnel <span style="color: #ef4444; font-weight: 800;">* (obligatoire)</span> :</label>
@@ -1440,7 +1443,7 @@
             </div>
             <div class="form-group" style="justify-content: flex-end;">
                 <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; padding-top: 8px;">
-                    💡 L'email et le numéro permettent la transmission directe et instantanée du classeur Excel (.xlsx) par WhatsApp ou Email.
+                    💡 <b>Anti-Fraude & Traçabilité :</b> L'email et le numéro permettent la transmission du classeur Excel (.xlsx) et la liaison sécurisée de vos 5 pages offertes.
                 </span>
             </div>
         </div>
@@ -4043,6 +4046,8 @@
         chargerBPU();
         verifierConnexionServeur();
         actualiserAffichageProfilUtilisateur();
+        obtenirEmpreinteAppareil();
+        detecterIpClientPublic();
 
         // -------------------------------------------------------------
         // SÉPARATION STRICTE : URL CLIENTS PUBLIQUE vs URL PROPRIÉTAIRE (TITULAIRE)
@@ -6705,17 +6710,188 @@
         if (errBox) errBox.style.display = 'none';
     }
 
+    // ============================================================
+    // FILTRE ANTI-EMAIL JETABLE & EMBARGO ADRESSES TEMPORAIRES
+    // ============================================================
+    const DOMAINES_EMAILS_JETABLES = new Set([
+        "yopmail.com", "yopmail.fr", "yopmail.net", "cool.fr.nf", "jetable.fr.nf", "courriel.fr.nf",
+        "moncourrier.fr.nf", "monemail.fr.nf", "monmail.fr.nf", "mailinator.com", "mailinator2.com",
+        "tempmail.com", "temp-mail.org", "tempmail.net", "tempmail.io", "temp-mail.io", "10minutemail.com",
+        "10minutemail.net", "10minutemail.org", "10minute.email", "guerrillamail.com", "guerrillamail.net",
+        "guerrillamail.org", "guerrillamail.biz", "guerrillamailblock.com", "sharklasers.com", "grr.la",
+        "dispostable.com", "trashmail.com", "trashmail.net", "trashmail.org", "trashmail.me", "trashmail.at",
+        "trashmail.io", "trash-mail.com", "getnada.com", "mohmal.com", "mohmal.in", "throwawaymail.com",
+        "maildrop.cc", "crazymailing.com", "fakeinbox.com", "emailondeck.com", "mytemp.email", "inboxkitten.com",
+        "generator.email", "tempr.email", "discard.email", "burnermail.io", "dropmail.me", "tempail.com",
+        "fakemailgenerator.com", "nada.ltd", "getairmail.com", "dayrep.com", "teleworm.us", "rhyta.com",
+        "superrito.com", "armyspy.com", "cuvox.de", "jourrapide.com", "fleckens.hu", "gustr.com", "einrot.com",
+        "chacuo.net", "0-mail.com", "kasmail.com", "mailcatch.com", "spamgourmet.com", "spambox.us",
+        "incognitomail.org", "mailnesia.com", "mytempemail.com", "tempinbox.com", "zillamail.com", "fakemail.net",
+        "harakirimail.com", "disposablemail.com", "inboxbear.com", "jetable.org", "jetable.net", "jetable.com",
+        "boun.cr", "tmail.ws", "tmpmail.org", "tmpmail.net", "inboxalias.com", "fastmail.fm", "emailfake.com",
+        "fake-mail.org", "fakemail.io", "mailsac.com", "anonaddy.me", "anonaddy.com", "simplelogin.co",
+        "minutemail.com", "luxusmail.ru", "mohmal.im", "tempmailaddress.com", "disposable.email", "trashymail.com",
+        "mailnull.com", "burner.email", "burner.com", "mytempmail.com", "crazymailing.net"
+    ]);
+
+    const REGEX_JETABLE_PATTERN = /(yopmail|mailinator|temp[-_.]?mail|dispos|guerrilla|sharklasers|10minute|throwaway|trash[-_.]?mail|fake[-_.]?mail|burner|mytemp|getnada|mohmal|maildrop|emailondeck|inboxkitten|dispostable|generator\.email|discard\.email|dropmail|nada\.ltd|teleworm|armyspy|cuvox|dayrep|jourrapide|fleckens|gustr|einrot|chacuo)/i;
+
+    function estEmailJetable(email) {
+        if (!email || typeof email !== 'string') return false;
+        const e = email.trim().toLowerCase();
+        const parts = e.split('@');
+        if (parts.length !== 2) return false;
+        const domain = parts[1].trim();
+        if (DOMAINES_EMAILS_JETABLES.has(domain)) return true;
+        if (REGEX_JETABLE_PATTERN.test(domain)) return true;
+        return false;
+    }
+
+    function validerEmailEnTempsReel(inputEl) {
+        if (!inputEl) return;
+        const val = (inputEl.value || '').trim();
+        const feedback = document.getElementById('emailFeedbackMsg');
+        if (!val) {
+            if (feedback) feedback.style.display = 'none';
+            inputEl.style.border = '1px solid var(--gray-300)';
+            inputEl.style.backgroundColor = 'white';
+            return;
+        }
+
+        if (estEmailJetable(val)) {
+            if (feedback) {
+                feedback.textContent = "⛔ Adresse temporaire / jetable détectée et strictement interdite !";
+                feedback.style.display = 'block';
+            }
+            inputEl.style.border = '2px solid #ef4444';
+            inputEl.style.backgroundColor = '#fef2f2';
+        } else if (!validerFormatEmail(val)) {
+            if (feedback) {
+                feedback.textContent = "ℹ️ Saisissez une adresse email valide (ex : nom@entreprise.dz ou gmail.com)";
+                feedback.style.color = '#64748b';
+                feedback.style.display = 'block';
+            }
+            inputEl.style.border = '1px solid var(--gray-300)';
+            inputEl.style.backgroundColor = 'white';
+        } else {
+            if (feedback) {
+                feedback.textContent = "✓ Adresse email conforme et sécurisée.";
+                feedback.style.color = '#10b981';
+                feedback.style.display = 'block';
+            }
+            inputEl.style.border = '1.5px solid #10b981';
+            inputEl.style.backgroundColor = '#f0fdf4';
+        }
+    }
+
     function validerFormatEmail(email) {
         if (!email) return false;
-        const e = email.trim();
+        const e = email.trim().toLowerCase();
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-        return re.test(e);
+        if (!re.test(e)) return false;
+        if (estEmailJetable(e)) return false;
+        return true;
     }
 
     function validerFormatTelephone(tel) {
         if (!tel) return false;
         const chiffres = tel.replace(/[^0-9]/g, '');
         return chiffres.length >= 8;
+    }
+
+    // ============================================================
+    // EMPREINTE APPAREIL & REGISTRE LOCAL ANTI-FRAUDE IP / RÉFÉRENCES
+    // ============================================================
+    function obtenirEmpreinteAppareil() {
+        let deviceId = localStorage.getItem('btp_anti_fraude_device_id');
+        if (!deviceId) {
+            const raw = [
+                navigator.userAgent || '',
+                navigator.language || '',
+                (screen.width || 0) + 'x' + (screen.height || 0),
+                screen.colorDepth || 24,
+                (navigator.hardwareConcurrency || 2),
+                (Intl && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : ''
+            ].join('###');
+            let hash = 0;
+            for (let i = 0; i < raw.length; i++) {
+                hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+                hash |= 0;
+            }
+            deviceId = 'dev_' + Math.abs(hash).toString(36) + '_' + Date.now().toString(36);
+            localStorage.setItem('btp_anti_fraude_device_id', deviceId);
+        }
+        return deviceId;
+    }
+
+    async function detecterIpClientPublic() {
+        let ipEnCache = localStorage.getItem('btp_client_ip_detectee') || '';
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2800);
+            const res = await fetch('https://api.ipify.org?format=json', { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.ip) {
+                    localStorage.setItem('btp_client_ip_detectee', data.ip);
+                    return data.ip;
+                }
+            }
+        } catch(e) {}
+
+        // Repli via notre serveur API
+        try {
+            const res2 = await fetch(`${API_BASE}/api/clients/verifier-ip`);
+            if (res2.ok) {
+                const d2 = await res2.json();
+                if (d2 && d2.ip) {
+                    localStorage.setItem('btp_client_ip_detectee', d2.ip);
+                    return d2.ip;
+                }
+            }
+        } catch(e2) {}
+
+        return ipEnCache;
+    }
+
+    function chargerRegistreEssaisLocal() {
+        try {
+            const raw = localStorage.getItem('btp_registre_essais_local');
+            if (raw) {
+                const d = JSON.parse(raw);
+                if (d && typeof d === 'object') return d;
+            }
+        } catch(e) {}
+        return { ips: [], emails: [], telephones: [], devices: [] };
+    }
+
+    function enregistrerEssaiLocal(tel, email, ip, deviceId) {
+        const reg = chargerRegistreEssaisLocal();
+        const telClean = (tel || '').replace(/[^0-9]/g, '');
+        const emailClean = (email || '').trim().toLowerCase();
+        if (telClean && !reg.telephones.includes(telClean)) reg.telephones.push(telClean);
+        if (emailClean && !reg.emails.includes(emailClean)) reg.emails.push(emailClean);
+        if (ip && !reg.ips.includes(ip) && ip !== '127.0.0.1' && ip !== 'localhost') reg.ips.push(ip);
+        if (deviceId && !reg.devices.includes(deviceId)) reg.devices.push(deviceId);
+        localStorage.setItem('btp_registre_essais_local', JSON.stringify(reg));
+    }
+
+    function verifierFraudeEssaiLocal(tel, email, ip, deviceId) {
+        if (estTitulaireConnecte()) return false;
+        const quotaConsomme = parseInt(localStorage.getItem('btp_device_pages_consommees') || '0', 10);
+        if (quotaConsomme >= 5) return true;
+
+        const reg = chargerRegistreEssaisLocal();
+        const telClean = (tel || '').replace(/[^0-9]/g, '');
+        const emailClean = (email || '').trim().toLowerCase();
+
+        if (telClean && reg.telephones.includes(telClean)) return true;
+        if (emailClean && reg.emails.includes(emailClean)) return true;
+        if (ip && ip !== '127.0.0.1' && ip !== 'localhost' && reg.ips.includes(ip)) return true;
+        if (deviceId && reg.devices.includes(deviceId)) return true;
+
+        return false;
     }
 
     function remplirCoordonneesTest() {
@@ -6766,7 +6942,7 @@
             }
         }
 
-        // 2. Validation obligatoire de l'Email
+        // 2. Validation obligatoire de l'Email avec rejet strict des adresses jetables
         if (!email) {
             erreurs.push("Email du Client ou Entreprise (obligatoire)");
             if (elEmail) {
@@ -6774,8 +6950,15 @@
                 elEmail.style.backgroundColor = '#fef2f2';
                 if (!premierChampInvalide) premierChampInvalide = elEmail;
             }
+        } else if (estEmailJetable(email)) {
+            erreurs.push("⛔ Les adresses emails temporaires ou jetables (ex: yopmail, mailinator, temp-mail...) sont strictement interdites. Veuillez renseigner une adresse email valide (Gmail, Yahoo, Outlook ou domaine d'entreprise).");
+            if (elEmail) {
+                elEmail.style.border = '2px solid #ef4444';
+                elEmail.style.backgroundColor = '#fef2f2';
+                if (!premierChampInvalide) premierChampInvalide = elEmail;
+            }
         } else if (!validerFormatEmail(email)) {
-            erreurs.push("Format d'Email invalide (exemple : contact@entreprise.dz)");
+            erreurs.push("Format d'Email invalide (exemple : contact@entreprise.dz ou nom@gmail.com)");
             if (elEmail) {
                 elEmail.style.border = '2px solid #ef4444';
                 elEmail.style.backgroundColor = '#fef2f2';
@@ -7080,7 +7263,7 @@
     }
 
     async function validerAccueilClientEtContinuer() {
-        // CONTRÔLE STRICT : Bloquer si Nom, Email ou Tel manquant
+        // CONTRÔLE STRICT 1 : Bloquer si Nom, Email ou Tel manquant ou email jetable
         if (!verifierChampsIdentificationObligatoires(true)) {
             return;
         }
@@ -7090,13 +7273,27 @@
         const tel = (document.getElementById('telClient')?.value || '').trim();
         const email = (document.getElementById('emailClient')?.value || '').trim();
 
+        // Double verrouillage formel contre les emails jetables
+        if (estEmailJetable(email)) {
+            alert("⛔ ADRESSE EMAIL JETABLE INTERDITE !\n\nLes adresses emails temporaires ou jetables (yopmail, temp-mail, etc.) sont formellement interdites.\n\nVeuillez renseigner votre véritable adresse email professionnelle ou personnelle.");
+            const elEmail = document.getElementById('emailClient');
+            if (elEmail) {
+                elEmail.focus();
+                elEmail.style.border = '2px solid #ef4444';
+                elEmail.style.backgroundColor = '#fef2f2';
+            }
+            return;
+        }
+
         sauvegarderLocalement();
 
         // Enregistrer la validation formelle de l'Étape 1
         localStorage.setItem('btp_etape1_validee', '1');
         localStorage.setItem('btp_client_onboarding_done', '1');
 
-        // Récupérer le solde réel et vérifier l'empreinte appareil (Zéro triche sur les 5 pages)
+        // Récupérer empreinte appareil et IP publique pour détection de fraude multi-comptes
+        const deviceId = obtenirEmpreinteAppareil();
+        const ipDetectee = await detecterIpClientPublic();
         const clientExistant = obtenirOuCreerClient();
         const quotaConsommeAppareil = parseInt(localStorage.getItem('btp_device_pages_consommees') || '0', 10);
         
@@ -7105,16 +7302,28 @@
             !['gratuit', 'professionnel_gratuit', 'essai', 'professionnel'].includes(clientExistant.type_abonnement) && 
             parseInt(clientExistant.credits_pages, 10) > 0;
 
+        // VÉRIFICATION STRICTE ANTI-FRAUDE SUR LES 5 PAGES GRATUITES
+        const estFraudeDetectee = !estTitulaireConnecte() && !estAbonnePayant && (
+            quotaConsommeAppareil >= 5 ||
+            verifierFraudeEssaiLocal(tel, email, ipDetectee, deviceId)
+        );
+
         let soldeCredits = 5;
         if (estAbonnePayant) {
             soldeCredits = parseInt(clientExistant.credits_pages, 10);
-        } else if (quotaConsommeAppareil >= 5) {
-            // Empreinte appareil : les 5 pages offertes sont DÉJÀ consommées !
+        } else if (estFraudeDetectee) {
+            // Empreinte appareil, IP ou références déjà utilisées : 0 page gratuite !
             soldeCredits = 0;
+            localStorage.setItem('btp_device_pages_consommees', '5');
         } else if (clientExistant && clientExistant.credits_pages !== undefined) {
             soldeCredits = Math.max(0, Math.min(5 - quotaConsommeAppareil, parseInt(clientExistant.credits_pages, 10)));
         } else {
             soldeCredits = Math.max(0, 5 - quotaConsommeAppareil);
+        }
+
+        // Enregistrer les références dans le registre anti-fraude local
+        if (!estTitulaireConnecte() && !estAbonnePayant) {
+            enregistrerEssaiLocal(tel, email, ipDetectee, deviceId);
         }
 
         const clientInfo = {
@@ -7135,7 +7344,9 @@
             email: email,
             credits_pages: soldeCredits,
             pages_consommees: Math.max(quotaConsommeAppareil, (clientExistant ? parseInt(clientExistant.pages_consommees || 0, 10) : 0)),
-            type_abonnement: estAbonnePayant ? clientExistant.type_abonnement : "professionnel"
+            type_abonnement: estAbonnePayant ? clientExistant.type_abonnement : "professionnel",
+            device_id: deviceId,
+            ip: ipDetectee
         };
         localStorage.setItem('btp_client', JSON.stringify(clientLocal));
 
@@ -7144,7 +7355,16 @@
 
         actualiserAffichageCredits(soldeCredits);
 
-        // Enregistrer le client en arrière-plan sur le serveur Supabase / API
+        if (estFraudeDetectee && soldeCredits <= 0) {
+            alert(
+                "🚫 OFFRE DÉCOUVERTE DÉJÀ UTILISÉE !\n\n" +
+                "Cette adresse IP, cet appareil ou ces coordonnées ont déjà bénéficié de l'essai gratuit de 5 pages.\n\n" +
+                "Votre solde gratuit est épuisé (0 page disponible).\n\n" +
+                "Vous êtes automatiquement redirigé vers l'Étape 2 (Tarifs & BaridiMob) pour souscrire à une formule professionnelle."
+            );
+        }
+
+        // Enregistrer le client en arrière-plan sur le serveur Supabase / API avec IP et deviceId
         try {
             fetch(`${API_BASE}/api/clients/connexion`, {
                 method: 'POST',
@@ -7153,14 +7373,18 @@
                     telephone: tel,
                     nom_complet: nom,
                     email: email,
-                    wilaya: "Alger"
+                    wilaya: "Alger",
+                    device_id: deviceId,
+                    ip: ipDetectee
                 })
             }).then(r => r.json()).then(data => {
                 if (data && data.client) {
                     const serverCredits = parseInt(data.client.credits_pages, 10);
+                    const serverEssaiDejaUtilise = Boolean(data.essai_deja_utilise);
+
                     if (!isNaN(serverCredits)) {
                         let finalCredits = serverCredits;
-                        if (!estAbonnePayant && quotaConsommeAppareil >= 5) {
+                        if (!estAbonnePayant && (quotaConsommeAppareil >= 5 || estFraudeDetectee || serverEssaiDejaUtilise)) {
                             finalCredits = 0;
                         }
                         data.client.credits_pages = finalCredits;
@@ -7168,6 +7392,7 @@
                         actualiserAffichageCredits(finalCredits);
                         if (finalCredits <= 0) {
                             localStorage.removeItem('btp_etape2_validee');
+                            localStorage.setItem('btp_device_pages_consommees', '5');
                         }
                     }
                 }
@@ -9270,15 +9495,18 @@
         // Empreinte appareil pour éviter le contournement par suppression de btp_client
         let quotaAppareil = localStorage.getItem('btp_device_pages_consommees');
         let pagesConsommees = quotaAppareil ? parseInt(quotaAppareil, 10) : 0;
+        const devId = (typeof obtenirEmpreinteAppareil === 'function') ? obtenirEmpreinteAppareil() : '';
+        const ipStockee = localStorage.getItem('btp_client_ip_detectee') || '';
+        const estFraudeHistorique = (typeof verifierFraudeEssaiLocal === 'function') && verifierFraudeEssaiLocal('', '', ipStockee, devId);
 
         if (!client || typeof client !== 'object') {
-            const creditsInitiaux = Math.max(0, 5 - pagesConsommees);
+            const creditsInitiaux = (!estFraudeHistorique && pagesConsommees < 5) ? Math.max(0, 5 - pagesConsommees) : 0;
             client = {
                 id: 'btp_usr_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
                 nom_complet: 'Client Invité',
                 telephone: '',
                 credits_pages: creditsInitiaux,
-                pages_consommees: pagesConsommees,
+                pages_consommees: (creditsInitiaux === 0) ? 5 : pagesConsommees,
                 type_abonnement: 'gratuit'
             };
             localStorage.setItem('btp_client', JSON.stringify(client));
@@ -9286,8 +9514,8 @@
             // Est-ce un abonné payant qui a acheté des crédits ?
             const estAbonnePayant = client.type_abonnement && !['gratuit', 'professionnel_gratuit', 'essai', 'professionnel'].includes(client.type_abonnement) && parseInt(client.credits_pages, 10) > 0;
             
-            // Si le quota de 5 pages gratuites est déjà consommé et que ce n'est pas un abonné payant : 0 crédit garanti !
-            if (!estAbonnePayant && pagesConsommees >= 5) {
+            // Si le quota de 5 pages gratuites est déjà consommé ou multi-compte détecté et pas abonné payant : 0 crédit garanti !
+            if (!estAbonnePayant && (pagesConsommees >= 5 || estFraudeHistorique)) {
                 client.credits_pages = 0;
                 localStorage.setItem('btp_client', JSON.stringify(client));
             } else if (client.credits_pages === undefined || client.credits_pages === null || isNaN(client.credits_pages)) {

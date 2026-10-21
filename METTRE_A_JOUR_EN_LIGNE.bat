@@ -73,7 +73,7 @@ git add -A >> "%~dp0deploy_log.txt" 2>&1
 echo.
 echo [*] 3/4 - Validation de la version (commit)...
 echo [*] Validation de la version (commit)... >> "%~dp0deploy_log.txt" 2>&1
-git commit -m "Mise a jour officielle : Titulaire BOUFELDJA BENABDALLAH, RIP 00799999000191804708, Assistance chiffrage et Avis clients" >> "%~dp0deploy_log.txt" 2>&1
+git commit -m "Securite : Rejet emails jetables et verrouillage anti-fraude IP/references sur les 5 pages gratuites" >> "%~dp0deploy_log.txt" 2>&1
 
 :: S'assurer que la branche active s'appelle main
 git branch -M main >> "%~dp0deploy_log.txt" 2>&1

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 # Chargement automatique des variables d'environnement (.env)
 load_dotenv()
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, Request
 from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -1116,6 +1116,74 @@ async def exporter_excel(payload: dict = Body(...)):
         raise HTTPException(status_code=500, detail=f"Erreur de génération Excel : {str(e)}")
 
 # ============================================================
+# FILTRE ANTI-EMAIL JETABLE & BOUCLIER ANTI-FRAUDE IP / RÉFÉRENCES
+# ============================================================
+
+DISPOSABLE_EMAIL_DOMAINS = {
+    "yopmail.com", "yopmail.fr", "yopmail.net", "cool.fr.nf", "jetable.fr.nf", "courriel.fr.nf",
+    "moncourrier.fr.nf", "monemail.fr.nf", "monmail.fr.nf", "mailinator.com", "mailinator2.com",
+    "tempmail.com", "temp-mail.org", "tempmail.net", "tempmail.io", "temp-mail.io", "10minutemail.com",
+    "10minutemail.net", "10minutemail.org", "10minute.email", "guerrillamail.com", "guerrillamail.net",
+    "guerrillamail.org", "guerrillamail.biz", "guerrillamailblock.com", "sharklasers.com", "grr.la",
+    "dispostable.com", "trashmail.com", "trashmail.net", "trashmail.org", "trashmail.me", "trashmail.at",
+    "trashmail.io", "trash-mail.com", "getnada.com", "mohmal.com", "mohmal.in", "throwawaymail.com",
+    "maildrop.cc", "crazymailing.com", "fakeinbox.com", "emailondeck.com", "mytemp.email", "inboxkitten.com",
+    "generator.email", "tempr.email", "discard.email", "burnermail.io", "dropmail.me", "tempail.com",
+    "fakemailgenerator.com", "nada.ltd", "getairmail.com", "dayrep.com", "teleworm.us", "rhyta.com",
+    "superrito.com", "armyspy.com", "cuvox.de", "jourrapide.com", "fleckens.hu", "gustr.com", "einrot.com",
+    "chacuo.net", "0-mail.com", "kasmail.com", "mailcatch.com", "spamgourmet.com", "spambox.us",
+    "incognitomail.org", "mailnesia.com", "mytempemail.com", "tempinbox.com", "zillamail.com", "fakemail.net",
+    "harakirimail.com", "disposablemail.com", "inboxbear.com", "jetable.org", "jetable.net", "jetable.com",
+    "boun.cr", "tmail.ws", "tmpmail.org", "tmpmail.net", "inboxalias.com", "fastmail.fm", "emailfake.com",
+    "fake-mail.org", "fakemail.io", "mailsac.com", "anonaddy.me", "anonaddy.com", "simplelogin.co",
+    "minutemail.com", "luxusmail.ru", "mohmal.im", "tempmailaddress.com", "disposable.email", "trashymail.com",
+    "mailnull.com", "burner.email", "burner.com", "mytempmail.com", "crazymailing.net"
+}
+
+DISPOSABLE_KEYWORD_PATTERN = re.compile(
+    r"(yopmail|mailinator|temp[-_.]?mail|dispos|guerrilla|sharklasers|10minute|throwaway|trash[-_.]?mail|fake[-_.]?mail|burner|mytemp|getnada|mohmal|maildrop|emailondeck|inboxkitten|dispostable|generator\.email|discard\.email|dropmail|nada\.ltd|teleworm|armyspy|cuvox|dayrep|jourrapide|fleckens|gustr|einrot|chacuo)",
+    re.IGNORECASE
+)
+
+def is_disposable_email(email: str) -> bool:
+    """Détecte de façon infaillible si un email provient d'un service temporaire ou jetable."""
+    if not email or "@" not in email:
+        return False
+    parts = email.strip().lower().split("@")
+    if len(parts) != 2:
+        return False
+    domain = parts[1].strip()
+    if domain in DISPOSABLE_EMAIL_DOMAINS:
+        return True
+    if DISPOSABLE_KEYWORD_PATTERN.search(domain):
+        return True
+    return False
+
+REGISTRE_ESSAIS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "registre_essais_gratuits.json")
+
+def charger_registre_essais() -> dict:
+    if os.path.exists(REGISTRE_ESSAIS_FILE):
+        try:
+            with open(REGISTRE_ESSAIS_FILE, "r", encoding="utf-8") as f:
+                d = json.load(f)
+                if isinstance(d, dict):
+                    if "ips" not in d: d["ips"] = {}
+                    if "telephones" not in d: d["telephones"] = {}
+                    if "emails" not in d: d["emails"] = {}
+                    if "devices" not in d: d["devices"] = {}
+                    return d
+        except Exception:
+            pass
+    return {"ips": {}, "telephones": {}, "emails": {}, "devices": {}}
+
+def sauvegarder_registre_essais(registre: dict):
+    try:
+        with open(REGISTRE_ESSAIS_FILE, "w", encoding="utf-8") as f:
+            json.dump(registre, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+# ============================================================
 # ENDPOINTS SUPABASE / LOCAL : CLIENTS, DEVIS & PAIEMENTS BARIDIMOB
 # ============================================================
 
@@ -1139,11 +1207,26 @@ def sauvegarder_clients_locaux(data: dict):
     except Exception:
         pass
 
+@app.get("/api/clients/verifier-ip")
+async def verifier_ip_essai(request: Request):
+    """Permet au frontend de vérifier si l'adresse IP a déjà bénéficié de l'offre d'essai de 5 pages."""
+    forwarded = request.headers.get("x-forwarded-for")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "127.0.0.1")
+    registre = charger_registre_essais()
+    is_local = client_ip in ["127.0.0.1", "localhost", "::1"]
+    deja_utilise = (not is_local) and (client_ip in registre.get("ips", {}))
+    return {
+        "ip": client_ip,
+        "essai_deja_consomme": deja_utilise
+    }
+
 @app.post("/api/clients/connexion")
-async def client_connexion(payload: dict = Body(...)):
+async def client_connexion(request: Request, payload: dict = Body(...)):
     telephone_brut = (payload.get("telephone") or "").strip()
     nom_complet = (payload.get("nom_complet") or "").strip() or "Artisan BTP"
+    email = (payload.get("email") or "").strip().lower()
     wilaya = (payload.get("wilaya") or "Alger").strip()
+    device_id = (payload.get("device_id") or "").strip()
     
     tel_clean = re.sub(r'[^0-9+]', '', telephone_brut)
     if not tel_clean or len(tel_clean) < 8:
@@ -1154,7 +1237,35 @@ async def client_connexion(payload: dict = Body(...)):
         "0551422166" in tel_clean or
         "213551422166" in tel_clean or
         "titulaire" in nom_complet.lower() or
-        "benabdallah" in nom_complet.lower()
+        "benabdallah" in nom_complet.lower() or
+        "contact@devis-btp.dz" in email
+    )
+
+    # 1. RÈGLE STRICTE 1 : REJET FORMEL DES EMAILS JETABLES / TEMPORAIRES
+    if not is_titulaire and email and is_disposable_email(email):
+        raise HTTPException(
+            status_code=400,
+            detail="⛔ Les adresses emails temporaires ou jetables (ex: yopmail, mailinator, etc.) sont strictement interdites. Veuillez renseigner une adresse email valide (Gmail, Yahoo, Outlook, domaine d'entreprise)."
+        )
+
+    # 2. RÈGLE STRICTE 2 : BOUCLIER ANTI-FRAUDE SUR LES 5 PAGES D'ESSAI GRATUIT (IP, TÉL, EMAIL, DEVICE)
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        client_ip = forwarded.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else "127.0.0.1"
+
+    registre = charger_registre_essais()
+    is_local_ip = client_ip in ["127.0.0.1", "localhost", "::1"]
+
+    ip_deja_vue = (not is_local_ip) and (client_ip in registre.get("ips", {}))
+    tel_deja_vu = tel_clean in registre.get("telephones", {})
+    email_deja_vu = bool(email and email in registre.get("emails", {}))
+    device_deja_vu = bool(device_id and device_id in registre.get("devices", {}))
+
+    # Détection de tentative de réutilisation ou création multiple pour avoir 5 pages gratuites
+    fraude_essai_detectee = not is_titulaire and (
+        ip_deja_vue or tel_deja_vu or email_deja_vu or device_deja_vu
     )
 
     sb = get_supabase_client()
@@ -1164,24 +1275,60 @@ async def client_connexion(payload: dict = Body(...)):
             client = clients_local[tel_clean]
             if nom_complet and nom_complet != "Artisan BTP":
                 client["nom_complet"] = nom_complet
+            if email:
+                client["email"] = email
             if is_titulaire:
                 client["credits_pages"] = 9999
                 client["type_abonnement"] = "titulaire_illimite"
+            elif fraude_essai_detectee and int(client.get("credits_pages", 0) or 0) <= 0:
+                client["credits_pages"] = 0
             sauvegarder_clients_locaux(clients_local)
-            return {"success": True, "nouveau": False, "client": client}
+            return {
+                "success": True,
+                "nouveau": False,
+                "essai_deja_utilise": fraude_essai_detectee,
+                "client": client
+            }
         else:
+            # Nouveau compte tenté : Si l'IP, le tél, l'email ou l'appareil a DÉJÀ bénéficié d'un essai, ZÉRO CRÉDIT !
+            credits_accordes = 9999 if is_titulaire else (0 if fraude_essai_detectee else 5)
+            pages_consommees_initiales = 0 if is_titulaire else (5 if fraude_essai_detectee else 0)
+
             new_c = {
                 "id": f"cli_{tel_clean}",
                 "telephone": tel_clean,
                 "nom_complet": "BENABDALLAH (Titulaire)" if is_titulaire else nom_complet,
+                "email": email,
                 "wilaya": wilaya,
-                "credits_pages": 9999 if is_titulaire else 5,
-                "pages_consommees": 0,
-                "type_abonnement": "titulaire_illimite" if is_titulaire else "gratuit"
+                "credits_pages": credits_accordes,
+                "pages_consommees": pages_consommees_initiales,
+                "type_abonnement": "titulaire_illimite" if is_titulaire else "gratuit",
+                "ip_inscription": client_ip,
+                "device_id": device_id
             }
             clients_local[tel_clean] = new_c
             sauvegarder_clients_locaux(clients_local)
-            return {"success": True, "nouveau": True, "client": new_c}
+
+            # Enregistrer dans le registre anti-fraude si nouveau compte valide ou frauduleux
+            if not is_titulaire:
+                date_str = time.strftime("%Y-%m-%d %H:%M:%S")
+                if not is_local_ip:
+                    registre["ips"][client_ip] = {"telephone": tel_clean, "email": email, "nom": nom_complet, "date": date_str}
+                registre["telephones"][tel_clean] = {"ip": client_ip, "email": email, "nom": nom_complet, "date": date_str}
+                if email:
+                    registre["emails"][email] = {"telephone": tel_clean, "ip": client_ip, "nom": nom_complet, "date": date_str}
+                if device_id:
+                    registre["devices"][device_id] = {"telephone": tel_clean, "ip": client_ip, "date": date_str}
+                sauvegarder_registre_essais(registre)
+
+            msg = "Cette adresse IP, cet appareil ou ces coordonnées ont déjà bénéficié de l'offre d'essai de 5 pages gratuites. Solde à 0 page." if fraude_essai_detectee else "Bienvenue ! 5 pages gratuites vous ont été attribuées."
+            return {
+                "success": True,
+                "nouveau": True,
+                "essai_deja_utilise": fraude_essai_detectee,
+                "message": msg,
+                "client": new_c
+            }
         
     try:
         res = sb.table("clients").select("*").eq("telephone", tel_clean).execute()
@@ -1190,37 +1337,64 @@ async def client_connexion(payload: dict = Body(...)):
             if is_titulaire:
                 client["credits_pages"] = 9999
                 client["type_abonnement"] = "titulaire_illimite"
-            return {"success": True, "nouveau": False, "client": client}
+            return {
+                "success": True,
+                "nouveau": False,
+                "essai_deja_utilise": fraude_essai_detectee,
+                "client": client
+            }
         else:
+            credits_accordes = 9999 if is_titulaire else (0 if fraude_essai_detectee else 5)
             new_client = {
                 "nom_complet": "BENABDALLAH (Titulaire)" if is_titulaire else nom_complet,
                 "telephone": tel_clean,
+                "email": email,
                 "wilaya": wilaya,
                 "type_abonnement": "titulaire_illimite" if is_titulaire else "gratuit",
-                "credits_pages": 9999 if is_titulaire else 5,
-                "pages_consommees": 0
+                "credits_pages": credits_accordes,
+                "pages_consommees": 0 if is_titulaire else (5 if fraude_essai_detectee else 0)
             }
             ins = sb.table("clients").insert(new_client).execute()
             created = ins.data[0] if ins.data else new_client
-            return {"success": True, "nouveau": True, "client": created}
+
+            if not is_titulaire:
+                date_str = time.strftime("%Y-%m-%d %H:%M:%S")
+                if not is_local_ip:
+                    registre["ips"][client_ip] = {"telephone": tel_clean, "email": email, "nom": nom_complet, "date": date_str}
+                registre["telephones"][tel_clean] = {"ip": client_ip, "email": email, "nom": nom_complet, "date": date_str}
+                if email:
+                    registre["emails"][email] = {"telephone": tel_clean, "ip": client_ip, "nom": nom_complet, "date": date_str}
+                if device_id:
+                    registre["devices"][device_id] = {"telephone": tel_clean, "ip": client_ip, "date": date_str}
+                sauvegarder_registre_essais(registre)
+
+            return {
+                "success": True,
+                "nouveau": True,
+                "essai_deja_utilise": fraude_essai_detectee,
+                "client": created
+            }
     except Exception as e:
         clients_local = charger_clients_locaux()
         if tel_clean in clients_local:
             return {"success": True, "nouveau": False, "client": clients_local[tel_clean]}
+        credits_accordes = 9999 if is_titulaire else (0 if fraude_essai_detectee else 5)
         new_c = {
             "id": f"cli_{tel_clean}",
             "telephone": tel_clean,
             "nom_complet": nom_complet,
+            "email": email,
             "wilaya": wilaya,
-            "credits_pages": 5,
-            "pages_consommees": 0,
-            "type_abonnement": "gratuit"
+            "credits_pages": credits_accordes,
+            "pages_consommees": 0 if is_titulaire else (5 if fraude_essai_detectee else 0),
+            "type_abonnement": "titulaire_illimite" if is_titulaire else "gratuit"
         }
         clients_local[tel_clean] = new_c
         sauvegarder_clients_locaux(clients_local)
         return {
             "success": True,
             "mode": "fallback_local",
+            "essai_deja_utilise": fraude_essai_detectee,
             "message": f"Supabase en attente d'initialisation SQL ({str(e)}).",
             "client": new_c
         }
