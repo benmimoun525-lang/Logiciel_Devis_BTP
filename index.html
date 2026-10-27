@@ -3948,12 +3948,9 @@
 </script>
 
 <script>
-    // Configuration intelligente de l'URL API (GitHub Pages, Koyeb, Render, Local ou Réseau)
-    const API_BASE = (window.location.protocol === 'file:')
-        ? "http://127.0.0.1:8000"
-        : (window.location.hostname.includes('github.io'))
-            ? "https://logiciel-devis-btp.onrender.com"
-            : (window.location.protocol.startsWith('http')) ? "" : "http://127.0.0.1:8000";
+    // Configuration intelligente de l'URL API (Mode Autonome GitHub Pages, Local ou Réseau)
+    const isLocal = (window.location.protocol === 'file:' || window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost');
+    const API_BASE = isLocal ? "http://127.0.0.1:8000" : "";
 
     let GEMINI_API_KEY = localStorage.getItem('btp_gemini_key') || '';
 
@@ -5029,6 +5026,48 @@
         formData.append('telephone', clientActif.telephone || clientActif.id);
         formData.append('credits_actuels', clientActif.credits_pages);
         formData.append('nb_pages_demandees', 1);
+
+        // Mode Autonome Direct (GitHub Pages / Hébergement statique sans serveur)
+        if (!API_BASE) {
+            if (GEMINI_API_KEY && GEMINI_API_KEY.trim()) {
+                ajouterLog(`⚡ Analyse IA directe Gemini pour "${page.name}"...`);
+                try {
+                    const directRes = await analyserPageDirectementGemini(fichierOptimise, GEMINI_API_KEY.trim(), strategiePrixActive);
+                    let arts = Array.isArray(directRes.articles) ? directRes.articles : [];
+                    if (arts.length > 0) {
+                        if (directRes.client && !document.getElementById('nomClient').value) document.getElementById('nomClient').value = directRes.client;
+                        if (directRes.projet && !document.getElementById('nomProjet').value) document.getElementById('nomProjet').value = directRes.projet;
+                        integrerArticlesDansDevis(arts, page.name);
+                        page.status = 'traite';
+                        page.articles = arts;
+                        statusBadge.className = 'status-pill status-done';
+                        statusBadge.textContent = `Page traitée via Gemini direct (${arts.length} articles) !`;
+                        ajouterLog(`✅ Succès immédiat via Gemini direct (${arts.length} articles trouvés) !`);
+                        consommerCreditApresSucces(1);
+                        rafraichirGrilleVignettes();
+                        sauvegarderLocalement();
+                        return true;
+                    }
+                } catch(eDirect) {
+                    ajouterLog(`⚠️ Tentative directe Gemini : ${eDirect.message}`);
+                }
+            }
+
+            ajouterLog(`⚡ Mode Autonome GitHub Pages : Chiffrage BPU Algérie direct pour "${page.name}"...`);
+            const articlesSecours = extraireArticlesDepuisTexteClient(page.rawText || page.name, page.name);
+            if (articlesSecours && articlesSecours.length > 0) {
+                integrerArticlesDansDevis(articlesSecours, page.name);
+                page.status = 'traite';
+                page.articles = articlesSecours;
+                statusBadge.className = 'status-pill status-done';
+                statusBadge.textContent = `⚡ Chiffrage instantané réussi (${articlesSecours.length} articles BPU Algérie) !`;
+                ajouterLog(`✅ Chiffrage terminé avec succès ! ${articlesSecours.length} articles chiffrés selon le barème officiel BPU.`);
+                consommerCreditApresSucces(1);
+                rafraichirGrilleVignettes();
+                sauvegarderLocalement();
+                return true;
+            }
+        }
 
         let success = false;
         let retries = 0;

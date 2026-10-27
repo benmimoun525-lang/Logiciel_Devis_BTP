@@ -73,7 +73,7 @@ git add -A >> "%~dp0deploy_log.txt" 2>&1
 echo.
 echo [*] 3/4 - Validation de la version (commit)...
 echo [*] Validation de la version (commit)... >> "%~dp0deploy_log.txt" 2>&1
-git commit -m "Fix : Connexion API universelle GitHub Pages vers Render et configuration multi-domaines" >> "%~dp0deploy_log.txt" 2>&1
+git commit -m "Autonome : Deploiement GitHub Actions pour GitHub Pages et chiffrage BPU instantane 0-serveur" >> "%~dp0deploy_log.txt" 2>&1
 
 :: S'assurer que la branche active s'appelle main
 git branch -M main >> "%~dp0deploy_log.txt" 2>&1
@@ -143,16 +143,18 @@ echo   RIP BARIDIMOB      : 00799999000191804708
 echo   COMPTE CCP         : 0001918047 (Cle 08)
 echo   WHATSAPP           : 0551 42 21 66
 echo.
-echo   VOS LIENS OFFICIELS EN LIGNE (24h/24 et 7j/7) :
+echo   VOS LIENS OFFICIELS EN LIGNE (GRATUITS A VIE, 24h/24 et 7j/7) :
 echo.
-echo   [1] LIEN A METTRE SUR VOTRE PUBLICITE CLIENTS (Fonctionne a 100%%) :
-echo       https://logiciel-devis-btp.onrender.com
+echo   [1] LIEN PUBLIC CLIENT A METTRE SUR VOTRE PUBLICITE :
+echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/
 echo.
 echo   [2] VOTRE LIEN PERSONNEL TITULAIRE (Tableau de bord complet) :
-echo       https://logiciel-devis-btp.onrender.com/?pin=7788#titulaire
+echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/?pin=7788#titulaire
 echo.
-echo   [3] LIEN GITHUB PAGES (Actif des activation dans vos reglages GitHub) :
-echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/
+echo   NOTE IMPORTANTE :
+echo   Le service Render etant suspendu pour depassement de quota d'heures gratuites,
+echo   votre logiciel fonctionne desormais a 100%% en MODE AUTONOME DIRECT sur GitHub Pages.
+echo   Aucun serveur externe n'est requis : chiffrage BPU, exports Excel et PDF garantis !
 echo.
 echo   Dans 1 a 2 minutes, ouvrez le lien [1] ou [2] et faites Ctrl + F5 !
 echo ======================================================================
