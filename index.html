@@ -3948,12 +3948,12 @@
 </script>
 
 <script>
-    // Configuration intelligente de l'URL API (Koyeb, Hugging Face, Render, Local ou Réseau)
+    // Configuration intelligente de l'URL API (GitHub Pages, Koyeb, Render, Local ou Réseau)
     const API_BASE = (window.location.protocol === 'file:')
         ? "http://127.0.0.1:8000"
-        : (
-            window.location.protocol.startsWith('http')
-        ) ? "" : "http://127.0.0.1:8000";
+        : (window.location.hostname.includes('github.io'))
+            ? "https://logiciel-devis-btp.onrender.com"
+            : (window.location.protocol.startsWith('http')) ? "" : "http://127.0.0.1:8000";
 
     let GEMINI_API_KEY = localStorage.getItem('btp_gemini_key') || '';
 

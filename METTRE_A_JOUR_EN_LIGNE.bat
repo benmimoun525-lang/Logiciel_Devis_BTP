@@ -73,7 +73,7 @@ git add -A >> "%~dp0deploy_log.txt" 2>&1
 echo.
 echo [*] 3/4 - Validation de la version (commit)...
 echo [*] Validation de la version (commit)... >> "%~dp0deploy_log.txt" 2>&1
-git commit -m "Securite : Rejet emails jetables et verrouillage anti-fraude IP/references sur les 5 pages gratuites" >> "%~dp0deploy_log.txt" 2>&1
+git commit -m "Fix : Connexion API universelle GitHub Pages vers Render et configuration multi-domaines" >> "%~dp0deploy_log.txt" 2>&1
 
 :: S'assurer que la branche active s'appelle main
 git branch -M main >> "%~dp0deploy_log.txt" 2>&1
@@ -143,13 +143,18 @@ echo   RIP BARIDIMOB      : 00799999000191804708
 echo   COMPTE CCP         : 0001918047 (Cle 08)
 echo   WHATSAPP           : 0551 42 21 66
 echo.
-echo   Vos liens publics et personnels sont a jour :
-echo   - Lien Client Public     : https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/
-echo   - Votre Lien Titulaire   : https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/?pin=7788#titulaire
-echo   - Serveur Render         : https://logiciel-devis-btp.onrender.com
+echo   VOS LIENS OFFICIELS EN LIGNE (24h/24 et 7j/7) :
 echo.
-echo   Dans 1 a 2 minutes, ouvrez votre lien Titulaire ci-dessus et faites
-echo   Ctrl + F5 pour acceder directement a votre tableau de bord complet !
+echo   [1] LIEN A METTRE SUR VOTRE PUBLICITE CLIENTS (Fonctionne a 100%%) :
+echo       https://logiciel-devis-btp.onrender.com
+echo.
+echo   [2] VOTRE LIEN PERSONNEL TITULAIRE (Tableau de bord complet) :
+echo       https://logiciel-devis-btp.onrender.com/?pin=7788#titulaire
+echo.
+echo   [3] LIEN GITHUB PAGES (Actif des activation dans vos reglages GitHub) :
+echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/
+echo.
+echo   Dans 1 a 2 minutes, ouvrez le lien [1] ou [2] et faites Ctrl + F5 !
 echo ======================================================================
 goto FIN_AFFICHAGE
 
