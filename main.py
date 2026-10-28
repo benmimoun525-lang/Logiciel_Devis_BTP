@@ -778,6 +778,13 @@ def serve_didacticiel():
         return FileResponse(didacticiel_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="video_didacticiel.html non trouvé")
 
+@app.get("/europe")
+def serve_europe():
+    europe_path = os.path.join(os.path.dirname(__file__), "index_europe.html")
+    if os.path.exists(europe_path):
+        return FileResponse(europe_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="index_europe.html non trouvé")
+
 @app.get("/manifest.json")
 def serve_manifest():
     manifest_path = os.path.join(os.path.dirname(__file__), "manifest.json")
