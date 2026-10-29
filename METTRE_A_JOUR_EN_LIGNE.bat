@@ -71,10 +71,13 @@ if not errorlevel 1 (
     echo [*] Sauvegarde de la version Europe dans index_europe.html...
     copy /y "index.html" "index_europe.html" >nul
     echo [*] Restauration automatique de la version Algerie dans index.html...
-    git checkout 4a9bff2 -- index.html >nul 2>&1
-    if errorlevel 1 git checkout HEAD -- index.html >nul 2>&1
-    copy /y "index.html" "index_algerie.html" >nul
+    if exist "index_algerie.html" (
+        copy /y "index_algerie.html" "index.html" >nul
+    ) else if exist "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" (
+        copy /y "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" "index.html" >nul
+    )
 )
+copy /y "index.html" "index_algerie.html" >nul
 
 echo.
 echo [*] 2/4 - Indexation des fichiers modifies...

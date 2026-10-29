@@ -11,9 +11,134 @@ from dotenv import load_dotenv
 # Chargement automatique des variables d'environnement (.env)
 load_dotenv()
 
+import subprocess
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, Request
 from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+# ============================================================
+# RESTAURATION AUTOMATIQUE GARANTIE DE LA VERSION ALGÉRIE DANS index.html
+# ============================================================
+def restaurer_index_algerie_automatique():
+    """Restaure index.html depuis l'historique Git officiel Algérie (BOUFELDJA BENABDALLAH, DZD, BaridiMob)."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    index_path = os.path.join(base_dir, "index.html")
+    europe_path = os.path.join(base_dir, "index_europe.html")
+    algerie_path = os.path.join(base_dir, "index_algerie.html")
+    log_path = os.path.join(base_dir, "restauration_statut.txt")
+
+    besoin = False
+    if os.path.exists(index_path):
+        try:
+            with open(index_path, "r", encoding="utf-8", errors="ignore") as f:
+                head = f.read(600)
+                if "Version Europe" in head:
+                    besoin = True
+        except Exception:
+            besoin = True
+    else:
+        besoin = True
+
+    if not besoin:
+        return True
+
+    # Sauvegarder la version Europe dans index_europe.html
+    try:
+        if os.path.exists(index_path):
+            with open(index_path, "rb") as fin, open(europe_path, "wb") as fout:
+                fout.write(fin.read())
+    except Exception:
+        pass
+
+    # Priorité 1 : Restauration directe depuis C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html
+    backup_copie = r"C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html"
+    if os.path.exists(backup_copie):
+        try:
+            with open(backup_copie, "rb") as fin:
+                data_backup = fin.read()
+            if len(data_backup) > 50000:
+                with open(index_path, "wb") as fout, open(algerie_path, "wb") as fout_alg:
+                    fout.write(data_backup)
+                    fout_alg.write(data_backup)
+                with open(log_path, "w", encoding="utf-8") as f:
+                    f.write(f"Succès : index.html restauré depuis {backup_copie} ({len(data_backup)} octets).\n")
+                print(f"[RESTAURATION] ✅ index.html restauré depuis {backup_copie} ({len(data_backup):,} octets)")
+                return True
+        except Exception as e_copie:
+            print(f"[RESTAURATION] Note copie : {e_copie}")
+
+    # Priorité 2 : Détecter Git
+    possible_git = [
+        "git",
+        r"C:\Program Files\Git\cmd\git.exe",
+        r"C:\Program Files\Git\bin\git.exe",
+        r"C:\Program Files (x86)\Git\cmd\git.exe",
+        r"C:\Program Files (x86)\Git\bin\git.exe",
+        r"C:\Git\cmd\git.exe",
+        r"C:\Git\bin\git.exe",
+        os.path.expandvars(r"%LocalAppData%\Programs\Git\cmd\git.exe"),
+        os.path.expandvars(r"%LocalAppData%\Programs\Git\bin\git.exe"),
+        os.path.expandvars(r"%ProgramFiles%\Git\cmd\git.exe"),
+        os.path.expandvars(r"%ProgramFiles%\Git\bin\git.exe")
+    ]
+    git_exec = None
+    for p in possible_git:
+        if p == "git":
+            try:
+                r = subprocess.run(["git", "--version"], capture_output=True, timeout=2)
+                if r.returncode == 0:
+                    git_exec = "git"
+                    break
+            except Exception:
+                continue
+        elif os.path.exists(p):
+            git_exec = p
+            break
+
+    if not git_exec:
+        try:
+            with open(log_path, "w", encoding="utf-8") as f:
+                f.write("Erreur : Git introuvable sur le système.\n")
+        except Exception:
+            pass
+        return False
+
+    commits = ["4a9bff2", "38ed851", "HEAD~1", "HEAD~2", "HEAD~3", "main~1", "main"]
+    try:
+        l_res = subprocess.run([git_exec, "log", "-n", "30", "--format=%H"], capture_output=True, text=True, cwd=base_dir, timeout=5)
+        if l_res.returncode == 0:
+            for ch in l_res.stdout.strip().splitlines():
+                ch = ch.strip()
+                if ch and ch not in commits:
+                    commits.append(ch)
+    except Exception:
+        pass
+
+    for c in commits:
+        try:
+            show_res = subprocess.run([git_exec, "show", f"{c}:index.html"], capture_output=True, cwd=base_dir, timeout=10)
+            data = show_res.stdout
+            if len(data) > 100000 and (b"BENABDALLAH" in data or b"BaridiMob" in data or b"00799999000191804708" in data):
+                with open(index_path, "wb") as f:
+                    f.write(data)
+                with open(algerie_path, "wb") as f:
+                    f.write(data)
+                with open(log_path, "w", encoding="utf-8") as f:
+                    f.write(f"Succès : index.html Algérie restauré depuis commit {c} ({len(data)} octets).\n")
+                print(f"[RESTAURATION] ✅ index.html Algérie restauré ({len(data):,} octets) depuis commit {c}")
+                return True
+        except Exception:
+            continue
+
+    try:
+        with open(log_path, "w", encoding="utf-8") as f:
+            f.write("Erreur : Version Algérie non trouvée dans les commits Git.\n")
+    except Exception:
+        pass
+    return False
+
+# Exécution immédiate au chargement du module
+restaurer_index_algerie_automatique()
 
 # SDK Gemini moderne (google-genai) avec repli vers legacy (google.generativeai)
 try:
@@ -757,6 +882,7 @@ def create_excel_multilots(payload: dict) -> io.BytesIO:
 
 @app.get("/")
 def serve_index():
+    restaurer_index_algerie_automatique()
     index_path = os.path.join(os.path.dirname(__file__), "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path, media_type="text/html")
@@ -766,10 +892,17 @@ def serve_index():
 @app.get("/admin")
 def serve_titulaire_espace():
     """Route directe pour accéder à l'espace Titulaire / Administration."""
+    restaurer_index_algerie_automatique()
     index_path = os.path.join(os.path.dirname(__file__), "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="index.html non trouvé")
+
+@app.get("/api/restaurer-algerie")
+def api_restaurer_algerie():
+    """Endpoint déclencheur pour forcer la restauration de la version Algérie."""
+    ok = restaurer_index_algerie_automatique()
+    return {"success": ok, "message": "Restauration effectuée." if ok else "Erreur de restauration Git."}
 
 @app.get("/didacticiel")
 def serve_didacticiel():
