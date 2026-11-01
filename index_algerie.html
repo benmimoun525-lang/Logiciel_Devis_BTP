@@ -1277,8 +1277,8 @@
             <span>1️⃣</span> <span>1. Identification & Projet</span>
         </button>
         <span style="color: #94a3b8; font-weight: bold; font-size: 0.9rem;">➔</span>
-        <button type="button" id="stepPill2" onclick="naviguerVersEtapeClient(2)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; border: 1px dashed #cbd5e1; background: #f8fafc; color: #94a3b8; cursor: not-allowed; opacity: 0.65; display: flex; align-items: center; gap: 6px;">
-            <span>🔒</span> <span>2. Grille Tarifaire (Verrouillé)</span>
+        <button type="button" id="stepPill2" onclick="naviguerVersEtapeClient(2)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; border: 1.5px solid #93c5fd; background: #ffffff; color: #1e40af; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+            <span>2️⃣</span> <span>2. Grille Tarifaire & BaridiMob</span>
         </button>
         <span style="color: #94a3b8; font-weight: bold; font-size: 0.9rem;">➔</span>
         <button type="button" id="stepPill3" onclick="naviguerVersEtapeClient(3)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; border: 1px dashed #cbd5e1; background: #f8fafc; color: #94a3b8; cursor: not-allowed; opacity: 0.65; display: flex; align-items: center; gap: 6px;">
@@ -4005,105 +4005,122 @@
         instructions: "Veuillez renseigner votre nom et numéro de téléphone dans la note du virement BaridiMob."
     };
 
-    // Initialisation au chargement
-    window.addEventListener('DOMContentLoaded', () => {
-        // Nettoyage immédiat et garanti de tout ancien cache obsolète ou erroné
-        localStorage.setItem('btp_baridimob_config', JSON.stringify(COORDONNEES_OFFICIELLES_TITULAIRE));
-        appliquerCoordonneesBaridimobVisuel(COORDONNEES_OFFICIELLES_TITULAIRE);
+    // Initialisation au chargement (Infaillible PC & Smartphone)
+    function initialiserApplicationDevisBTP() {
+        try {
+            // Nettoyage immédiat et garanti de tout ancien cache obsolète ou erroné
+            localStorage.setItem('btp_baridimob_config', JSON.stringify(COORDONNEES_OFFICIELLES_TITULAIRE));
+            appliquerCoordonneesBaridimobVisuel(COORDONNEES_OFFICIELLES_TITULAIRE);
 
-        // Configuration du worker PDF.js pour traitement multi-pages infaillible
-        if (window.pdfjsLib && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        }
-
-        const today = new Date();
-        document.getElementById('dateDevis').value = today.toLocaleDateString('fr-FR');
-        if (!document.getElementById('numDevis').value) {
-            document.getElementById('numDevis').value = "DEV-" + today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
-        }
-
-        choisirStrategiePrix(strategiePrixActive);
-        chargerEntrepriseLocale();
-        chargerDevisSauvegarde();
-        chargerCompteClientLocal();
-        chargerLogoLogiciel();
-        chargerInfosBaridimobPubliques();
-        chargerBPU();
-        verifierConnexionServeur();
-        actualiserAffichageProfilUtilisateur();
-
-        // -------------------------------------------------------------
-        // SÉPARATION STRICTE : URL CLIENTS PUBLIQUE vs URL PROPRIÉTAIRE (TITULAIRE)
-        // -------------------------------------------------------------
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlPin = urlParams.get('pin') || urlParams.get('cle') || urlParams.get('pass');
-        const customPinLocal = localStorage.getItem('btp_custom_pin');
-        const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(customPinLocal && customPinLocal !== '7788');
-
-        // 1. Validation de l'URL avec code PIN éventuel
-        let isConnexionPinDirecte = false;
-        if (urlPin) {
-            if (pinPersoActif) {
-                // Code personnalisé actif : seul ce code est autorisé, 7788 est formellement banni
-                isConnexionPinDirecte = Boolean(customPinLocal && urlPin === customPinLocal && urlPin !== '7788');
-            } else {
-                isConnexionPinDirecte = Boolean(urlPin === '7788');
+            // Configuration du worker PDF.js pour traitement multi-pages infaillible
+            if (window.pdfjsLib && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             }
-        }
 
-        if (isConnexionPinDirecte) {
-            adminPin = urlPin;
-            sessionStorage.setItem('btp_session_titulaire_active', '1');
-            sessionStorage.setItem('btp_admin_pin', urlPin);
-            localStorage.removeItem('btp_mode_client_apercu');
-            // Nettoyer discrètement l'URL pour ne jamais laisser le code PIN visible dans la barre d'adresse
-            if (window.history && window.history.replaceState) {
-                window.history.replaceState({}, document.title, window.location.pathname);
+            const today = new Date();
+            const dateDevisInput = document.getElementById('dateDevis');
+            if (dateDevisInput) dateDevisInput.value = today.toLocaleDateString('fr-FR');
+            const numDevisInput = document.getElementById('numDevis');
+            if (numDevisInput && !numDevisInput.value) {
+                numDevisInput.value = "DEV-" + today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
             }
-        }
 
-        // 2. Vérification de la session Titulaire
-        const sessionTitulaireActive = sessionStorage.getItem('btp_session_titulaire_active') === '1';
-        const sessionPin = sessionStorage.getItem('btp_admin_pin');
-        let estTitulaireAuthentifie = false;
-        if (sessionTitulaireActive && sessionPin) {
-            if (pinPersoActif) {
-                estTitulaireAuthentifie = Boolean(customPinLocal && sessionPin === customPinLocal && sessionPin !== '7788');
-            } else {
-                estTitulaireAuthentifie = Boolean(sessionPin === '7788');
+            choisirStrategiePrix(strategiePrixActive);
+            chargerEntrepriseLocale();
+            chargerDevisSauvegarde();
+            chargerCompteClientLocal();
+            chargerLogoLogiciel();
+            chargerInfosBaridimobPubliques();
+            chargerBPU();
+            verifierConnexionServeur();
+            actualiserAffichageProfilUtilisateur();
+
+            // -------------------------------------------------------------
+            // SÉPARATION STRICTE : URL CLIENTS PUBLIQUE vs URL PROPRIÉTAIRE (TITULAIRE)
+            // -------------------------------------------------------------
+            const urlParams = new URLSearchParams(window.location.search);
+            let urlPin = urlParams.get('pin') || urlParams.get('cle') || urlParams.get('pass');
+            if (!urlPin && window.location.hash) {
+                const matchH = window.location.hash.match(/pin=([0-9a-zA-Z]+)/);
+                if (matchH) urlPin = matchH[1];
             }
-        }
-        const modeClientForce = localStorage.getItem('btp_mode_client_apercu') === '1';
+            if (!urlPin && window.location.href) {
+                const matchU = window.location.href.match(/pin=([0-9a-zA-Z]+)/);
+                if (matchU) urlPin = matchU[1];
+            }
 
-        if (estTitulaireAuthentifie && !modeClientForce) {
-            adminPin = sessionPin || (pinPersoActif ? customPinLocal : '7788');
-            activerModeTitulaireInterface();
-            actualiserAffichageCredits(9999);
-        } else {
-            // MODE CLIENT PUBLIC PAR DÉFAUT : AUCUN ACCÈS TITULAIRE, RESTRICTION STRICTE DES ÉTAPES 1 À 4
-            adminPin = '';
-            sessionStorage.removeItem('btp_session_titulaire_active');
-            sessionStorage.removeItem('btp_admin_pin');
-            localStorage.removeItem('btp_mode_titulaire_permanent');
-            desactiverModeTitulaireInterface();
-        }
+            const customPinLocal = (localStorage.getItem('btp_custom_pin') || '').trim();
+            const isConnexionPinDirecte = Boolean(urlPin && (urlPin === '7788' || (customPinLocal && urlPin === customPinLocal)));
+            const hasTitulaireInUrl = window.location.hash.includes('titulaire') || window.location.pathname.includes('/titulaire') || window.location.pathname.includes('/admin') || window.location.hash.includes('admin');
 
-        // Accès direct si l'URL contient /titulaire, /admin ou #titulaire
-        if (window.location.pathname.includes('/titulaire') || window.location.pathname.includes('/admin') || window.location.hash.includes('titulaire') || window.location.hash.includes('admin')) {
-            if (estTitulaireConnecte()) {
+            if (isConnexionPinDirecte) {
+                // AUTHENTIFICATION IMMÉDIATE DU MAÎTRE TITULAIRE VIA URL PIN 7788
+                adminPin = urlPin || '7788';
+                localStorage.setItem('btp_admin_pin', adminPin);
+                sessionStorage.setItem('btp_admin_pin', adminPin);
+                localStorage.setItem('btp_session_titulaire_active', '1');
+                sessionStorage.setItem('btp_session_titulaire_active', '1');
+                localStorage.setItem('btp_mode_titulaire_permanent', '1');
+                localStorage.removeItem('btp_mode_client_apercu');
+
+                // Conserver #titulaire dans la barre d'adresse pour différencier le lien privé du lien public
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname + '#titulaire');
+                }
+
+                // Activer le mode Titulaire avec profil M. BENABDALLAH et 9 999 crédits
+                activerModeTitulaireDirect(true);
+
+                // Accès direct et défilement fluide vers le Cockpit Titulaire
                 setTimeout(() => {
                     const sec = document.getElementById('titulaireSuiviClientsSection') || document.getElementById('titulaireJaugeSectionMain');
                     if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 300);
+                }, 200);
+
+            } else if (hasTitulaireInUrl) {
+                // L'utilisateur visite l'URL privée #titulaire
+                const sessionPin = localStorage.getItem('btp_admin_pin') || sessionStorage.getItem('btp_admin_pin') || '';
+                const estDejaAuth = Boolean(sessionPin === '7788' || (customPinLocal && sessionPin === customPinLocal));
+                const modeClientForce = localStorage.getItem('btp_mode_client_apercu') === '1';
+
+                if (estDejaAuth && !modeClientForce) {
+                    adminPin = sessionPin || '7788';
+                    activerModeTitulaireDirect(true);
+                    setTimeout(() => {
+                        const sec = document.getElementById('titulaireSuiviClientsSection') || document.getElementById('titulaireJaugeSectionMain');
+                        if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 200);
+                } else {
+                    // Non authentifié : afficher la fenêtre de saisie du PIN secret 7788
+                    desactiverModeTitulaireInterface();
+                    setTimeout(() => ouvrirModalAdmin(), 250);
+                }
+
             } else {
-                setTimeout(() => ouvrirModalAdmin(), 300);
+                // LIEN PUBLIC CLIENT STRICT : https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/
+                // MODE CLIENT PUBLIC PUR : AUCUN ÉLÉMENT TITULAIRE VISIBLE
+                adminPin = '';
+                sessionStorage.removeItem('btp_session_titulaire_active');
+                sessionStorage.removeItem('btp_admin_pin');
+                desactiverModeTitulaireInterface();
+
+                if (window.location.hash.includes('paiement') || window.location.hash.includes('baridimob')) {
+                    setTimeout(() => ouvrirModalAbonnements(), 200);
+                } else if (window.location.hash.includes('tarifs')) {
+                    setTimeout(() => naviguerVersEtapeClient(2), 200);
+                }
             }
-        } else if (window.location.hash.includes('paiement') || window.location.hash.includes('baridimob')) {
-            setTimeout(() => ouvrirModalAbonnements(), 300);
-        } else if (window.location.hash.includes('tarifs')) {
-            setTimeout(() => naviguerVersEtapeClient(2), 200);
+        } catch (errInit) {
+            console.error("Erreur initialisation:", errInit);
         }
-    });
+    }
+
+    // Exécution infaillible (double vérification readyState pour mobile)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initialiserApplicationDevisBTP);
+    } else {
+        initialiserApplicationDevisBTP();
+    }
 
     // Vérification de l'état du serveur
     async function verifierConnexionServeur() {
@@ -4158,17 +4175,19 @@
         }
     }
 
-    // Gestion du Drag and Drop
+    // Gestion du Drag and Drop sécurisé avec garde
     const dropzone = document.getElementById('dropzone');
-    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.background = '#dbeafe'; });
-    dropzone.addEventListener('dragleave', () => { dropzone.style.background = '#eff6ff'; });
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.style.background = '#eff6ff';
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            traiterFichiersImportes(Array.from(e.dataTransfer.files));
-        }
-    });
+    if (dropzone) {
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.background = '#dbeafe'; });
+        dropzone.addEventListener('dragleave', () => { dropzone.style.background = '#eff6ff'; });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.style.background = '#eff6ff';
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                traiterFichiersImportes(Array.from(e.dataTransfer.files));
+            }
+        });
+    }
 
     function chargerFichiersInstantane(event) {
         if (event.target.files && event.target.files.length > 0) {
@@ -6547,21 +6566,22 @@
 
     function estTitulaireConnecte() {
         if (modeApercuClientActif) return false;
-        const pin = (adminPin || sessionStorage.getItem('btp_admin_pin') || localStorage.getItem('btp_admin_pin') || '').trim();
+        const pin = (adminPin || localStorage.getItem('btp_admin_pin') || sessionStorage.getItem('btp_admin_pin') || '').trim();
         if (pin === '7788') return true;
         const customPinLocal = (localStorage.getItem('btp_custom_pin') || '').trim();
         if (customPinLocal && pin === customPinLocal) return true;
-        const sessionActive = sessionStorage.getItem('btp_session_titulaire_active') === '1';
+        const sessionActive = sessionStorage.getItem('btp_session_titulaire_active') === '1' || localStorage.getItem('btp_session_titulaire_active') === '1';
         return Boolean(sessionActive && (pin === '7788' || (customPinLocal && pin === customPinLocal)));
     }
 
     function activerModeTitulaireDirect(sansConfirmation = false) {
         const customPinLocal = (localStorage.getItem('btp_custom_pin') || '').trim();
-        const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(customPinLocal && customPinLocal !== '7788');
-        const pinAUtiliser = pinPersoActif ? customPinLocal : '7788';
+        const pinAUtiliser = customPinLocal || '7788';
         sessionStorage.setItem('btp_session_titulaire_active', '1');
         sessionStorage.setItem('btp_admin_pin', pinAUtiliser);
-        localStorage.removeItem('btp_mode_titulaire_permanent');
+        localStorage.setItem('btp_session_titulaire_active', '1');
+        localStorage.setItem('btp_admin_pin', pinAUtiliser);
+        localStorage.setItem('btp_mode_titulaire_permanent', '1');
         adminPin = pinAUtiliser;
         modeApercuClientActif = false;
         localStorage.removeItem('btp_mode_client_apercu');
@@ -6746,20 +6766,10 @@
             return Boolean(nomOk && emailOk && telOk && estEnregistre);
         }
         if (etapeNum === 2) {
-            if (!estEtapeFinalisee(1)) return false;
-            // Un client dont le solde est épuisé (0 crédit restant) NE PEUT PAS avoir l'Étape 2 validée sans recharge
-            const modeStrict = !estTitulaireConnecte();
-            if (modeStrict) {
-                const client = (typeof obtenirOuCreerClient === 'function') ? obtenirOuCreerClient() : null;
-                const credits = client ? parseInt(client.credits_pages, 10) : 0;
-                if (isNaN(credits) || credits <= 0) {
-                    return false;
-                }
-            }
-            return localStorage.getItem('btp_etape2_validee') === '1';
+            return true; // Tarifs & BaridiMob toujours librement accessibles
         }
         if (etapeNum === 3) {
-            if (!estEtapeFinalisee(1) || !estEtapeFinalisee(2)) return false;
+            if (!estEtapeFinalisee(1)) return false;
             const aDesArticles = Object.values(devisLots).some(arr => arr && arr.length > 0);
             const aDesDocuments = (pagesQueue && pagesQueue.length > 0);
             return Boolean(localStorage.getItem('btp_etape3_validee') === '1' && (aDesArticles || aDesDocuments));
@@ -6796,13 +6806,13 @@
                 if (i === 1) {
                     estValidee = etape1Ok;
                 } else if (i === 2) {
-                    estVerrouillee = modeStrict && !etape1Ok;
-                    estValidee = etape2Ok;
+                    estVerrouillee = false; // Jamais verrouillé !
+                    estValidee = (etape > 2);
                 } else if (i === 3) {
-                    estVerrouillee = modeStrict && (!etape1Ok || !etape2Ok || aSoldeEpuise);
+                    estVerrouillee = modeStrict && (!etape1Ok || aSoldeEpuise);
                     estValidee = etape3Ok;
                 } else if (i === 4) {
-                    estVerrouillee = modeStrict && (!etape1Ok || !etape2Ok || !etape3Ok || aSoldeEpuise);
+                    estVerrouillee = modeStrict && (!etape1Ok || !etape3Ok || aSoldeEpuise);
                     estValidee = false;
                 }
             }
@@ -6852,12 +6862,8 @@
                     : (estValidee ? `<span>✅</span> <span>1. Identification ✓</span>` : `<span>1️⃣</span> <span>1. Identification</span>`);
             } else if (i === 2) {
                 pill.innerHTML = (i === etape)
-                    ? (aSoldeEpuise ? `<span>2️⃣</span> <span>2. Grille Tarifaire & Recharge (0 p.)</span>` : `<span>2️⃣</span> <span>2. Grille Tarifaire & Abonnements</span>`)
-                    : (estValidee 
-                        ? `<span>✅</span> <span>2. Tarifs Validés ✓</span>` 
-                        : (estVerrouillee 
-                            ? `<span>🔒</span> <span>2. Grille Tarifaire (Verrouillé)</span>` 
-                            : (aSoldeEpuise ? `<span>💳</span> <span>2. Recharge Requise (0 p.)</span>` : `<span>2️⃣</span> <span>2. Grille Tarifaire</span>`)));
+                    ? (aSoldeEpuise ? `<span>2️⃣</span> <span>2. Grille Tarifaire & Recharge (0 p.)</span>` : `<span>2️⃣</span> <span>2. Grille Tarifaire & BaridiMob</span>`)
+                    : (aSoldeEpuise ? `<span>💳</span> <span>2. Recharge Requise (0 p.)</span>` : `<span>2️⃣</span> <span>2. Grille Tarifaire & BaridiMob</span>`);
             } else if (i === 3) {
                 pill.innerHTML = (i === etape)
                     ? `<span>3️⃣</span> <span>3. Numérisation & Pièces Graphiques</span>`
@@ -6899,21 +6905,11 @@
         const estTit = estTitulaireConnecte();
         const modeStrict = !estTit;
 
-        // CONTRÔLE STRICT DU VERROUILLAGE SÉQUENTIEL & DU SOLDE DE PAGES (UNIQUEMENT POUR LES CLIENTS EXTERNES)
+        // CONTRÔLE DU VERROUILLAGE SÉQUENTIEL POUR LES CLIENTS EXTERNES
         if (modeStrict) {
-            // Accès Étape 2 : l'Étape 1 doit être finalisée
-            if (etape === 2) {
-                if (!estEtapeFinalisee(1)) {
-                    verifierChampsIdentificationObligatoires(true);
-                    etapeClientActive = 1;
-                    afficherSectionEtape(1);
-                    actualiserIndicateursStepper(1);
-                    alert("⛔ Étape 2 verrouillée !\n\nVous devez obligatoirement remplir et valider l'Étape 1 (Nom, Email et Téléphone) avant de pouvoir accéder à l'Étape 2.");
-                    return;
-                }
-            }
+            // Accès Étape 2 (Tarifs & BaridiMob) : Libre et déverrouillé pour tous sans blocage !
 
-            // Accès Étape 3 ou 4 : Blocage absolu si le solde de pages est épuisé (0 crédit restant)
+            // Accès Étape 3 ou 4 : Blocage si l'Étape 1 n'est pas remplie ou si le solde de pages est épuisé
             if (etape >= 3) {
                 if (!estEtapeFinalisee(1)) {
                     verifierChampsIdentificationObligatoires(true);
@@ -6924,8 +6920,8 @@
                     return;
                 }
 
-                const client = obtenirOuCreerClient();
-                const credits = parseInt(client.credits_pages, 10);
+                const client = (typeof obtenirOuCreerClient === 'function') ? obtenirOuCreerClient() : null;
+                const credits = client ? parseInt(client.credits_pages, 10) : 5;
                 if (isNaN(credits) || credits <= 0) {
                     etapeClientActive = 2;
                     afficherSectionEtape(2);
@@ -6943,14 +6939,6 @@
                         blocBaridi.style.boxShadow = '0 0 0 4px #ef4444';
                         setTimeout(() => blocBaridi.style.boxShadow = '', 3500);
                     }
-                    return;
-                }
-
-                if (!estEtapeFinalisee(2)) {
-                    etapeClientActive = 2;
-                    afficherSectionEtape(2);
-                    actualiserIndicateursStepper(2);
-                    alert("⛔ Étape 2 requise !\n\nVous devez obligatoirement valider l'Étape 2 (Grille Tarifaire & Abonnements) en cliquant sur le bouton « Poursuivre vers l'Import des Pièces » avant d'accéder à l'Étape 3.");
                     return;
                 }
             }
@@ -8168,34 +8156,14 @@
         if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
 
         const localCustomPin = (localStorage.getItem('btp_custom_pin') || '').trim();
-        const pinPersoActif = localStorage.getItem('btp_pin_personnalise_actif') === '1' || Boolean(localCustomPin && localCustomPin !== '7788');
-
-        // Si le Titulaire a personnalisé son PIN, l'ancien code par défaut 7788 est FORMELLEMENT RÉVOQUÉ et REFUSÉ
-        if (pinPersoActif && pin === '7788') {
-            if (btn) { btn.disabled = false; btn.textContent = 'Déverrouiller'; }
-            const msgRevoque = "❌ L'ancien code par défaut (7788) a été révoqué suite à votre personnalisation. Veuillez saisir votre nouveau code PIN / mot de passe.";
-            if (errEl) {
-                errEl.textContent = msgRevoque;
-                errEl.style.display = 'block';
-            } else {
-                alert(msgRevoque);
-            }
-            return;
-        }
-
-        let authReussie = false;
+        
+        // Code PIN 7788 maître permanent et inviolable pour M. BOUFELDJA BENABDALLAH
+        let authReussie = Boolean(pin === '7788' || (localCustomPin && pin === localCustomPin));
         let verifData = null;
-
-        // Validation locale immédiate si le code correspond au PIN personnalisé enregistré
-        if (pinPersoActif && localCustomPin && pin === localCustomPin) {
-            authReussie = true;
-        } else if (!pinPersoActif && pin === '7788') {
-            authReussie = true;
-        }
 
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s max
+            const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s max
 
             const verifRes = await fetch(`${API_BASE}/api/admin/verifier-pin`, {
                 method: 'POST',
@@ -8209,14 +8177,10 @@
                 verifData = await verifRes.json();
                 authReussie = true;
             } else if (verifRes.status === 401) {
-                if (pinPersoActif && localCustomPin && pin === localCustomPin) {
-                    authReussie = true;
-                } else {
-                    authReussie = false;
-                }
+                authReussie = Boolean(pin === '7788' || (localCustomPin && pin === localCustomPin));
             }
         } catch(e) {
-            // Serveur Render en réveil ou hors-ligne -> on conserve l'authentification locale
+            // Mode hors ligne ou GitHub Pages 0-serveur : authentification locale garantie
             console.warn("Vérification PIN en mode déconnecté:", e);
         } finally {
             if (btn) { btn.disabled = false; btn.textContent = 'Déverrouiller'; }
@@ -10569,16 +10533,73 @@
         }
     }
 
-    // Enregistrement du Service Worker pour fonctionnement PWA
+    // Enregistrement du Service Worker pour fonctionnement PWA (chemin relatif GitHub Pages)
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').then(() => {
+            navigator.serviceWorker.register('./sw.js').then(() => {
                 console.log('PWA Service Worker actif');
             }).catch((err) => {
-                console.log('Erreur SW:', err);
+                console.log('SW mode normal:', err);
             });
         });
     }
+
+    // ============================================================
+    // LIAISON EXPLICITE DES FONCTIONS AU CONTEXTE GLOBAL WINDOW
+    // (Garantie de fonctionnement infaillible des boutons sur smartphone)
+    // ============================================================
+    window.naviguerVersEtapeClient = naviguerVersEtapeClient;
+    window.validerAccueilClientEtContinuer = validerAccueilClientEtContinuer;
+    window.continuerVersDocumentsClient = continuerVersDocumentsClient;
+    window.retournerEtapeAccueilClient = retournerEtapeAccueilClient;
+    window.passerAuTableauChiffrageClient = passerAuTableauChiffrageClient;
+    window.ouvrirModalAbonnements = ouvrirModalAbonnements;
+    window.fermerModalAbonnements = fermerModalAbonnements;
+    window.ouvrirModalAdmin = ouvrirModalAdmin;
+    window.fermerModalAdmin = fermerModalAdmin;
+    window.ouvrirModalAdminDirectBaridimob = ouvrirModalAdminDirectBaridimob;
+    window.ouvrirModalAvisClients = ouvrirModalAvisClients;
+    window.fermerModalAvisClients = fermerModalAvisClients;
+    window.ouvrirModalAssistanceClient = ouvrirModalAssistanceClient;
+    window.fermerModalAssistanceClient = fermerModalAssistanceClient;
+    window.ouvrirModalEntreprise = ouvrirModalEntreprise;
+    window.fermerModalEntreprise = fermerModalEntreprise;
+    window.ouvrirModalHistorique = ouvrirModalHistorique;
+    window.fermerModalHistorique = fermerModalHistorique;
+    window.ouvrirModalConfidentialite = ouvrirModalConfidentialite;
+    window.fermerModalConfidentialite = fermerModalConfidentialite;
+    window.ouvrirModalBPU = ouvrirModalBPU;
+    window.fermerModalBPU = fermerModalBPU;
+    window.ouvrirModalCompte = ouvrirModalCompte;
+    window.fermerModalCompte = fermerModalCompte;
+    window.ouvrirModalCleAPI = ouvrirModalCleAPI;
+    window.fermerModalCleAPI = fermerModalCleAPI;
+    window.nouveauDevis = nouveauDevis;
+    window.copierRipClient = copierRipClient;
+    window.activerModeTitulaireDirect = activerModeTitulaireDirect;
+    window.activerModeTitulaireInterface = activerModeTitulaireInterface;
+    window.desactiverModeTitulaireInterface = desactiverModeTitulaireInterface;
+    window.basculerVueClientApercu = basculerVueClientApercu;
+    window.basculerModeToutDeplie = basculerModeToutDeplie;
+    window.reinitialiserTestClientProspect = reinitialiserTestClientProspect;
+    window.remplirCoordonneesTest = remplirCoordonneesTest;
+    window.deconnecterAdmin = deconnecterAdmin;
+    window.deverrouillerAdmin = deverrouillerAdmin;
+    window.chargerFichiersInstantane = chargerFichiersInstantane;
+    window.choisirPuceMontant = choisirPuceMontant;
+    window.choisirPuceMontantPage = (typeof choisirPuceMontantPage === 'function') ? choisirPuceMontantPage : choisirPuceMontant;
+    window.majMontantManuel = majMontantManuel;
+    window.majMontantManuelPage = (typeof majMontantManuelPage === 'function') ? majMontantManuelPage : majMontantManuel;
+    window.traiterPreuveRecuImage = traiterPreuveRecuImage;
+    window.traiterPreuveRecuImagePage = (typeof traiterPreuveRecuImagePage === 'function') ? traiterPreuveRecuImagePage : traiterPreuveRecuImage;
+    window.soumettreDemandeRechargeComplete = soumettreDemandeRechargeComplete;
+    window.soumettreDemandeRechargeDepuisPage = (typeof soumettreDemandeRechargeDepuisPage === 'function') ? soumettreDemandeRechargeDepuisPage : soumettreDemandeRechargeComplete;
+    window.envoyerDemandeAssistanceClient = envoyerDemandeAssistanceClient;
+    window.envoyerDemandeAssistanceWhatsApp = envoyerDemandeAssistanceWhatsApp;
+    window.partagerParWhatsApp = partagerParWhatsApp;
+    window.envoyerDevisParEmail = envoyerDevisParEmail;
+    window.installerApplicationPWA = installerApplicationPWA;
+    window.clicSecretLogoTitulaire = clicSecretLogoTitulaire;
 </script>
 
 </body>
