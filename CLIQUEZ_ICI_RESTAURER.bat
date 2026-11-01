@@ -50,46 +50,14 @@ if exist "index.html" (
     )
 )
 
-:: 3. Restauration directe de index.html
-set "DEJA_ALGERIE=0"
-if exist "index.html" (
-    findstr /i "Devis BTP Algérie" "index.html" >nul 2>&1
-    if not errorlevel 1 (
-        for %%F in ("index.html") do (
-            if %%~zF GTR 100000 set "DEJA_ALGERIE=1"
-        )
-    )
+REM 3. Restauration directe et immediate de index.html
+if exist "%~dp0index_europe.html" (
+    copy /y "%~dp0index_europe.html" "%~dp0index.html" >nul
+    copy /y "%~dp0index_europe.html" "%~dp0index_algerie.html" >nul
+) else if exist "%~dp0index_algerie.html" (
+    copy /y "%~dp0index_algerie.html" "%~dp0index.html" >nul
 )
 
-if "!DEJA_ALGERIE!"=="1" (
-    echo [OK] La version Algérie officielle 100%% autonome est déjà active dans index.html.
-    copy /y "index.html" "index_algerie.html" >nul
-) else if exist "index_algerie.html" (
-    set "TAILLE_ALG=0"
-    for %%F in ("index_algerie.html") do set "TAILLE_ALG=%%~zF"
-    if !TAILLE_ALG! GTR 100000 (
-        echo [*] Restauration depuis votre copie locale index_algerie.html...
-        copy /y "index_algerie.html" "index.html" >nul
-    ) else if exist "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" (
-        echo [*] Restauration de secours depuis C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html...
-        copy /y "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" "index.html" >nul
-        copy /y "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" "index_algerie.html" >nul
-    )
-) else if exist "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" (
-    echo [*] Restauration de secours depuis C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html...
-    copy /y "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" "index.html" >nul
-    copy /y "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" "index_algerie.html" >nul
-) else (
-    echo [*] Restauration du fichier source original index.html depuis Git...
-    "!GIT_CMD!" checkout 4a9bff2 -- index.html >nul 2>&1
-    if errorlevel 1 "!GIT_CMD!" checkout 38ed851 -- index.html >nul 2>&1
-    if errorlevel 1 "!GIT_CMD!" checkout HEAD~1 -- index.html >nul 2>&1
-    if errorlevel 1 (
-        echo [*] Extraction directe par flux Git...
-        "!GIT_CMD!" show 4a9bff2:index.html > "index.html" 2>nul
-        if errorlevel 1 "!GIT_CMD!" show 38ed851:index.html > "index.html" 2>nul
-    )
-)
 
 :: 4. Vérification et validation
 set "TAILLE=0"

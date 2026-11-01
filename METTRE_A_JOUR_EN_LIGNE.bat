@@ -65,19 +65,12 @@ git config user.name "BOUFELDJA BENABDALLAH" >> "%~dp0deploy_log.txt" 2>&1
 git config user.email "contact@devis-btp.dz" >> "%~dp0deploy_log.txt" 2>&1
 echo Identite configuree : BOUFELDJA BENABDALLAH >> "%~dp0deploy_log.txt" 2>&1
 
-:: Securite : S'assurer que index.html est bien la Version Algerie
-findstr /i "Version Europe" "index.html" >nul 2>&1
-if not errorlevel 1 (
-    echo [*] Sauvegarde de la version Europe dans index_europe.html...
-    copy /y "index.html" "index_europe.html" >nul
-    echo [*] Restauration automatique de la version Algerie dans index.html...
-    if exist "index_algerie.html" (
-        copy /y "index_algerie.html" "index.html" >nul
-    ) else if exist "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" (
-        copy /y "C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html" "index.html" >nul
-    )
-)
-copy /y "index.html" "index_algerie.html" >nul
+REM Copie directe et immediate de la version Algerie vers index.html
+echo [*] Copie de index_europe.html vers index.html... >> "%~dp0deploy_log.txt" 2>&1
+copy /y "%~dp0index_europe.html" "%~dp0index.html" >> "%~dp0deploy_log.txt" 2>&1
+copy /y "%~dp0index_europe.html" "%~dp0index_algerie.html" >> "%~dp0deploy_log.txt" 2>&1
+echo [OK] index.html pret pour la mise en ligne. >> "%~dp0deploy_log.txt" 2>&1
+
 
 echo.
 echo [*] 2/4 - Indexation des fichiers modifies...

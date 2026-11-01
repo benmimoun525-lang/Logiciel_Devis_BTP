@@ -42,30 +42,40 @@ def restaurer_index_algerie_automatique():
     if not besoin:
         return True
 
-    # Sauvegarder la version Europe dans index_europe.html
-    try:
-        if os.path.exists(index_path):
-            with open(index_path, "rb") as fin, open(europe_path, "wb") as fout:
-                fout.write(fin.read())
-    except Exception:
-        pass
-
-    # Priorité 1 : Restauration directe depuis C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html
-    backup_copie = r"C:\Users\hp\Logiciel_Devis_BTP_COPIE\index.html"
-    if os.path.exists(backup_copie):
+    # Priorité 1 : Si index_europe.html contient le logiciel complet Algérie (> 100 Ko)
+    if os.path.exists(europe_path) and os.path.getsize(europe_path) > 100000:
         try:
-            with open(backup_copie, "rb") as fin:
-                data_backup = fin.read()
-            if len(data_backup) > 50000:
-                with open(index_path, "wb") as fout, open(algerie_path, "wb") as fout_alg:
-                    fout.write(data_backup)
-                    fout_alg.write(data_backup)
+            with open(europe_path, "rb") as fin:
+                data_europe = fin.read()
+            if b"BENABDALLAH" in data_europe or b"BaridiMob" in data_europe or b"00799999000191804708" in data_europe:
+                if besoin or not os.path.exists(index_path) or os.path.getsize(index_path) < 100000:
+                    with open(index_path, "wb") as fout, open(algerie_path, "wb") as fout_alg:
+                        fout.write(data_europe)
+                        fout_alg.write(data_europe)
+                    with open(log_path, "w", encoding="utf-8") as f:
+                        f.write(f"Succès : index.html restauré depuis index_europe.html ({len(data_europe)} octets).\n")
+                    print(f"[RESTAURATION] ✅ index.html restauré depuis index_europe.html ({len(data_europe):,} octets)")
+                    return True
+        except Exception as e_eur:
+            print(f"[RESTAURATION] Note index_europe : {e_eur}")
+
+    # Priorité 2 : Si index_algerie.html existe (> 100 Ko)
+    if os.path.exists(algerie_path) and os.path.getsize(algerie_path) > 100000:
+        try:
+            with open(algerie_path, "rb") as fin:
+                data_alg = fin.read()
+            if besoin or not os.path.exists(index_path) or os.path.getsize(index_path) < 100000:
+                with open(index_path, "wb") as fout:
+                    fout.write(data_alg)
                 with open(log_path, "w", encoding="utf-8") as f:
-                    f.write(f"Succès : index.html restauré depuis {backup_copie} ({len(data_backup)} octets).\n")
-                print(f"[RESTAURATION] ✅ index.html restauré depuis {backup_copie} ({len(data_backup):,} octets)")
+                    f.write(f"Succès : index.html restauré depuis index_algerie.html ({len(data_alg)} octets).\n")
+                print(f"[RESTAURATION] ✅ index.html restauré depuis index_algerie.html ({len(data_alg):,} octets)")
                 return True
-        except Exception as e_copie:
-            print(f"[RESTAURATION] Note copie : {e_copie}")
+        except Exception as e_alg:
+            print(f"[RESTAURATION] Note index_algerie : {e_alg}")
+
+    if not besoin:
+        return True
 
     # Priorité 2 : Détecter Git
     possible_git = [
