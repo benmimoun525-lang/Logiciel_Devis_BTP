@@ -563,6 +563,9 @@
                 <button type="button" class="btn-header-pill" onclick="ouvrirModalConfigIA()" style="background: rgba(14, 165, 233, 0.25); border: 1.5px solid #38bdf8; color: #e0f2fe;" title="Activer la puissance de vision Google (Google Lens & Gemini) pour une extraction parfaite">
                     ✨ <span>Google Lens & Vision</span>
                 </button>
+                <a href="index.html" class="btn-header-pill" style="background: rgba(5, 150, 105, 0.25); border: 1.5px solid #34d399; color: #6ee7b7; text-decoration: none; font-weight: 800;" title="Basculer vers la Version Algérie (DZD)">
+                    <span>🇩🇿</span> <span>Version Algérie (DZD)</span>
+                </a>
             </div>
         </header>
 
@@ -800,42 +803,89 @@
                     </div>
                 </div>
 
-                <!-- TABLEAU DU DEVIS NUMÉRISÉ (SANS PRIX : QUANTITÉS & DÉSIGNATIONS UNIQUEMENT) -->
-                <div id="blocDevisNumerise" style="margin-top: 18px; background: white; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                <!-- Transition & Accès Direct vers le Dossier Devis (Étape 4) -->
+                <div style="margin-top: 18px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <div style="font-weight: 800; color: #166534; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                            <span>✓</span> <span>Articles Prêts & Chiffrables (<span id="compteurArticlesEtape3">10</span> ouvrages BTP)</span>
+                        </div>
+                        <div style="font-size: 0.82rem; color: #15803d; margin-top: 3px;">
+                            Vos articles sont synchronisés en temps réel dans votre dossier : <b>Devis Numérisé (Bordereau Vierge)</b> et <b>Devis Chiffré (DQE Financier)</b>.
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" onclick="naviguerVersEtape(4); basculerOngletEurope('numerise');" style="background: #ffffff; color: #1e3a8a; border: 1.5px solid #93c5fd; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 800; cursor: pointer;">
+                            📋 1. Voir Devis Numérisé (Vierge)
+                        </button>
+                        <button type="button" onclick="naviguerVersEtape(4); basculerOngletEurope('chiffre');" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border: none; padding: 8px 18px; border-radius: 8px; font-size: 0.82rem; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(37,99,235,0.25);">
+                            💰 2. Voir Devis Chiffré (DQE Financier) ➔
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION ÉTAPE 4 : DOSSIER DEVIS (NUMÉRISÉ VIERGE vs CHIFFRÉ DQE vs APERÇU A4) -->
+            <div id="sectionEtape4" style="margin-top: 24px; border-top: 1.5px solid #f1f5f9; padding-top: 20px;">
+                <!-- Sélecteur d'Onglets Étape 4 : Les 2 Devis Identiques + Aperçu A4 -->
+                <div class="no-print" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap; align-items: center;">
+                    <button type="button" id="tabBtnEuropeNumerise" onclick="basculerOngletEurope('numerise')" style="padding: 10px 18px; font-weight: 800; font-size: 0.90rem; border-radius: 10px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" title="Consulter le devis métré avec les colonnes de prix vierges (sans prix)">
+                        <span>📋</span> <span>1. DEVIS NUMÉRISÉ (Bordereau Vierge — Sans Prix)</span>
+                        <span style="font-size: 0.70rem; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 2px 7px; border-radius: 10px; font-weight: 800;">Sans Prix</span>
+                    </button>
+                    <button type="button" id="tabBtnEuropeChiffre" onclick="basculerOngletEurope('chiffre')" style="padding: 10px 18px; font-weight: 800; font-size: 0.90rem; border-radius: 10px; border: 2px solid #059669; background: #ecfdf5; color: #065f46; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(5,150,105,0.2); transition: all 0.2s;" title="Consulter ce même devis complété avec les prix unitaires, montants HT, TVA et TTC">
+                        <span>💰</span> <span>2. DEVIS CHIFFRÉ (DQE Financier — P.U., HT, TVA, TTC)</span>
+                        <span style="font-size: 0.70rem; background: #10b981; color: white; padding: 2px 7px; border-radius: 10px; font-weight: 800;">Chiffré ✓</span>
+                    </button>
+                    <button type="button" id="tabBtnEuropeA4" onclick="basculerOngletEurope('a4')" style="padding: 10px 18px; font-weight: 700; font-size: 0.88rem; border-radius: 10px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" title="Consulter l'aperçu A4 imprimable officiel">
+                        <span>📑</span> <span>3. Aperçu Devis A4 Normalisé</span>
+                        <span style="font-size: 0.68rem; background: #2563eb; color: white; padding: 2px 8px; border-radius: 12px; font-weight: 800;">A4</span>
+                    </button>
+                </div>
+
+                <!-- 1. VUE DEVIS NUMÉRISÉ (BORDEREAU VIERGE AVEC COLONNES DE PRIX VIDES) -->
+                <div id="vueDevisNumerise" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
                         <div>
                             <div style="font-weight: 800; font-size: 1.05rem; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
-                                <span>📋</span> <span>Devis Numérisé (Bordereau Quantitatif Métré — Sans Prix)</span>
+                                <span>📋</span> <span>1. Devis Numérisé (Bordereau Vierge d'Appel d'Offres — Sans Prix)</span>
                                 <span id="badgeNbArticlesNumerises" style="font-size: 0.74rem; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-weight: 800;">10 articles</span>
                             </div>
                             <div style="font-size: 0.80rem; color: #64748b; margin-top: 2px;">
-                                Version consultation client / appel d'offres : affiche <b>uniquement</b> les désignations, unités et quantités réelles (strictement <b>sans prix unitaires ni montants financiers</b>).
+                                Identique au devis chiffré : mêmes articles, chapitres et métrés. Les colonnes de <b>prix unitaires, montants HT, TVA et TTC sont laissées vierges</b> pour consultation ou appel d'offres.
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button type="button" onclick="ajouterLigneNumerisee()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
-                                ➕ Ajouter Poste Numérisé
-                            </button>
                             <button type="button" onclick="ajouterChapitre()" style="background: #0f172a; border: 1px solid #334155; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
                                 🏷️ + Chapitre / Lot
                             </button>
-                            <button type="button" onclick="naviguerVersEtape(4)" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(37,99,235,0.25);">
-                                ➡️ Passer au Devis Chiffré (Étape 4)
+                            <button type="button" onclick="ajouterLigneNumerisee()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                ➕ Ajouter Poste
+                            </button>
+                            <button type="button" onclick="exporterExcel(true)" style="background: #0284c7; border: 1px solid #0369a1; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
+                                📊 Export Excel Vierge (.xlsx)
+                            </button>
+                            <button type="button" onclick="imprimerDevis(true)" style="background: #2563eb; border: 1px solid #1d4ed8; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
+                                🖨️ Imprimer Bordereau Vierge A4
                             </button>
                         </div>
                     </div>
 
-                    <!-- Tableau du Devis Numérisé sans prix -->
+                    <!-- Tableau du Devis Numérisé : Strictement les mêmes 11 colonnes que le Devis Chiffré -->
                     <div class="table-responsive">
                         <table class="dqe-table" id="tableDevisNumerise">
                             <thead>
                                 <tr style="background: #0f172a; color: #f8fafc;">
                                     <th style="width: 45px; text-align: center;">N°</th>
-                                    <th style="width: 170px;">Chapitre / Lot</th>
-                                    <th>Désignation des Travaux / Ouvrages BTP</th>
-                                    <th style="text-align: center; width: 75px;">Unité</th>
-                                    <th style="text-align: right; width: 90px;">Quantité</th>
-                                    <th style="text-align: center; width: 50px;">Act.</th>
+                                    <th style="width: 140px;">Chapitre / Lot</th>
+                                    <th>Désignation des Ouvrages BTP</th>
+                                    <th style="text-align: center; width: 65px;">Unité</th>
+                                    <th style="text-align: right; width: 75px;">Qté</th>
+                                    <th style="text-align: right; width: 100px; color: #94a3b8;">P.U. HT (€) [Vierge]</th>
+                                    <th style="text-align: right; width: 110px; color: #94a3b8;">Total HT (€) [Vierge]</th>
+                                    <th style="text-align: center; width: 65px; color: #94a3b8;">TVA [Vierge]</th>
+                                    <th style="text-align: right; width: 95px; color: #94a3b8;">TVA (€) [Vierge]</th>
+                                    <th style="text-align: right; width: 115px; color: #94a3b8;">Total TTC (€) [Vierge]</th>
+                                    <th style="text-align: center; width: 45px;">Act.</th>
                                 </tr>
                             </thead>
                             <tbody id="tbodyDevisNumerise">
@@ -843,151 +893,182 @@
                             </tbody>
                         </table>
                     </div>
-                    <div style="margin-top: 10px; font-size: 0.75rem; color: #64748b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                        <span>🔒 <i>Synchronisation directe : toute modification de désignation ou quantité ici est immédiatement reportée sur le devis chiffré en Étape 4.</i></span>
-                        <span style="color: #059669; font-weight: 700;">✓ Strictement sans prix (bordereau quantitatif conforme)</span>
-                    </div>
-                </div>
-            </div>
 
-            <!-- SECTION ÉTAPE 4 : BORDEREAU DQE & CHIFFRAGE EN EUROS -->
-            <div id="sectionEtape4" style="margin-top: 24px; border-top: 1.5px solid #f1f5f9; padding-top: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
-                    <div>
-                        <div style="font-weight: 800; font-size: 1.05rem; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
-                            <span>💰</span> <span>4. Devis Chiffré & Bordereau DQE Financier (P.U. HT, Montants HT, TVA et TTC)</span>
-                            <span id="badgeNbArticlesChiffres" style="font-size: 0.74rem; background: #ecfdf5; color: #065f46; border: 1px solid #86efac; padding: 2px 8px; border-radius: 10px; font-weight: 800;">10 articles chiffrés</span>
-                        </div>
-                        <div style="font-size: 0.80rem; color: #64748b; margin-top: 2px;">
-                            Ce devis reprend <b>exactement les mêmes articles</b> que le devis numérisé ci-dessus, avec le chiffrage complet des prix unitaires, montants de travaux, TVA et montant total TTC.
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button type="button" onclick="ajouterChapitre()" style="background: #0f172a; border: 1px solid #334155; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
-                            🏷️ + Chapitre / Lot
-                        </button>
-                        <button type="button" onclick="ajouterLigne()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
-                            ➕ Ajouter Poste Chiffré
-                        </button>
-                        <button type="button" onclick="exporterExcel()" style="background: #059669; border: 1px solid #10b981; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
-                            📊 Export Excel (.xlsx)
-                        </button>
-                        <button type="button" onclick="window.print()" style="background: #2563eb; border: 1px solid #3b82f6; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
-                            🖨️ Imprimer Devis A4
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tableau DQE structuré en LIGNES et COLONNES conformes au standard BTP -->
-                <div class="table-responsive">
-                    <table class="dqe-table" id="tableDQE">
-                        <thead>
-                            <tr style="background: #1e293b; color: #f8fafc;">
-                                <th style="width: 45px; text-align: center;">N°</th>
-                                <th style="width: 140px;">Chapitre / Lot</th>
-                                <th>Désignation des Ouvrages BTP</th>
-                                <th style="text-align: center; width: 65px;">Unité</th>
-                                <th style="text-align: right; width: 75px;">Qté</th>
-                                <th style="text-align: right; width: 100px;">P.U. HT (€)</th>
-                                <th style="text-align: right; width: 110px;">Total HT (€)</th>
-                                <th style="text-align: center; width: 65px;">TVA</th>
-                                <th style="text-align: right; width: 95px;">TVA (€)</th>
-                                <th style="text-align: right; width: 115px;">Total TTC (€)</th>
-                                <th style="text-align: center; width: 45px;">Act.</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyDQE">
-                            <!-- Rempli par JavaScript ligne par ligne avec chapitres et calculs exacts -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Récapitulatif Total Financier avec Totaux HT, TVA et TTC -->
-                <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-                        <div style="font-size: 0.82rem; color: #475569; line-height: 1.6;">
-                            <div>✓ <b>Règle de chiffrage BTP :</b> Montant HT = Quantité × P.U. HT | Montant TVA = Total HT × Taux TVA | Total TTC = Total HT + TVA</div>
-                            <div>✓ <b>Retenue de garantie légale BTP :</b> 5% (Loi n° 71-584) déductible sur situation finale</div>
-                            <div>✓ <b>Modalités :</b> Acompte 30% à la commande, situations mensuelles d'avancement, solde à réception</div>
-                        </div>
-                        <div style="min-width: 310px; text-align: right; font-size: 0.88rem; background: white; padding: 14px 18px; border-radius: 10px; border: 1.5px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
-                            <div style="display:flex; justify-content:space-between; color:#334155; font-weight:700;">
-                                <span>MONTANT TOTAL GÉNÉRAL HT :</span>
-                                <b id="lblTotalHT" style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #1e3a8a;">0.00 €</b>
+                    <!-- Bannière récapitulative du Devis Numérisé Vierge -->
+                    <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 12px; padding: 16px 20px; margin-top: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <div style="font-weight: 800; color: #1e40af; font-size: 0.95rem;">
+                                    📋 BORDEREAU QUANTITATIF ESTIMATIF (CADRE SANS PRIX POUR SOUMISSION)
+                                </div>
+                                <div style="font-size: 0.82rem; color: #3b82f6; margin-top: 3px;">
+                                    Ce bordereau reprend <b>exactement les mêmes articles</b> que le devis chiffré. Les colonnes de prix sont vierges conformément aux usages BTP.
+                                </div>
                             </div>
-                            <div style="display:flex; justify-content:space-between; color:#64748b; font-weight:700; margin-top: 6px;">
-                                <span>MONTANT TOTAL TVA :</span>
-                                <b id="lblTotalTVA" style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">0.00 €</b>
-                            </div>
-                            <div style="display:flex; justify-content:space-between; font-size: 1.25rem; font-weight: 900; color: #059669; border-top: 2px solid #059669; padding-top: 8px; margin-top: 8px;">
-                                <span>MONTANT TOTAL GÉNÉRAL TTC :</span>
-                                <b id="lblTotalTTC" style="font-family: 'JetBrains Mono', monospace;">0.00 €</b>
+                            <div>
+                                <button type="button" onclick="basculerOngletEurope('chiffre')" style="background: #059669; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-weight: 800; font-size: 0.85rem; cursor: pointer; box-shadow: 0 2px 6px rgba(5,150,105,0.25);">
+                                    💰 Passer au Devis Chiffré (P.U., HT, TVA, TTC) ➔
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div style="margin-top: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; font-size: 0.80rem; color: #334155;">
-                        <b>Montant arrêté en toutes lettres :</b> <span id="lblTotalLettres" style="font-style: italic; color: #1e3a8a; font-weight: 700;">Zéro euro et zéro centime</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- APERÇU DEVIS A4 OFFICIEL CONFORME -->
-            <div style="margin-top: 30px;">
-                <div style="font-weight: 800; font-size: 1.05rem; margin-bottom: 14px; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
-                    <span>📑</span> <span>Aperçu Impression Devis Officiel A4 Normalisé</span>
                 </div>
 
-                <div class="devis-a4" id="devisA4Imprimable">
-                    <div style="display:flex; justify-content:space-between; border-bottom: 2px solid #1e3a8a; padding-bottom: 12px; margin-bottom: 16px;">
+                <!-- 2. VUE DEVIS CHIFFRÉ (DQE FINANCIER AVEC P.U. HT, MONTANTS HT, TVA ET TTC) -->
+                <div id="vueDevisChiffre">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
                         <div>
-                            <div style="font-size: 1.25rem; font-weight: 900; color: #1e3a8a;" id="a4Ent">BTP RÉNOVATION EUROPE SAS</div>
-                            <div style="font-size: 0.78rem; color: #64748b; margin-top: 3px;" id="a4Siret">SIRET : 842 190 283 00012 - RCS PARIS</div>
-                            <div style="font-size: 0.78rem; color: #64748b;" id="a4Decennale">Assurance Décennale : AXA France (Police DEC-982341)</div>
+                            <div style="font-weight: 800; font-size: 1.05rem; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
+                                <span>💰</span> <span>2. Devis Chiffré & Bordereau DQE Financier (P.U. HT, Montants HT, TVA et TTC)</span>
+                                <span id="badgeNbArticlesChiffres" style="font-size: 0.74rem; background: #ecfdf5; color: #065f46; border: 1px solid #86efac; padding: 2px 8px; border-radius: 10px; font-weight: 800;">10 articles chiffrés</span>
+                            </div>
+                            <div style="font-size: 0.80rem; color: #64748b; margin-top: 2px;">
+                                Reproduit <b>exactement les mêmes articles</b> que le devis numérisé ci-dessus, avec tous les prix unitaires, montants HT, TVA et TTC.
+                            </div>
                         </div>
-                        <div style="text-align: right; font-size: 0.80rem;">
-                            <div style="background:#1e3a8a; color:white; font-weight:900; padding:4px 10px; border-radius:6px; display:inline-block;">DEVIS OFFICIEL</div>
-                            <div style="margin-top: 6px;">N° : <b>DEV-2026-EU01</b></div>
-                            <div>Date : <b>06/11/2026</b></div>
-                            <div>Validité : <b>3 mois</b></div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" onclick="basculerOngletEurope('numerise')" style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #1d4ed8; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                📋 Voir Bordereau Vierge
+                            </button>
+                            <button type="button" onclick="ajouterChapitre()" style="background: #0f172a; border: 1px solid #334155; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
+                                🏷️ + Chapitre / Lot
+                            </button>
+                            <button type="button" onclick="ajouterLigne()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                ➕ Ajouter Poste Chiffré
+                            </button>
+                            <button type="button" onclick="exporterExcel(false)" style="background: #059669; border: 1px solid #10b981; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
+                                📊 Export Excel (.xlsx)
+                            </button>
+                            <button type="button" onclick="imprimerDevis(false)" style="background: #2563eb; border: 1px solid #3b82f6; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
+                                🖨️ Imprimer Devis A4
+                            </button>
                         </div>
                     </div>
 
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px;">
-                        <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 800;">Client & Chantier :</div>
-                        <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a;" id="a4Client">M. Pierre DUPONT</div>
-                        <div style="font-size: 0.80rem; color: #475569;" id="a4Chantier">Chantier : 14, Rue des Bâtisseurs - 75015 Paris</div>
+                    <!-- Tableau DQE structuré en LIGNES et COLONNES conformes au standard BTP -->
+                    <div class="table-responsive">
+                        <table class="dqe-table" id="tableDQE">
+                            <thead>
+                                <tr style="background: #1e293b; color: #f8fafc;">
+                                    <th style="width: 45px; text-align: center;">N°</th>
+                                    <th style="width: 140px;">Chapitre / Lot</th>
+                                    <th>Désignation des Ouvrages BTP</th>
+                                    <th style="text-align: center; width: 65px;">Unité</th>
+                                    <th style="text-align: right; width: 75px;">Qté</th>
+                                    <th style="text-align: right; width: 100px;">P.U. HT (€)</th>
+                                    <th style="text-align: right; width: 110px;">Total HT (€)</th>
+                                    <th style="text-align: center; width: 65px;">TVA</th>
+                                    <th style="text-align: right; width: 95px;">TVA (€)</th>
+                                    <th style="text-align: right; width: 115px;">Total TTC (€)</th>
+                                    <th style="text-align: center; width: 45px;">Act.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyDQE">
+                                <!-- Rempli par JavaScript ligne par ligne avec chapitres et calculs exacts -->
+                            </tbody>
+                        </table>
                     </div>
 
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.80rem;">
-                        <thead>
-                            <tr style="background: #0f172a; color: white;">
-                                <th style="padding: 6px 8px; text-align: center; width: 40px;">N°</th>
-                                <th style="padding: 6px 8px; text-align: left; width: 120px;">Chapitre / Lot</th>
-                                <th style="padding: 6px 8px; text-align: left;">Désignation des Ouvrages</th>
-                                <th style="padding: 6px 8px; text-align: center; width: 45px;">Unité</th>
-                                <th style="padding: 6px 8px; text-align: right; width: 50px;">Qté</th>
-                                <th style="padding: 6px 8px; text-align: right; width: 85px;">P.U. HT</th>
-                                <th style="padding: 6px 8px; text-align: right; width: 95px;">Montant HT</th>
-                                <th style="padding: 6px 8px; text-align: center; width: 55px;">TVA</th>
-                                <th style="padding: 6px 8px; text-align: right; width: 95px;">Montant TTC</th>
-                            </tr>
-                        </thead>
-                        <tbody id="a4TableBody">
-                            <!-- Lignes A4 -->
-                        </tbody>
-                    </table>
-
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid #1e3a8a; padding-top: 14px;">
-                        <div style="font-size: 0.74rem; color: #64748b; max-width: 440px; line-height: 1.5;">
-                            <div>• <b>Retenue de garantie :</b> 5% selon la loi n° 71-584, restituée à l'année de parfait achèvement.</div>
-                            <div>• <b>Validité du devis :</b> 3 mois. Conditions de règlement : 30% acompte, solde à réception des travaux.</div>
-                            <div>• Mention manuscrite obligatoire : <i>« Bon pour accord et acceptation du devis »</i> suivie de date et signature.</div>
+                    <!-- Récapitulatif Total Financier avec Totaux HT, TVA et TTC -->
+                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 16px 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                            <div style="font-size: 0.82rem; color: #475569; line-height: 1.6;">
+                                <div>✓ <b>Règle de chiffrage BTP :</b> Montant HT = Quantité × P.U. HT | Montant TVA = Total HT × Taux TVA | Total TTC = Total HT + TVA</div>
+                                <div>✓ <b>Retenue de garantie légale BTP :</b> 5% (Loi n° 71-584) déductible sur situation finale</div>
+                                <div>✓ <b>Modalités :</b> Acompte 30% à la commande, situations mensuelles d'avancement, solde à réception</div>
+                            </div>
+                            <div style="min-width: 310px; text-align: right; font-size: 0.88rem; background: white; padding: 14px 18px; border-radius: 10px; border: 1.5px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                                <div style="display:flex; justify-content:space-between; color:#334155; font-weight:700;">
+                                    <span>MONTANT TOTAL GÉNÉRAL HT :</span>
+                                    <b id="lblTotalHT" style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #1e3a8a;">0.00 €</b>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; color:#64748b; font-weight:700; margin-top: 6px;">
+                                    <span>MONTANT TOTAL TVA :</span>
+                                    <b id="lblTotalTVA" style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">0.00 €</b>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-size: 1.25rem; font-weight: 900; color: #059669; border-top: 2px solid #059669; padding-top: 8px; margin-top: 8px;">
+                                    <span>MONTANT TOTAL GÉNÉRAL TTC :</span>
+                                    <b id="lblTotalTTC" style="font-family: 'JetBrains Mono', monospace;">0.00 €</b>
+                                </div>
+                            </div>
                         </div>
-                        <div style="min-width: 250px; text-align: right; font-size: 0.84rem; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                            <div style="display:flex; justify-content:space-between; font-weight:700; color:#334155;"><span>MONTANT TOTAL HT :</span><b id="a4TotalHT" style="font-family:'JetBrains Mono', monospace;">0.00 €</b></div>
-                            <div style="display:flex; justify-content:space-between; font-weight:700; color:#64748b; margin-top:3px;"><span>TOTAL TVA :</span><b id="a4TotalTVA" style="font-family:'JetBrains Mono', monospace;">0.00 €</b></div>
-                            <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:900; color:#059669; border-top:2px solid #059669; padding-top:6px; margin-top:6px;">
-                                <span>TOTAL GÉNÉRAL TTC :</span><b id="a4TotalTTC" style="font-family:'JetBrains Mono', monospace;">0.00 €</b>
+                        <div style="margin-top: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px; font-size: 0.80rem; color: #334155;">
+                            <b>Montant arrêté en toutes lettres :</b> <span id="lblTotalLettres" style="font-style: italic; color: #1e3a8a; font-weight: 700;">Zéro euro et zéro centime</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. VUE APERÇU DEVIS A4 OFFICIEL CONFORME -->
+                <div id="vueDevisA4" style="display: none; margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+                        <div style="font-weight: 800; font-size: 1.05rem; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
+                            <span>📑</span> <span>3. Aperçu Impression Devis Officiel A4 Normalisé</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" onclick="basculerOngletEurope('numerise')" style="background: #eff6ff; border: 1.5px solid #bfdbfe; color: #1d4ed8; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                📋 Voir Bordereau Vierge
+                            </button>
+                            <button type="button" onclick="basculerOngletEurope('chiffre')" style="background: #ecfdf5; border: 1.5px solid #86efac; color: #065f46; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                                💰 Voir Devis Chiffré
+                            </button>
+                            <button type="button" onclick="window.print()" style="background: #2563eb; border: 1px solid #1d4ed8; color: white; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
+                                🖨️ Imprimer ce Devis A4
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="devis-a4" id="devisA4Imprimable">
+                        <div style="display:flex; justify-content:space-between; border-bottom: 2px solid #1e3a8a; padding-bottom: 12px; margin-bottom: 16px;">
+                            <div>
+                                <div style="font-size: 1.25rem; font-weight: 900; color: #1e3a8a;" id="a4Ent">BTP RÉNOVATION EUROPE SAS</div>
+                                <div style="font-size: 0.78rem; color: #64748b; margin-top: 3px;" id="a4Siret">SIRET : 842 190 283 00012 - RCS PARIS</div>
+                                <div style="font-size: 0.78rem; color: #64748b;" id="a4Decennale">Assurance Décennale : AXA France (Police DEC-982341)</div>
+                            </div>
+                            <div style="text-align: right; font-size: 0.80rem;">
+                                <div style="background:#1e3a8a; color:white; font-weight:900; padding:4px 10px; border-radius:6px; display:inline-block;" id="a4BadgeTitre">DEVIS OFFICIEL</div>
+                                <div style="margin-top: 6px;">N° : <b>DEV-2026-EU01</b></div>
+                                <div>Date : <b>06/11/2026</b></div>
+                                <div>Validité : <b>3 mois</b></div>
+                            </div>
+                        </div>
+
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px;">
+                            <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 800;">Client & Chantier :</div>
+                            <div style="font-size: 0.95rem; font-weight: 800; color: #0f172a;" id="a4Client">M. Pierre DUPONT</div>
+                            <div style="font-size: 0.80rem; color: #475569;" id="a4Chantier">Chantier : 14, Rue des Bâtisseurs - 75015 Paris</div>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 0.80rem;">
+                            <thead>
+                                <tr style="background: #0f172a; color: white;">
+                                    <th style="padding: 6px 8px; text-align: center; width: 40px;">N°</th>
+                                    <th style="padding: 6px 8px; text-align: left; width: 120px;">Chapitre / Lot</th>
+                                    <th style="padding: 6px 8px; text-align: left;">Désignation des Ouvrages</th>
+                                    <th style="padding: 6px 8px; text-align: center; width: 45px;">Unité</th>
+                                    <th style="padding: 6px 8px; text-align: right; width: 50px;">Qté</th>
+                                    <th style="padding: 6px 8px; text-align: right; width: 85px;">P.U. HT</th>
+                                    <th style="padding: 6px 8px; text-align: right; width: 95px;">Montant HT</th>
+                                    <th style="padding: 6px 8px; text-align: center; width: 55px;">TVA</th>
+                                    <th style="padding: 6px 8px; text-align: right; width: 95px;">Montant TTC</th>
+                                </tr>
+                            </thead>
+                            <tbody id="a4TableBody">
+                                <!-- Lignes A4 -->
+                            </tbody>
+                        </table>
+
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid #1e3a8a; padding-top: 14px;">
+                            <div style="font-size: 0.74rem; color: #64748b; max-width: 440px; line-height: 1.5;">
+                                <div>• <b>Retenue de garantie :</b> 5% selon la loi n° 71-584, restituée à l'année de parfait achèvement.</div>
+                                <div>• <b>Validité du devis :</b> 3 mois. Conditions de règlement : 30% acompte, solde à réception des travaux.</div>
+                                <div>• Mention manuscrite obligatoire : <i>« Bon pour accord et acceptation du devis »</i> suivie de date et signature.</div>
+                            </div>
+                            <div style="min-width: 250px; text-align: right; font-size: 0.84rem; background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                <div style="display:flex; justify-content:space-between; font-weight:700; color:#334155;"><span>MONTANT TOTAL HT :</span><b id="a4TotalHT" style="font-family:'JetBrains Mono', monospace;">0.00 €</b></div>
+                                <div style="display:flex; justify-content:space-between; font-weight:700; color:#64748b; margin-top:3px;"><span>TOTAL TVA :</span><b id="a4TotalTVA" style="font-family:'JetBrains Mono', monospace;">0.00 €</b></div>
+                                <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:900; color:#059669; border-top:2px solid #059669; padding-top:6px; margin-top:6px;">
+                                    <span>TOTAL GÉNÉRAL TTC :</span><b id="a4TotalTTC" style="font-family:'JetBrains Mono', monospace;">0.00 €</b>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1286,6 +1367,10 @@
             if (p.get("titulaire") === "1" || p.get("admin") === "true") {
                 activerModeTitulaireSecret();
             }
+            if (!lignesDQE || lignesDQE.length === 0) {
+                lignesDQE = JSON.parse(JSON.stringify(DIX_ARTICLES_EXEMPLES));
+            }
+            basculerOngletEurope('chiffre');
             rendreTableaux();
         });
 
@@ -2118,6 +2203,100 @@ LOT 07 - FINITIONS ET PEINTURE
             }
         }
 
+        let modeOngletEurope = 'chiffre';
+
+        function basculerOngletEurope(mode) {
+            modeOngletEurope = mode;
+            const tabNum = document.getElementById("tabBtnEuropeNumerise");
+            const tabChif = document.getElementById("tabBtnEuropeChiffre");
+            const tabA4 = document.getElementById("tabBtnEuropeA4");
+            const vueNum = document.getElementById("vueDevisNumerise");
+            const vueChif = document.getElementById("vueDevisChiffre");
+            const vueA4 = document.getElementById("vueDevisA4");
+
+            if (mode === 'numerise') {
+                if (vueNum) vueNum.style.display = 'block';
+                if (vueChif) vueChif.style.display = 'none';
+                if (vueA4) vueA4.style.display = 'none';
+                if (tabNum) {
+                    tabNum.style.border = '2px solid #2563eb';
+                    tabNum.style.background = '#eff6ff';
+                    tabNum.style.color = '#1d4ed8';
+                    tabNum.style.boxShadow = '0 2px 6px rgba(37,99,235,0.15)';
+                }
+                if (tabChif) {
+                    tabChif.style.border = '2px solid #cbd5e1';
+                    tabChif.style.background = '#ffffff';
+                    tabChif.style.color = '#475569';
+                    tabChif.style.boxShadow = 'none';
+                }
+                if (tabA4) {
+                    tabA4.style.border = '2px solid #cbd5e1';
+                    tabA4.style.background = '#ffffff';
+                    tabA4.style.color = '#475569';
+                    tabA4.style.boxShadow = 'none';
+                }
+            } else if (mode === 'chiffre') {
+                if (vueNum) vueNum.style.display = 'none';
+                if (vueChif) vueChif.style.display = 'block';
+                if (vueA4) vueA4.style.display = 'none';
+                if (tabNum) {
+                    tabNum.style.border = '2px solid #cbd5e1';
+                    tabNum.style.background = '#ffffff';
+                    tabNum.style.color = '#475569';
+                    tabNum.style.boxShadow = 'none';
+                }
+                if (tabChif) {
+                    tabChif.style.border = '2px solid #059669';
+                    tabChif.style.background = '#ecfdf5';
+                    tabChif.style.color = '#065f46';
+                    tabChif.style.boxShadow = '0 2px 6px rgba(5,150,105,0.2)';
+                }
+                if (tabA4) {
+                    tabA4.style.border = '2px solid #cbd5e1';
+                    tabA4.style.background = '#ffffff';
+                    tabA4.style.color = '#475569';
+                    tabA4.style.boxShadow = 'none';
+                }
+            } else if (mode === 'a4') {
+                if (vueNum) vueNum.style.display = 'none';
+                if (vueChif) vueChif.style.display = 'none';
+                if (vueA4) vueA4.style.display = 'block';
+                if (tabNum) {
+                    tabNum.style.border = '2px solid #cbd5e1';
+                    tabNum.style.background = '#ffffff';
+                    tabNum.style.color = '#475569';
+                    tabNum.style.boxShadow = 'none';
+                }
+                if (tabChif) {
+                    tabChif.style.border = '2px solid #cbd5e1';
+                    tabChif.style.background = '#ffffff';
+                    tabChif.style.color = '#475569';
+                    tabChif.style.boxShadow = 'none';
+                }
+                if (tabA4) {
+                    tabA4.style.border = '2px solid #2563eb';
+                    tabA4.style.background = '#eff6ff';
+                    tabA4.style.color = '#1d4ed8';
+                    tabA4.style.boxShadow = '0 2px 6px rgba(37,99,235,0.15)';
+                }
+            }
+            rendreTableaux();
+        }
+
+        function imprimerDevis(sansPrix = false) {
+            const ancien = modeOngletEurope;
+            if (sansPrix) {
+                modeOngletEurope = 'numerise';
+                rendreTableaux();
+            }
+            window.print();
+            if (sansPrix && ancien !== 'numerise') {
+                modeOngletEurope = ancien;
+                rendreTableaux();
+            }
+        }
+
         // Rendu interactif synchronisé : Devis Numérisé (sans prix) + Devis Chiffré (avec prix) + Devis A4
         function rendreTableaux() {
             const tbodyNumerise = document.getElementById("tbodyDevisNumerise");
@@ -2143,15 +2322,16 @@ LOT 07 - FINITIONS ET PEINTURE
                 totalTVA += ligneTVA;
 
                 // -------------------------------------------------------------
-                // 1. ENDROIT 1 : LE DEVIS NUMÉRISÉ (ÉTAPE 3) - SANS PRIX
-                // Colonnes : N°, Chapitre/Lot, Désignation, Unité, Quantité, Action
+                // 1. ENDROIT 1 : LE DEVIS NUMÉRISÉ (BORDEREAU VIERGE SANS PRIX)
+                // Colonnes strictement identiques au Devis Chiffré (11 colonnes)
+                // Les colonnes financières P.U. HT, Total HT, TVA, Total TTC sont VIERGES
                 // -------------------------------------------------------------
                 if (tbodyNumerise) {
                     if (l.chapitre && l.chapitre !== dernierChapitreNum) {
                         dernierChapitreNum = l.chapitre;
                         tbodyNumerise.innerHTML += `
                             <tr style="background: #e2e8f0; font-weight: 800; color: #1e3a8a;">
-                                <td colspan="6" style="padding: 6px 12px; font-size: 0.82rem; letter-spacing: 0.5px;">
+                                <td colspan="11" style="padding: 6px 12px; font-size: 0.82rem; letter-spacing: 0.5px;">
                                     🏷️ ${escapeHtml(l.chapitre)}
                                 </td>
                             </tr>
@@ -2171,8 +2351,13 @@ LOT 07 - FINITIONS ET PEINTURE
                                 <input type="text" value="${escapeHtml(l.unite)}" onchange="modifierChamp(${idx}, 'unite', this.value)" style="width: 45px; text-align: center; border: 1px solid transparent; background: transparent; font-family: 'JetBrains Mono', monospace; font-weight: 700;" title="Unité">
                             </td>
                             <td style="text-align: right;">
-                                <input type="number" step="any" value="${l.qte}" onchange="modifierChamp(${idx}, 'qte', parseFloat(this.value)||0)" style="width: 65px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-weight: 800; font-family: 'JetBrains Mono', monospace;" title="Quantité">
+                                <input type="number" step="any" value="${l.qte}" onchange="modifierChamp(${idx}, 'qte', parseFloat(this.value)||0)" style="width: 60px; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-weight: 800; font-family: 'JetBrains Mono', monospace;" title="Quantité">
                             </td>
+                            <td style="text-align: right; color: #94a3b8; font-style: italic; font-weight: 700; font-family: 'JetBrains Mono', monospace;">[ Vierge / --- ]</td>
+                            <td style="text-align: right; color: #94a3b8; font-weight: 700; font-family: 'JetBrains Mono', monospace;">---</td>
+                            <td style="text-align: center; color: #94a3b8; font-weight: 700;">---</td>
+                            <td style="text-align: right; color: #94a3b8; font-weight: 700; font-family: 'JetBrains Mono', monospace;">---</td>
+                            <td style="text-align: right; color: #94a3b8; font-weight: 700; font-family: 'JetBrains Mono', monospace;">---</td>
                             <td style="text-align: center;">
                                 <button type="button" onclick="supprimerLigne(${idx})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;" title="Supprimer ce poste">✕</button>
                             </td>
@@ -2181,8 +2366,8 @@ LOT 07 - FINITIONS ET PEINTURE
                 }
 
                 // -------------------------------------------------------------
-                // 2. ENDROIT 2 : LE DEVIS CHIFFRÉ DQE (ÉTAPE 4) - AVEC TOUS LES PRIX
-                // Colonnes : N°, Chapitre/Lot, Désignation, Unité, Quantité, P.U. HT, Total HT, TVA %, TVA €, Total TTC, Action
+                // 2. ENDROIT 2 : LE DEVIS CHIFFRÉ DQE (AVEC TOUS LES PRIX)
+                // Colonnes strictement identiques, mais avec les prix unitaires, montants HT, TVA %, TVA €, Total TTC
                 // -------------------------------------------------------------
                 if (tbodyDQE) {
                     if (l.chapitre && l.chapitre !== dernierChapitreDQE) {
@@ -2246,6 +2431,7 @@ LOT 07 - FINITIONS ET PEINTURE
                         `;
                     }
 
+                    const estViergeA4 = (modeOngletEurope === 'numerise');
                     a4TableBody.innerHTML += `
                         <tr style="border-bottom: 1px solid #e2e8f0;">
                             <td style="padding: 5px 6px; text-align: center; color: #64748b; font-family: 'JetBrains Mono', monospace;">${idx + 1}</td>
@@ -2253,10 +2439,10 @@ LOT 07 - FINITIONS ET PEINTURE
                             <td style="padding: 5px 8px; font-weight: 600; color: #0f172a;">${escapeHtml(l.designation)}</td>
                             <td style="padding: 5px 6px; text-align: center; font-family: 'JetBrains Mono', monospace;">${escapeHtml(l.unite)}</td>
                             <td style="padding: 5px 6px; text-align: right; font-weight: bold; font-family: 'JetBrains Mono', monospace;">${l.qte}</td>
-                            <td style="padding: 5px 6px; text-align: right; font-family: 'JetBrains Mono', monospace;">${l.pu.toFixed(2)} €</td>
-                            <td style="padding: 5px 6px; text-align: right; font-weight: bold; font-family: 'JetBrains Mono', monospace;">${ligneHT.toFixed(2)} €</td>
-                            <td style="padding: 5px 6px; text-align: center;">${l.tva}%</td>
-                            <td style="padding: 5px 6px; text-align: right; font-weight: 900; color: #059669; font-family: 'JetBrains Mono', monospace;">${ligneTTC.toFixed(2)} €</td>
+                            <td style="padding: 5px 6px; text-align: right; font-family: 'JetBrains Mono', monospace; color: ${estViergeA4 ? '#94a3b8' : '#0f172a'};">${estViergeA4 ? '---' : l.pu.toFixed(2) + ' €'}</td>
+                            <td style="padding: 5px 6px; text-align: right; font-weight: bold; font-family: 'JetBrains Mono', monospace; color: ${estViergeA4 ? '#94a3b8' : '#0f172a'};">${estViergeA4 ? '---' : ligneHT.toFixed(2) + ' €'}</td>
+                            <td style="padding: 5px 6px; text-align: center; color: ${estViergeA4 ? '#94a3b8' : '#0f172a'};">${estViergeA4 ? '---' : l.tva + '%'}</td>
+                            <td style="padding: 5px 6px; text-align: right; font-weight: 900; color: ${estViergeA4 ? '#94a3b8' : '#059669'}; font-family: 'JetBrains Mono', monospace;">${estViergeA4 ? '---' : ligneTTC.toFixed(2) + ' €'}</td>
                         </tr>
                     `;
                 }
@@ -2275,9 +2461,19 @@ LOT 07 - FINITIONS ET PEINTURE
             const elA4HT = document.getElementById("a4TotalHT");
             const elA4TVA = document.getElementById("a4TotalTVA");
             const elA4TTC = document.getElementById("a4TotalTTC");
-            if (elA4HT) elA4HT.textContent = totalHT.toFixed(2) + " €";
-            if (elA4TVA) elA4TVA.textContent = totalTVA.toFixed(2) + " €";
-            if (elA4TTC) elA4TTC.textContent = totalTTC.toFixed(2) + " €";
+            const elA4Badge = document.getElementById("a4BadgeTitre");
+
+            if (modeOngletEurope === 'numerise') {
+                if (elA4HT) elA4HT.textContent = "---";
+                if (elA4TVA) elA4TVA.textContent = "---";
+                if (elA4TTC) elA4TTC.textContent = "CADRE SANS PRIX";
+                if (elA4Badge) elA4Badge.textContent = "BORDEREAU VIERGE (SANS PRIX)";
+            } else {
+                if (elA4HT) elA4HT.textContent = totalHT.toFixed(2) + " €";
+                if (elA4TVA) elA4TVA.textContent = totalTVA.toFixed(2) + " €";
+                if (elA4TTC) elA4TTC.textContent = totalTTC.toFixed(2) + " €";
+                if (elA4Badge) elA4Badge.textContent = "DEVIS OFFICIEL CHIFFRÉ";
+            }
 
             // Montant en toutes lettres officiel
             const elLettres = document.getElementById("lblTotalLettres");
@@ -2293,10 +2489,16 @@ LOT 07 - FINITIONS ET PEINTURE
             const cptTrouves = document.getElementById("compteurArticlesTrouves");
             if (cptTrouves) cptTrouves.textContent = lignesDQE.length;
 
+            const cptE3 = document.getElementById("compteurArticlesEtape3");
+            if (cptE3) cptE3.textContent = lignesDQE.length;
+
             // En-têtes du devis A4
             if (document.getElementById("entNom") && document.getElementById("a4Ent")) document.getElementById("a4Ent").textContent = document.getElementById("entNom").value;
             if (document.getElementById("entSiret") && document.getElementById("a4Siret")) document.getElementById("a4Siret").textContent = "SIRET : " + document.getElementById("entSiret").value;
             if (document.getElementById("entDecennale") && document.getElementById("a4Decennale")) document.getElementById("a4Decennale").textContent = document.getElementById("entDecennale").value;
+            if (document.getElementById("clientNom") && document.getElementById("a4Client")) document.getElementById("a4Client").textContent = document.getElementById("clientNom").value;
+            if (document.getElementById("chantierAdresse") && document.getElementById("a4Chantier")) document.getElementById("a4Chantier").textContent = "Chantier : " + document.getElementById("chantierAdresse").value;
+        }
             if (document.getElementById("clientNom") && document.getElementById("a4Client")) document.getElementById("a4Client").textContent = document.getElementById("clientNom").value;
             if (document.getElementById("chantierAdresse") && document.getElementById("a4Chantier")) document.getElementById("a4Chantier").textContent = "Chantier : " + document.getElementById("chantierAdresse").value;
         }
@@ -2388,31 +2590,47 @@ LOT 07 - FINITIONS ET PEINTURE
             }
         }
 
-        function exporterExcel() {
+        function exporterExcel(sansPrix = false) {
+            const isVierge = (sansPrix === true) || (modeOngletEurope === 'numerise');
+            const titre = isVierge 
+                ? "BORDEREAU QUANTITATIF ESTIMATIF (CADRE SANS PRIX POUR SOUMISSION)" 
+                : "DEVIS BTP EUROPE - CHIFFRAGE DQE OFFICIEL CONFORME BTP";
             const data = [
-                ["DEVIS BTP EUROPE - CHIFFRAGE DQE OFFICIEL CONFORME BTP"],
+                [titre],
                 ["Entreprise :", document.getElementById("entNom")?.value || ""],
                 ["Client :", document.getElementById("clientNom")?.value || ""],
                 ["Chantier :", document.getElementById("chantierAdresse")?.value || ""],
                 ["Date :", new Date().toLocaleDateString("fr-FR")],
                 [],
-                ["N°", "Chapitre / Lot", "Désignation des Ouvrages BTP", "Unité", "Quantité", "P.U. HT (€)", "Total HT (€)", "Taux TVA (%)", "Montant TVA (€)", "Total TTC (€)"]
+                isVierge
+                    ? ["N°", "Chapitre / Lot", "Désignation des Ouvrages BTP", "Unité", "Quantité", "P.U. HT (€) [Vierge]", "Total HT (€) [Vierge]", "Taux TVA (%) [Vierge]", "Montant TVA (€) [Vierge]", "Total TTC (€) [Vierge]"]
+                    : ["N°", "Chapitre / Lot", "Désignation des Ouvrages BTP", "Unité", "Quantité", "P.U. HT (€)", "Total HT (€)", "Taux TVA (%)", "Montant TVA (€)", "Total TTC (€)"]
             ];
             lignesDQE.forEach((l, i) => {
                 const ligneHT = l.qte * l.pu;
                 const ligneTVA = ligneHT * (l.tva / 100);
                 const ligneTTC = ligneHT + ligneTVA;
-                data.push([i + 1, l.chapitre, l.designation, l.unite, l.qte, l.pu, ligneHT, l.tva, ligneTVA, ligneTTC]);
+                if (isVierge) {
+                    data.push([i + 1, l.chapitre, l.designation, l.unite, l.qte, "", "", "", "", ""]);
+                } else {
+                    data.push([i + 1, l.chapitre, l.designation, l.unite, l.qte, l.pu, ligneHT, l.tva, ligneTVA, ligneTTC]);
+                }
             });
             data.push([]);
-            data.push(["", "", "", "", "", "", "MONTANT GLOBAL HT :", document.getElementById("lblTotalHT")?.textContent || "0.00 €"]);
-            data.push(["", "", "", "", "", "", "MONTANT TOTAL TVA :", document.getElementById("lblTotalTVA")?.textContent || "0.00 €"]);
-            data.push(["", "", "", "", "", "", "MONTANT GLOBAL TTC :", document.getElementById("lblTotalTTC")?.textContent || "0.00 €"]);
+            if (!isVierge) {
+                data.push(["", "", "", "", "", "", "MONTANT GLOBAL HT :", document.getElementById("lblTotalHT")?.textContent || "0.00 €"]);
+                data.push(["", "", "", "", "", "", "MONTANT TOTAL TVA :", document.getElementById("lblTotalTVA")?.textContent || "0.00 €"]);
+                data.push(["", "", "", "", "", "", "MONTANT GLOBAL TTC :", document.getElementById("lblTotalTTC")?.textContent || "0.00 €"]);
+            } else {
+                data.push(["", "", "", "", "", "", "MONTANT GLOBAL :", "CADRE SANS PRIX (POUR SOUMISSION)"]);
+            }
 
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Devis_BTP_Europe");
-            XLSX.writeFile(wb, "Devis_BTP_Europe.xlsx");
+            const sheetNom = isVierge ? "Bordereau_Vierge" : "Devis_BTP_Europe";
+            const fileName = isVierge ? "Bordereau_Vierge_BTP_Europe.xlsx" : "Devis_BTP_Europe.xlsx";
+            XLSX.utils.book_append_sheet(wb, ws, sheetNom);
+            XLSX.writeFile(wb, fileName);
         }
 
         function ouvrirModalAssistance() { document.getElementById("modalAssistance").style.display = "flex"; }

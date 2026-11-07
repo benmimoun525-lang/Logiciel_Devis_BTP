@@ -65,11 +65,12 @@ git config user.name "BOUFELDJA BENABDALLAH" >> "%~dp0deploy_log.txt" 2>&1
 git config user.email "contact@devis-btp.dz" >> "%~dp0deploy_log.txt" 2>&1
 echo Identite configuree : BOUFELDJA BENABDALLAH >> "%~dp0deploy_log.txt" 2>&1
 
-REM Copie directe et immediate de la version Algerie vers index.html
-echo [*] Copie de index_europe.html vers index.html... >> "%~dp0deploy_log.txt" 2>&1
-copy /y "%~dp0index_europe.html" "%~dp0index.html" >> "%~dp0deploy_log.txt" 2>&1
-copy /y "%~dp0index_europe.html" "%~dp0index_algerie.html" >> "%~dp0deploy_log.txt" 2>&1
-echo [OK] index.html pret pour la mise en ligne. >> "%~dp0deploy_log.txt" 2>&1
+REM S'assurer que index.html est la version Algerie officielle, tout en preservant index_europe.html
+echo [*] Synchronisation de index_algerie.html vers index.html... >> "%~dp0deploy_log.txt" 2>&1
+if exist "%~dp0index_algerie.html" (
+    copy /y "%~dp0index_algerie.html" "%~dp0index.html" >> "%~dp0deploy_log.txt" 2>&1
+)
+echo [OK] Fichiers prets et separes : index.html (Algerie), index_algerie.html (Algerie), index_europe.html (Europe). >> "%~dp0deploy_log.txt" 2>&1
 
 
 echo.

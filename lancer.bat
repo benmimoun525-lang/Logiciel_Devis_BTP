@@ -9,11 +9,8 @@ echo          🏗️  LOGICIEL DE CHIFFRAGE DEVIS BTP (ALGERIE)
 echo =====================================================================
 echo.
 
-REM Garantie de la version Algerie dans index.html
-if exist "%~dp0index_europe.html" (
-    copy /y "%~dp0index_europe.html" "%~dp0index.html" >nul
-    copy /y "%~dp0index_europe.html" "%~dp0index_algerie.html" >nul
-) else if exist "%~dp0index_algerie.html" (
+REM S'assurer que index.html est la version Algerie sans ecraser la version Europe
+if exist "%~dp0index_algerie.html" (
     copy /y "%~dp0index_algerie.html" "%~dp0index.html" >nul
 )
 

@@ -41,20 +41,11 @@ if not defined GIT_CMD (
 echo [*] Git détecté avec succès.
 echo.
 
-:: 2. Sauvegarde de la version Europe dans index_europe.html
-if exist "index.html" (
-    findstr /i "Version Europe" "index.html" >nul 2>&1
-    if not errorlevel 1 (
-        echo [*] Sauvegarde de la version Europe dans "index_europe.html"...
-        copy /y "index.html" "index_europe.html" >nul
-    )
-)
+:: 2. La version Europe reste intacte et indépendante dans index_europe.html
+echo [*] Preservation de la version Europe dans index_europe.html...
 
-REM 3. Restauration directe et immediate de index.html
-if exist "%~dp0index_europe.html" (
-    copy /y "%~dp0index_europe.html" "%~dp0index.html" >nul
-    copy /y "%~dp0index_europe.html" "%~dp0index_algerie.html" >nul
-) else if exist "%~dp0index_algerie.html" (
+REM 3. Restauration directe et immediate de index.html depuis index_algerie.html
+if exist "%~dp0index_algerie.html" (
     copy /y "%~dp0index_algerie.html" "%~dp0index.html" >nul
 )
 

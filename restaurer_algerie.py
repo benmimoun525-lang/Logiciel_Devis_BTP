@@ -28,28 +28,16 @@ for p in possible_git:
 
 print(f"[*] Utilisation de Git : {git_cmd}")
 
-# Priorité 1 : Vérifier si index_europe.html ou index_algerie.html contient la version officielle Algérie (> 100 Ko)
-if os.path.exists("index_europe.html") and os.path.getsize("index_europe.html") > 100000:
-    try:
-        with open("index_europe.html", "rb") as fin:
-            data = fin.read()
-        if b"BENABDALLAH" in data or b"BaridiMob" in data:
-            with open("index.html", "wb") as fout, open("index_algerie.html", "wb") as fout_alg:
-                fout.write(data)
-                fout_alg.write(data)
-            print(f"[OK] index.html restauré avec succès depuis index_europe.html ({len(data):,} octets) !")
-            sys.exit(0)
-    except Exception as e:
-        print(f"[*] Note index_europe: {e}")
-
+# Priorité 1 : Vérifier si index_algerie.html contient la version officielle Algérie (> 100 Ko)
 if os.path.exists("index_algerie.html") and os.path.getsize("index_algerie.html") > 100000:
     try:
         with open("index_algerie.html", "rb") as fin:
             data = fin.read()
-        with open("index.html", "wb") as fout:
-            fout.write(data)
-        print(f"[OK] index.html restauré depuis index_algerie.html ({len(data):,} octets) !")
-        sys.exit(0)
+        if b"BENABDALLAH" in data or b"BaridiMob" in data:
+            with open("index.html", "wb") as fout:
+                fout.write(data)
+            print(f"[OK] index.html restauré depuis index_algerie.html ({len(data):,} octets) !")
+            sys.exit(0)
     except Exception as e:
         print(f"[*] Note index_algerie: {e}")
 
