@@ -960,6 +960,9 @@
                 <a href="index_europe.html" style="background: rgba(37,99,235,0.25); border: 1.5px solid #60a5fa; color: #93c5fd; border-radius: 10px; padding: 7px 12px; font-size: 0.83rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Basculer vers la Version Europe (€)">
                     <span>🇪🇺</span> <span>Version Europe (€)</span>
                 </a>
+                <button type="button" onclick="ouvrirModalAdmin()" style="background: rgba(245, 158, 11, 0.2); border: 1.5px solid #f59e0b; color: #fde047; border-radius: 10px; padding: 7px 12px; font-size: 0.83rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(245,158,11,0.25); transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" title="Connexion Propriétaire / Titulaire (M. BOUFELDJA BENABDALLAH)">
+                    👑 <span>Accès Titulaire</span>
+                </button>
                 <button type="button" id="btnReinitialiserTestProspect" onclick="reinitialiserTestClientProspect(true)" style="display: none; background: #d97706; border: 1.5px solid #fbbf24; color: white; border-radius: 10px; padding: 7px 11px; font-size: 0.82rem; font-weight: 700; cursor: pointer; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(217,119,6,0.3);" title="Vider l'identification et reverrouiller les étapes 2 à 4 pour tester à blanc">
                     🔒 <span>Reverrouiller Étapes (Test)</span>
                 </button>
@@ -4039,10 +4042,10 @@
             choisirStrategiePrix(strategiePrixActive);
             chargerEntrepriseLocale();
             chargerDevisSauvegarde();
-            // Si le devis est vide au démarrage, charger immédiatement le devis modèle BTP complet (18 postes par lots)
+            // Si le devis est vide au démarrage, charger immédiatement le devis modèle BTP complet (18 postes par lots) en mode silencieux
             const totalArtsInit = Object.values(devisLots || {}).reduce((acc, l) => acc + (l ? l.length : 0), 0);
             if (totalArtsInit === 0) {
-                chargerExempleDevisDossierComplet();
+                chargerExempleDevisDossierComplet(true);
             }
             chargerCompteClientLocal();
             chargerLogoLogiciel();
@@ -5517,7 +5520,7 @@
                         <button type="button" class="btn btn-outline" onclick="imprimerOuExporterPDF()" style="padding: 9px 16px; font-weight: 700; font-size: 0.84rem;">
                             🖨️ Imprimer Devis Vierge A4
                         </button>
-                        <button type="button" class="btn btn-outline" onclick="exporterExcel(true)" style="padding: 9px 16px; font-weight: 700; font-size: 0.84rem; color: #15803d; border-color: #86efac;">
+                        <button type="button" class="btn btn-outline" onclick="telechargerExcel(true)" style="padding: 9px 16px; font-weight: 700; font-size: 0.84rem; color: #15803d; border-color: #86efac;">
                             📊 Exporter Excel Vierge (.xlsx)
                         </button>
                     </div>
@@ -5932,14 +5935,14 @@
         actualiserPlanningGantt();
     }
 
-    function chargerExempleDevisDossierComplet() {
-        document.getElementById('nomClient').value = "EURL BATIMENT & PROMOTION EL AMAL";
-        document.getElementById('nomProjet').value = "Construction Villa R+2 Birkhadem (Alger)";
+    function chargerExempleDevisDossierComplet(modeSilencieux = false) {
+        if (document.getElementById('nomClient')) document.getElementById('nomClient').value = "EURL BATIMENT & PROMOTION EL AMAL";
+        if (document.getElementById('nomProjet')) document.getElementById('nomProjet').value = "Construction Villa R+2 Birkhadem (Alger)";
         if (document.getElementById('emailClient')) document.getElementById('emailClient').value = "direction@benabdallah-btp.dz";
         if (document.getElementById('telClient')) document.getElementById('telClient').value = "0551422166";
-        document.getElementById('numDevis').value = "DEV-2026-COMPLET";
+        if (document.getElementById('numDevis')) document.getElementById('numDevis').value = "DEV-2026-COMPLET";
         const today = new Date();
-        document.getElementById('dateDevis').value = String(today.getDate()).padStart(2,'0') + '/' + String(today.getMonth()+1).padStart(2,'0') + '/' + today.getFullYear();
+        if (document.getElementById('dateDevis')) document.getElementById('dateDevis').value = String(today.getDate()).padStart(2,'0') + '/' + String(today.getMonth()+1).padStart(2,'0') + '/' + today.getFullYear();
 
         // Lots complets BTP réalistes
         devisLots = {
@@ -5986,20 +5989,19 @@
         reconstruireTableauDevis();
         calculerTotaux();
 
-        // Basculer sur Étape 4 et Onglet Planning
-        naviguerVersEtapeClient(4);
-        basculerOngletDossier('planning');
-        actualiserPlanningGantt();
+        // Afficher l'Étape 4 sur le Devis Chiffré par défaut
+        afficherSectionEtape(4);
+        basculerOngletDossier('chiffre');
 
-        ajouterLog("⭐ Exemple Dossier Complet BTP (Villa R+2) chargé avec succès ! 5 lots, délai contractuel 5 mois et Gantt calculé.");
-        alert(
-            "⭐ FORMULE DOSSIER COMPLET BTP ACTIVÉE !\n\n" +
-            "✓ 5 Lots BTP professionnels chargés (Terrassements, Gros-œuvre, Maçonnerie, CES, Finitions).\n" +
-            "✓ Montant total DQE chiffré ligne par ligne.\n" +
-            "✓ Délai de réalisation calculé : 5 Mois (150 Jours calendaires).\n" +
-            "✓ Planning Gantt d'exécution ordonnancé semaine par semaine.\n\n" +
-            "👉 Vous pouvez ajuster les dates et télécharger le classeur Excel bi-onglets (.xlsx) !"
-        );
+        ajouterLog("⭐ Exemple Dossier Complet BTP (Villa R+2) chargé avec succès ! 18 articles sur 5 lots.");
+        if (!modeSilencieux) {
+            alert(
+                "⭐ EXEMPLE DOSSIER BTP CHARGÉ !\n\n" +
+                "✓ 18 articles BTP professionnels chargés sur 5 lots.\n" +
+                "✓ Visible dans l'onglet '1. DEVIS NUMÉRISÉ (Bordereau Vierge)' et '2. DEVIS CHIFFRÉ (DQE)'.\n" +
+                "✓ Vous pouvez modifier tous les articles, quantités et prix librement !"
+            );
+        }
     }
 
     function ouvrirDossierCompletDirect() {
@@ -7129,63 +7131,21 @@
     }
 
     function naviguerVersEtapeClient(etape) {
-        const estTit = estTitulaireConnecte();
-        const modeStrict = !estTit;
-
-        // CONTRÔLE DU VERROUILLAGE SÉQUENTIEL POUR LES CLIENTS EXTERNES
-        if (modeStrict) {
-            // Accès Étape 2 (Tarifs & BaridiMob) : Libre et déverrouillé pour tous sans blocage !
-
-            // Accès Étape 3 ou 4 : Blocage si l'Étape 1 n'est pas remplie ou si le solde de pages est épuisé
-            if (etape >= 3) {
-                if (!estEtapeFinalisee(1)) {
-                    verifierChampsIdentificationObligatoires(true);
-                    etapeClientActive = 1;
-                    afficherSectionEtape(1);
-                    actualiserIndicateursStepper(1);
-                    alert("⛔ Étape 1 requise !\n\nVeuillez d'abord compléter et valider vos coordonnées à l'Étape 1.");
-                    return;
-                }
-
-                const client = (typeof obtenirOuCreerClient === 'function') ? obtenirOuCreerClient() : null;
-                const credits = client ? parseInt(client.credits_pages, 10) : 5;
-                if (isNaN(credits) || credits <= 0) {
-                    etapeClientActive = 2;
-                    afficherSectionEtape(2);
-                    actualiserIndicateursStepper(2);
-                    alert(
-                        "🚫 ACCÈS BLOQUÉ : SOLDE DE PAGES ÉPUISÉ (0 page disponible) !\n\n" +
-                        "Vous avez déjà consommé l'intégralité de vos 5 pages offertes.\n" +
-                        "Vous ne pouvez plus bénéficier de chiffrage gratuit.\n\n" +
-                        "Vous êtes automatiquement redirigé vers l'Étape 2 (Tarifs & BaridiMob).\n\n" +
-                        "👉 Veuillez choisir une formule ci-dessous (Pack 50 pages à 4 000 DZD, Pack 100 pages ou Mensuel) et transmettre votre reçu de virement pour continuer."
-                    );
-                    const blocBaridi = document.getElementById('formulairePreuvePaiementCard');
-                    if (blocBaridi) {
-                        blocBaridi.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        blocBaridi.style.boxShadow = '0 0 0 4px #ef4444';
-                        setTimeout(() => blocBaridi.style.boxShadow = '', 3500);
-                    }
-                    return;
-                }
-            }
-
-            // Accès Étape 4 : l'Étape 3 doit être finalisée
-            if (etape === 4) {
-                if (!estEtapeFinalisee(3)) {
-                    etapeClientActive = 3;
-                    afficherSectionEtape(3);
-                    actualiserIndicateursStepper(3);
-                    alert("⛔ Étape 4 verrouillée !\n\nVous devez obligatoirement importer au moins une photo de chantier, un plan ou un document PDF (ou insérer des articles) à l'Étape 3 avant d'accéder au Bordereau DQE.");
-                    return;
-                }
-            }
-        }
-
         etapeClientActive = etape;
         afficherSectionEtape(etape);
         actualiserIndicateursStepper(etape);
-        window.scrollTo({ top: 120, behavior: 'smooth' });
+
+        let targetEl = null;
+        if (etape === 1) targetEl = document.getElementById('sectionEtape1_Accueil');
+        else if (etape === 2) targetEl = document.getElementById('sectionEtape2_Tarifs');
+        else if (etape === 3) targetEl = document.getElementById('sectionEtape3_Documents');
+        else if (etape === 4) targetEl = document.getElementById('sectionDevis');
+
+        if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+        }
     }
 
     function basculerModeToutDeplie() {
@@ -10827,6 +10787,9 @@
     window.envoyerDevisParEmail = envoyerDevisParEmail;
     window.installerApplicationPWA = installerApplicationPWA;
     window.clicSecretLogoTitulaire = clicSecretLogoTitulaire;
+    window.telechargerExcel = telechargerExcel;
+    window.exporterExcel = telechargerExcel;
+    window.imprimerOuExporterPDF = imprimerOuExporterPDF;
 </script>
 
 </body>
