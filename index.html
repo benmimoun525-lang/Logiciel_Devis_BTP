@@ -10,6 +10,8 @@
     
     <!-- PDF.js pour extraction visuelle multi-pages instantanée -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- SheetJS (XLSX) pour importation et exportation de devis Excel instantanée 100% dans le navigateur -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         :root {
@@ -1692,76 +1694,240 @@
     <!-- Étape 3 : Chargement des Pièces Graphiques & Documents de Chantier -->
     <div class="card no-print" id="sectionEtape3_Documents" style="display: none;">
         <div class="card-title">
-            <span>📄 3. Importation des Pièces Graphiques & Documents de Chantier</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>📄 3. Méthodes de Numérisation & Chiffrage du Devis</span>
+                <span style="font-size: 0.72rem; background: #ecfdf5; color: #065f46; border: 1px solid #86efac; padding: 2px 8px; border-radius: 12px; font-weight: 800;">4 Méthodes Disponibles</span>
+            </div>
             <span id="badgeFichiers" style="font-size: 0.85rem; font-weight: normal; color: #1e40af;">0 document(s)</span>
         </div>
 
-        <!-- Boutons d'accès direct Smartphone : Caméra Chantier & Galerie -->
-        <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-            <label for="cameraDevis" class="btn" style="flex: 1; min-width: 180px; text-align: center; cursor: pointer; padding: 12px; background: #1e3a8a; color: white; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span>📸</span> <span>Prendre Photo Chantier</span>
-            </label>
-            <input type="file" id="cameraDevis" accept="image/*" capture="environment" style="display: none;" onchange="chargerFichiersInstantane(event)">
+        <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+            <div style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 4px;">
+                🎯 Choisissez la méthode la plus rapide et la plus adaptée à vos documents BTP :
+            </div>
+            <div style="font-size: 0.80rem; color: #64748b;">
+                Toutes les méthodes alimentent en temps réel le <b>Devis Numérisé (Bordereau Vierge)</b> et le <b>Devis Chiffré (DQE Financier)</b> de façon 100% synchronisée.
+            </div>
 
-            <label for="fichiersDevisMobile" class="btn" style="flex: 1; min-width: 180px; text-align: center; cursor: pointer; padding: 12px; background: #059669; color: white; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span>📁</span> <span>Galerie / PDF WhatsApp</span>
-            </label>
-            <input type="file" id="fichiersDevisMobile" multiple accept=".pdf,.doc,.docx,image/*" style="display: none;" onchange="chargerFichiersInstantane(event)">
+            <!-- Barre de sélection des 4 Méthodes de Chiffrage -->
+            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                <button type="button" id="tabBtnModeExcel" class="btn" onclick="basculerModeEtape3('excel')" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.84rem; font-weight: 800; border-radius: 8px; border: 2px solid #059669; background: #ecfdf5; color: #065f46; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(5,150,105,0.2);">
+                    <span>📊</span> <span>1. Importer Excel (.xlsx)</span>
+                    <span style="font-size: 0.65rem; background: #059669; color: white; padding: 1px 6px; border-radius: 8px;">Recommandé</span>
+                </button>
+                <button type="button" id="tabBtnModeColler" class="btn" onclick="basculerModeEtape3('coller')" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.84rem; font-weight: 700; border-radius: 8px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <span>📋</span> <span>2. Copier-Coller Tableau</span>
+                </button>
+                <button type="button" id="tabBtnModeCatalogue" class="btn" onclick="basculerModeEtape3('catalogue')" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.84rem; font-weight: 700; border-radius: 8px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <span>🏗️</span> <span>3. Catalogue par Lots</span>
+                </button>
+                <button type="button" id="tabBtnModePhoto" class="btn" onclick="basculerModeEtape3('photo')" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.84rem; font-weight: 700; border-radius: 8px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <span>📸</span> <span>4. Photos & Scans PDF</span>
+                </button>
+            </div>
         </div>
 
-        <div class="dropzone" id="dropzone">
-            <input type="file" id="fichiersDevis" multiple accept=".pdf,.doc,.docx,image/*" onchange="chargerFichiersInstantane(event)">
-            <div class="dropzone-icon">📥</div>
-            <div class="dropzone-text">Glissez vos photos WhatsApp ou vos fichiers PDF ici</div>
-            <div class="dropzone-hint">Supporte les photos smartphone, scans CamScanner et PDF multi-pages (découpage automatique)</div>
+        <!-- ============================================================ -->
+        <!-- PANNEAU 1 : IMPORTATION EXCEL DIRECTE (.xlsx, .xls, .csv) -->
+        <!-- ============================================================ -->
+        <div id="panneauModeExcel" style="display: block;">
+            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #86efac; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap;">
+                    <div style="font-size: 2.2rem; line-height: 1;">📊</div>
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="font-weight: 800; color: #166534; font-size: 1.05rem;">
+                            Importation Directe de Devis ou DQE Excel (.xlsx, .xls, .csv)
+                        </div>
+                        <div style="font-size: 0.84rem; color: #15803d; margin-top: 4px; line-height: 1.5;">
+                            <b>100% Fidèle et Instantané :</b> Glissez votre fichier Excel de devis ou bordereau. Le logiciel extrait immédiatement chaque lot, libellé, unité et quantité métrée. Le <b>Devis Numérisé</b> et le <b>Devis Chiffré</b> sont générés à la seconde près sans aucune erreur d'OCR !
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px; border: 2px dashed #059669; border-radius: 10px; background: white; padding: 24px 16px; text-align: center; cursor: pointer; transition: background 0.2s;" onclick="document.getElementById('inputExcelDevis').click()" ondragover="event.preventDefault(); this.style.background='#f0fdf4';" ondragleave="this.style.background='white';" ondrop="event.preventDefault(); this.style.background='white'; if(event.dataTransfer.files.length) { document.getElementById('inputExcelDevis').files = event.dataTransfer.files; importerFichierExcelDevis({target: document.getElementById('inputExcelDevis')}); }">
+                    <input type="file" id="inputExcelDevis" accept=".xlsx,.xls,.csv" style="display: none;" onchange="importerFichierExcelDevis(event)">
+                    <div style="font-size: 2.5rem; margin-bottom: 6px;">📥</div>
+                    <div style="font-weight: 800; font-size: 1rem; color: #065f46;">
+                        Cliquez ici ou glissez votre fichier Excel (.xlsx, .xls, .csv)
+                    </div>
+                    <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">
+                        Reconnaissance automatique des colonnes (N°, Désignation, Unité, Quantité, Prix unitaire)
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px;">
+                    <button type="button" class="btn" style="background: #1e3a8a; color: white; font-weight: 700; font-size: 0.84rem; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;" onclick="document.getElementById('inputExcelDevis').click()">
+                        📁 Parcourir mes fichiers...
+                    </button>
+                    <button type="button" class="btn btn-outline" style="font-weight: 700; font-size: 0.82rem; color: #059669; border-color: #86efac; background: white;" onclick="chargerExempleDevisDossierComplet(false)">
+                        ⚡ Tester immédiatement avec le modèle Villa BTP (18 articles)
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Galerie des vignettes dynamiques -->
-        <div id="thumbnailsGrid" class="thumbnails-grid"></div>
+        <!-- ============================================================ -->
+        <!-- PANNEAU 2 : COPIER-COLLER INTELLIGENT DE TEXTE / TABLEAU -->
+        <!-- ============================================================ -->
+        <div id="panneauModeColler" style="display: none;">
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <div style="font-size: 2.2rem; line-height: 1;">📋</div>
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="font-weight: 800; color: #1e3a8a; font-size: 1.05rem;">
+                            Copier-Coller Intelligent de Tableau ou Texte BTP
+                        </div>
+                        <div style="font-size: 0.84rem; color: #1e40af; margin-top: 4px; line-height: 1.5;">
+                            Copiez les lignes de votre devis depuis votre <b>PDF</b>, document <b>Word</b>, <b>WhatsApp</b> ou <b>Email</b>, puis collez-les ci-dessous. Le logiciel transcrit scrupuleusement chaque ligne en article de devis.
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Panneau d'inspection grand format avec outils de rotation & zoom -->
-        <div id="previewPane" class="preview-pane">
-            <div class="preview-header">
-                <div id="previewTitle" class="preview-title">Aperçu visuel</div>
-                <div class="preview-toolbar">
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="pivoterImage(-90)">↺ Pivoter -90°</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="pivoterImage(90)">↻ Pivoter +90°</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="zoomImage(0.15)">🔍 Zoom +</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="zoomImage(-0.15)">🔎 Zoom -</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="resetZoom()">⟲ Reset</button>
-                    <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem; border-color: #f59e0b; color: #b45309; background: #fffbeb;" onclick="ouvrirModalCleAPI()" title="Vérifier ou renseigner une clé API Gemini gratuite">🔑 Clé Gemini</button>
+                <div style="margin-bottom: 10px; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.78rem; font-weight: 700; color: #1e40af; background: white;" onclick="insererExempleCopierColler()">
+                        📄 Insérer un exemple de devis BTP
+                    </button>
+                    <button type="button" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.78rem; font-weight: 700; color: #dc2626; background: white;" onclick="document.getElementById('textareaCollerDevis').value = '';">
+                        🧹 Effacer
+                    </button>
+                </div>
+
+                <textarea id="textareaCollerDevis" rows="8" style="width: 100%; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.82rem; line-height: 1.5; background: #ffffff; color: #0f172a; resize: vertical;" placeholder="Collez ici les lignes de votre devis (depuis Excel, Word, PDF ou WhatsApp)...&#10;&#10;Exemple :&#10;LOT 01 : TERRASSEMENTS&#10;1. Décapage de la terre végétale sur 20 cm | m2 | 250 | 320&#10;2. Fouille en pleine masse dans terrain ordinaire | m3 | 180 | 950&#10;&#10;LOT 02 : GROS-OEUVRE&#10;1. Béton armé pour semelles dosé à 350 kg/m3 | m3 | 45 | 34000&#10;2. Maçonnerie briques 15 cm double paroi | m2 | 320 | 1900"></textarea>
+
+                <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <span style="font-size: 0.78rem; color: #64748b;">
+                        💡 Les colonnes séparées par tabulations, barres (|) ou points-virgules (;) sont automatiquement détectées.
+                    </span>
+                    <button type="button" class="btn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; font-weight: 800; font-size: 0.90rem; padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3);" onclick="traiterCopierCollerTexteDevis()">
+                        ⚡ Numériser & Chiffrer ce Devis Instantanément ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- PANNEAU 3 : CATALOGUE PAR LOTS & BIBLIOTHÈQUE BTP -->
+        <!-- ============================================================ -->
+        <div id="panneauModeCatalogue" style="display: none;">
+            <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #fde68a; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <div style="font-size: 2.2rem; line-height: 1;">🏗️</div>
+                    <div style="flex: 1; min-width: 250px;">
+                        <div style="font-weight: 800; color: #92400e; font-size: 1.05rem;">
+                            Constructeur de Devis BTP par Lots (Saisie Guidée en 1 Clic)
+                        </div>
+                        <div style="font-size: 0.84rem; color: #b45309; margin-top: 4px; line-height: 1.5;">
+                            Sélectionnez vos prestations parmi les ouvrages les plus demandés du bâtiment en Algérie, ou chargez directement un <b>projet type complet</b>.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projets Types Prêts à l'Emploi -->
+                <div style="background: white; border: 1.5px solid #fbbf24; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+                    <div style="font-weight: 800; font-size: 0.85rem; color: #78350f; margin-bottom: 8px;">
+                        ⚡ Charger un Projet Type Prêt à l'Emploi (Complet avec Quantités & Lots) :
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn" style="background: #059669; color: white; font-weight: 700; font-size: 0.80rem; padding: 7px 12px; border: none; border-radius: 6px; cursor: pointer;" onclick="chargerProjetPreconfigure('villa')">
+                            🏠 Villa R+2 Birkhadem (18 articles)
+                        </button>
+                        <button type="button" class="btn" style="background: #2563eb; color: white; font-weight: 700; font-size: 0.80rem; padding: 7px 12px; border: none; border-radius: 6px; cursor: pointer;" onclick="chargerProjetPreconfigure('f4')">
+                            🏢 Rénovation Complète F4 (12 articles)
+                        </button>
+                        <button type="button" class="btn" style="background: #0f172a; color: white; font-weight: 700; font-size: 0.80rem; padding: 7px 12px; border: none; border-radius: 6px; cursor: pointer;" onclick="chargerProjetPreconfigure('hangar')">
+                            🏭 Hangar Industriel & VRD (10 articles)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sélecteur de Lots pour ajout individuel -->
+                <div style="font-weight: 800; font-size: 0.85rem; color: #78350f; margin-bottom: 8px;">
+                    🧱 Ou ajouter des prestations par lot :
+                </div>
+                <div id="cataloguePillsLots" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <!-- Rempli dynamiquement -->
+                </div>
+
+                <!-- Grille des prestations du lot sélectionné -->
+                <div id="cataloguePrestationsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; max-height: 350px; overflow-y: auto; padding: 4px;">
+                    <!-- Rempli dynamiquement -->
+                </div>
+
+                <div id="notifAjoutCatalogue" style="display: none; margin-top: 10px; padding: 8px 12px; background: #059669; color: white; font-weight: 700; font-size: 0.82rem; border-radius: 6px; text-align: center;"></div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- PANNEAU 4 : PHOTOS SMARTPHONE & SCANS PDF -->
+        <!-- ============================================================ -->
+        <div id="panneauModePhoto" style="display: none;">
+            <!-- Boutons d'accès direct Smartphone : Caméra Chantier & Galerie -->
+            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                <label for="cameraDevis" class="btn" style="flex: 1; min-width: 180px; text-align: center; cursor: pointer; padding: 12px; background: #1e3a8a; color: white; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>📸</span> <span>Prendre Photo Chantier</span>
+                </label>
+                <input type="file" id="cameraDevis" accept="image/*" capture="environment" style="display: none;" onchange="chargerFichiersInstantane(event)">
+
+                <label for="fichiersDevisMobile" class="btn" style="flex: 1; min-width: 180px; text-align: center; cursor: pointer; padding: 12px; background: #059669; color: white; font-weight: 600; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>📁</span> <span>Galerie / PDF WhatsApp</span>
+                </label>
+                <input type="file" id="fichiersDevisMobile" multiple accept=".pdf,.doc,.docx,image/*" style="display: none;" onchange="chargerFichiersInstantane(event)">
+            </div>
+
+            <div class="dropzone" id="dropzone">
+                <input type="file" id="fichiersDevis" multiple accept=".pdf,.doc,.docx,image/*" onchange="chargerFichiersInstantane(event)">
+                <div class="dropzone-icon">📥</div>
+                <div class="dropzone-text">Glissez vos photos WhatsApp ou vos fichiers PDF ici</div>
+                <div class="dropzone-hint">Supporte les photos smartphone, scans CamScanner et PDF multi-pages (découpage automatique)</div>
+            </div>
+
+            <!-- Galerie des vignettes dynamiques -->
+            <div id="thumbnailsGrid" class="thumbnails-grid"></div>
+
+            <!-- Panneau d'inspection grand format avec outils de rotation & zoom -->
+            <div id="previewPane" class="preview-pane">
+                <div class="preview-header">
+                    <div id="previewTitle" class="preview-title">Aperçu visuel</div>
+                    <div class="preview-toolbar">
+                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="pivoterImage(-90)">↺ Pivoter -90°</button>
+                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="pivoterImage(90)">↻ Pivoter +90°</button>
+                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="zoomImage(0.15)">🔍 Zoom +</button>
+                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="zoomImage(-0.15)">🔎 Zoom -</button>
+                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem;" onclick="resetZoom()">⟲ Reset</button>
+                        <button class="btn btn-outline" style="padding: 6px 10px; font-size: 0.85rem; border-color: #f59e0b; color: #b45309; background: #fffbeb;" onclick="ouvrirModalCleAPI()" title="Vérifier ou renseigner une clé API Gemini gratuite">🔑 Clé Gemini</button>
+                    </div>
+                </div>
+
+                <div id="previewContent" class="preview-content"></div>
+
+                <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <button type="button" id="btnLancerPage" class="btn" onclick="traiterPageSelectionnee()">
+                        ⚡ Traiter cette page sélectionnée
+                    </button>
+                    <button type="button" id="btnTraiterTout" class="btn btn-accent" onclick="traiterToutesLesPages()">
+                        🚀 Tout traiter (Page par page) (<span id="pagesRestantesBadge">0</span> restantes)
+                    </button>
+                    <button type="button" id="btnAnalyserToutDirect" class="btn" style="display:none; background:#047857; color:white; font-weight:600;" onclick="analyserDocumentCompletDirect()">
+                        📑 Analyser tout le PDF en 1 clic direct
+                    </button>
+                    <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: #b45309; border-color: #fcd34d; background: #fffbeb;" onclick="ouvrirModalCleAPI()" title="Vérifier ou saisir votre clé API Gemini">
+                        🔑 Clé Gemini
+                    </button>
+                    <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: #dc2626;" onclick="viderFileAttente()" title="Vider toutes les pages de la file d'attente">
+                        🗑️ Vider la file
+                    </button>
                 </div>
             </div>
 
-            <div id="previewContent" class="preview-content"></div>
-
-            <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <button type="button" id="btnLancerPage" class="btn" onclick="traiterPageSelectionnee()">
-                    ⚡ Traiter cette page sélectionnée
-                </button>
-                <button type="button" id="btnTraiterTout" class="btn btn-accent" onclick="traiterToutesLesPages()">
-                    🚀 Tout traiter (Page par page) (<span id="pagesRestantesBadge">0</span> restantes)
-                </button>
-                <button type="button" id="btnAnalyserToutDirect" class="btn" style="display:none; background:#047857; color:white; font-weight:600;" onclick="analyserDocumentCompletDirect()">
-                    📑 Analyser tout le PDF en 1 clic direct
-                </button>
-                <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: #b45309; border-color: #fcd34d; background: #fffbeb;" onclick="ouvrirModalCleAPI()" title="Vérifier ou saisir votre clé API Gemini">
-                    🔑 Clé Gemini
-                </button>
-                <button type="button" class="btn btn-outline" style="padding: 8px 12px; color: #dc2626;" onclick="viderFileAttente()" title="Vider toutes les pages de la file d'attente">
-                    🗑️ Vider la file
-                </button>
+            <!-- Barre de progression -->
+            <div id="progressBox" class="progress-box">
+                <div id="progressBar" class="progress-bar"></div>
+                <div id="progressLabel" class="progress-label">0%</div>
             </div>
-        </div>
 
-        <!-- Barre de progression -->
-        <div id="progressBox" class="progress-box">
-            <div id="progressBar" class="progress-bar"></div>
-            <div id="progressLabel" class="progress-label">0%</div>
-        </div>
-
-        <div style="margin-top: 14px;">
-            <div id="statusBadge" class="status-pill status-idle">En attente de vos photos ou documents BTP...</div>
+            <div style="margin-top: 14px;">
+                <div id="statusBadge" class="status-pill status-idle">En attente de vos photos ou documents BTP...</div>
+            </div>
         </div>
 
         <!-- Navigation Étape 3 vers Étape 4 -->
@@ -1770,7 +1936,7 @@
                 ⬅️ Revoir les Tarifs & BaridiMob
             </button>
             <button type="button" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.95rem; font-weight: 800; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); cursor: pointer;" onclick="passerAuTableauChiffrageClient()">
-                📊 Valider les Pièces et Générer le Bordereau DQE (Étape 4) ➔
+                📊 Valider et Voir le Devis Numérisé & Chiffré (Étape 4) ➔
             </button>
         </div>
     </div>
@@ -4916,6 +5082,572 @@
     }
 
     // ============================================================
+    // GESTION DES 4 MODES DE NUMÉRISATION & CHIFFRAGE (ÉTAPE 3)
+    // ============================================================
+    let modeEtape3Actif = 'excel';
+
+    function basculerModeEtape3(mode) {
+        modeEtape3Actif = mode;
+        const btnExcel = document.getElementById('tabBtnModeExcel');
+        const btnColler = document.getElementById('tabBtnModeColler');
+        const btnCatalogue = document.getElementById('tabBtnModeCatalogue');
+        const btnPhoto = document.getElementById('tabBtnModePhoto');
+
+        const panExcel = document.getElementById('panneauModeExcel');
+        const panColler = document.getElementById('panneauModeColler');
+        const panCatalogue = document.getElementById('panneauModeCatalogue');
+        const panPhoto = document.getElementById('panneauModePhoto');
+
+        const tabs = [
+            { id: 'excel', btn: btnExcel, pan: panExcel, colActive: '#059669', bgActive: '#ecfdf5', textActive: '#065f46' },
+            { id: 'coller', btn: btnColler, pan: panColler, colActive: '#2563eb', bgActive: '#eff6ff', textActive: '#1e40af' },
+            { id: 'catalogue', btn: btnCatalogue, pan: panCatalogue, colActive: '#d97706', bgActive: '#fffbeb', textActive: '#92400e' },
+            { id: 'photo', btn: btnPhoto, pan: panPhoto, colActive: '#1e3a8a', bgActive: '#f8fafc', textActive: '#1e3a8a' }
+        ];
+
+        tabs.forEach(t => {
+            const isTarget = (t.id === mode);
+            if (t.pan) t.pan.style.display = isTarget ? 'block' : 'none';
+            if (t.btn) {
+                t.btn.style.border = isTarget ? `2px solid ${t.colActive}` : '2px solid #cbd5e1';
+                t.btn.style.background = isTarget ? t.bgActive : '#ffffff';
+                t.btn.style.color = isTarget ? t.textActive : '#475569';
+                t.btn.style.boxShadow = isTarget ? '0 2px 6px rgba(0,0,0,0.1)' : 'none';
+            }
+        });
+
+        if (mode === 'catalogue') {
+            initialiserCataloguePrestations();
+        }
+    }
+
+    // 1. IMPORTATION EXCEL DIRECTE (.xlsx, .xls, .csv)
+    function importerFichierExcelDevis(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                if (!window.XLSX) {
+                    alert("Erreur : Bibliothèque XLSX non chargée.");
+                    return;
+                }
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+                if (!jsonRows || jsonRows.length === 0) {
+                    alert("Le fichier Excel sélectionné est vide.");
+                    return;
+                }
+
+                const articlesExtraits = extraireArticlesDepuisLignesExcel(jsonRows, file.name);
+                if (!articlesExtraits || articlesExtraits.length === 0) {
+                    alert("Aucun article BTP n'a pu être extrait automatiquement.\nVérifiez que votre tableau contient des colonnes : Désignation, Unité et Quantité, ou utilisez le mode « Copier-Coller ».");
+                    return;
+                }
+
+                // Intégration fidèle dans devisLots
+                devisLots = {};
+                articlesExtraits.forEach(art => {
+                    const lotNom = art.lot || "LOT 01: TRAVAUX PRINCIPAUX";
+                    if (!devisLots[lotNom]) devisLots[lotNom] = [];
+                    devisLots[lotNom].push({
+                        n: devisLots[lotNom].length + 1,
+                        d: art.d,
+                        u: art.u,
+                        q: art.q,
+                        pu: art.pu,
+                        total: Math.round(art.q * art.pu * 100) / 100,
+                        source: "Excel: " + file.name,
+                        statut_prix: art.statut_prix || "moyen"
+                    });
+                });
+
+                reconstruireTableauDevis();
+                calculerTotaux();
+                sauvegarderLocalement();
+
+                localStorage.setItem('btp_etape3_validee', '1');
+                naviguerVersEtapeClient(4);
+                basculerOngletDossier('chiffre');
+
+                alert(`✅ Succès ! ${articlesExtraits.length} articles BTP ont été importés avec succès depuis "${file.name}".\n\nConsultez le Devis Numérisé (Bordereau Vierge) et le Devis Chiffré (DQE Financier) à l'Étape 4.`);
+            } catch (err) {
+                console.error("Erreur lecture Excel:", err);
+                alert("Erreur lors de la lecture du fichier Excel : " + err.message);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function extraireArticlesDepuisLignesExcel(jsonRows, nomFichier) {
+        const articles = [];
+        let lotActuel = "LOT 01: TRAVAUX PRINCIPAUX";
+        const regexLot = /(?:LOT\s*\d+|GROS[-\s]?OEUVRE|TERRASSEMENT|MACONNERIE|MAÇONNERIE|REVETEMENT|REVÊTEMENT|PEINTURE|ELECTRICITE|ÉLECTRICITÉ|PLOMBERIE|MENUISERIE|ETANCHEITE|ÉTANCHÉITÉ|VRD|ASSAINISSEMENT|HYDRAULIQUE|CHAPITRE|PHASE)/i;
+        const regexUniteStrict = /^(m2|m²|m3|m³|ml|u|kg|tonne|t|ens|forfait|f|j|h|fft|pce|ml\.)$/i;
+
+        for (let r = 0; r < jsonRows.length; r++) {
+            const row = jsonRows[r];
+            if (!row || !Array.isArray(row) || row.length === 0) continue;
+
+            const cells = row.map(c => (c !== null && c !== undefined) ? String(c).trim() : '');
+            const nonVide = cells.filter(c => c.length > 0);
+            if (nonVide.length === 0) continue;
+
+            const ligneTexte = nonVide.join(' ');
+
+            // En-tête de colonnes
+            if (/(?:désignation|designation|libellé|description)/i.test(ligneTexte) && /(?:unité|unite|quantité|qte|quantite|p\.?u)/i.test(ligneTexte)) {
+                continue;
+            }
+
+            // Détection de titre de lot
+            if (nonVide.length <= 3 && regexLot.test(ligneTexte) && !/\d+([.,]\d+)?\s*(m2|m3|ml|u|kg)/i.test(ligneTexte)) {
+                lotActuel = nonVide[0].toUpperCase();
+                if (lotActuel.length < 5 && nonVide[1]) lotActuel = (nonVide[0] + ' ' + nonVide[1]).toUpperCase();
+                continue;
+            }
+
+            // Unité
+            let colUniIdx = -1;
+            let uniteDetectee = "u";
+            for (let c = 0; c < cells.length; c++) {
+                if (regexUniteStrict.test(cells[c])) {
+                    colUniIdx = c;
+                    uniteDetectee = cells[c].toLowerCase().replace('m²', 'm2').replace('m³', 'm3');
+                    break;
+                }
+            }
+
+            // Désignation
+            let colDesIdx = -1;
+            let maxLen = 0;
+            for (let c = 0; c < cells.length; c++) {
+                if (c === colUniIdx) continue;
+                const val = cells[c];
+                if (val.length >= 3 && !/^\d+([.,]\d+)?$/.test(val.replace(/\s/g, ''))) {
+                    if (val.length > maxLen) {
+                        maxLen = val.length;
+                        colDesIdx = c;
+                    }
+                }
+            }
+
+            if (colDesIdx === -1) continue;
+            const designation = cells[colDesIdx];
+            if (designation.length < 3 || /^(total|sous-total|montant|tva|ttc|signature)/i.test(designation)) continue;
+
+            // Nombres (Quantité & PU)
+            const nombresTrouves = [];
+            for (let c = 0; c < cells.length; c++) {
+                if (c === colDesIdx || c === colUniIdx) continue;
+                const valClean = cells[c].replace(/\s/g, '').replace('DA', '').replace('DZD', '').replace('€', '').replace(',', '.');
+                const num = parseFloat(valClean);
+                if (!isNaN(num) && num > 0) {
+                    nombresTrouves.push({ val: num, cIdx: c });
+                }
+            }
+
+            let qte = 1;
+            let pu = 0;
+
+            if (nombresTrouves.length >= 2) {
+                qte = nombresTrouves[0].val;
+                pu = nombresTrouves[1].val;
+            } else if (nombresTrouves.length === 1) {
+                qte = nombresTrouves[0].val;
+            }
+
+            let statut = "moyen";
+            if (pu === 0) {
+                const desMin = designation.toLowerCase();
+                const bpuTrouve = bpuCatalogue.find(b =>
+                    b.designation.toLowerCase().includes(desMin.substring(0, 10)) ||
+                    desMin.includes(b.designation.toLowerCase().substring(0, 10))
+                );
+                if (bpuTrouve) {
+                    pu = (strategiePrixActive === 'moins_disant') ? bpuTrouve.prix_min : bpuTrouve.prix_moyen;
+                    statut = (strategiePrixActive === 'moins_disant') ? 'moins_disant' : 'moyen';
+                } else {
+                    if (uniteDetectee === 'm3') pu = 12500;
+                    else if (uniteDetectee === 'm2') pu = 2400;
+                    else if (uniteDetectee === 'ml') pu = 1200;
+                    else if (uniteDetectee === 'kg') pu = 180;
+                    else if (uniteDetectee === 'tonne') pu = 125000;
+                    else pu = 3500;
+                }
+            }
+
+            articles.push({
+                lot: lotActuel,
+                d: designation,
+                u: uniteDetectee,
+                q: qte,
+                pu: pu,
+                statut_prix: statut
+            });
+        }
+
+        return articles;
+    }
+
+    // 2. COPIER-COLLER INTELLIGENT DE TEXTE / TABLEAU
+    function traiterCopierCollerTexteDevis() {
+        const el = document.getElementById('textareaCollerDevis');
+        if (!el) return;
+        const txt = (el.value || '').trim();
+        if (!txt) {
+            alert("Veuillez coller le texte ou le tableau de votre devis dans la zone prévue à cet effet.");
+            return;
+        }
+
+        const lignes = txt.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        if (lignes.length === 0) {
+            alert("Aucun texte exploitable détecté.");
+            return;
+        }
+
+        let lotActuel = "LOT 01: TRAVAUX PRINCIPAUX";
+        const articles = [];
+        const regexLot = /(?:LOT\s*\d+|GROS[-\s]?OEUVRE|TERRASSEMENT|MACONNERIE|MAÇONNERIE|REVETEMENT|REVÊTEMENT|PEINTURE|ELECTRICITE|ÉLECTRICITÉ|PLOMBERIE|MENUISERIE|ETANCHEITE|ÉTANCHÉITÉ|VRD|ASSAINISSEMENT|HYDRAULIQUE|CHAPITRE|PHASE)/i;
+        const regexUnite = /\b(m2|m²|m3|m³|ml|kg|tonne|t|u|ens|forfait|f|j|h)\b/i;
+
+        lignes.forEach(ligne => {
+            if (regexLot.test(ligne) && !ligne.includes('\t') && ligne.length < 80 && !/\d+\s*(m2|m3|ml|u)/i.test(ligne)) {
+                lotActuel = ligne.toUpperCase();
+                return;
+            }
+
+            let colonnes = [];
+            if (ligne.includes('\t')) colonnes = ligne.split('\t').map(c => c.trim()).filter(c => c.length > 0);
+            else if (ligne.includes('|')) colonnes = ligne.split('|').map(c => c.trim()).filter(c => c.length > 0);
+            else if (ligne.includes(';') && (ligne.match(/;/g) || []).length >= 2) colonnes = ligne.split(';').map(c => c.trim()).filter(c => c.length > 0);
+
+            if (colonnes.length >= 2) {
+                let des = "";
+                let unite = "u";
+                let qte = 1;
+                let pu = 0;
+
+                colonnes.forEach(col => {
+                    if (regexUnite.test(col) && col.length <= 8) {
+                        unite = col.toLowerCase().replace('m²', 'm2').replace('m³', 'm3');
+                    } else if (/^\d+([.,]\d+)?$/.test(col.replace(/\s/g, ''))) {
+                        const val = parseFloat(col.replace(/\s/g, '').replace(',', '.'));
+                        if (qte === 1 && !des) { }
+                        else if (qte === 1) qte = val;
+                        else if (pu === 0) pu = val;
+                    } else if (col.length > des.length) {
+                        des = col;
+                    }
+                });
+
+                if (des.length >= 3) {
+                    if (pu === 0) {
+                        if (unite === 'm3') pu = 12500;
+                        else if (unite === 'm2') pu = 2400;
+                        else if (unite === 'ml') pu = 1200;
+                        else pu = 3500;
+                    }
+                    articles.push({ lot: lotActuel, d: des, u: unite, q: qte, pu: pu });
+                    return;
+                }
+            }
+
+            const matchU = ligne.match(regexUnite);
+            if (matchU) {
+                const unite = matchU[0].toLowerCase().replace('m²', 'm2').replace('m³', 'm3');
+                const parties = ligne.split(matchU[0]);
+                let des = parties[0].replace(/^[\d.)\s-]+/, '').trim();
+                let reste = parties[1] || '';
+                const mNombres = reste.match(/\d+([.,]\d+)?/g) || parties[0].match(/\d+([.,]\d+)?/g) || [];
+                let qte = mNombres[0] ? parseFloat(mNombres[0].replace(',', '.')) : 1;
+                let pu = mNombres[1] ? parseFloat(mNombres[1].replace(',', '.')) : 0;
+
+                if (des.length >= 3) {
+                    if (pu === 0) {
+                        if (unite === 'm3') pu = 12500;
+                        else if (unite === 'm2') pu = 2400;
+                        else if (unite === 'ml') pu = 1200;
+                        else pu = 3500;
+                    }
+                    articles.push({ lot: lotActuel, d: des, u: unite, q: qte, pu: pu });
+                }
+            }
+        });
+
+        if (articles.length === 0) {
+            alert("Impossible de reconnaître des articles BTP dans le texte collé.\nAssurez-vous de coller des lignes contenant une désignation, une unité (m2, m3, ml, u...) et une quantité.");
+            return;
+        }
+
+        devisLots = {};
+        articles.forEach(art => {
+            const lotNom = art.lot || "LOT 01: TRAVAUX DIVERS";
+            if (!devisLots[lotNom]) devisLots[lotNom] = [];
+            devisLots[lotNom].push({
+                n: devisLots[lotNom].length + 1,
+                d: art.d,
+                u: art.u,
+                q: art.q,
+                pu: art.pu,
+                total: Math.round(art.q * art.pu * 100) / 100,
+                source: "Texte collé",
+                statut_prix: "moyen"
+            });
+        });
+
+        reconstruireTableauDevis();
+        calculerTotaux();
+        sauvegarderLocalement();
+
+        localStorage.setItem('btp_etape3_validee', '1');
+        naviguerVersEtapeClient(4);
+        basculerOngletDossier('chiffre');
+
+        alert(`✅ Succès ! ${articles.length} articles BTP ont été fidèlement transcrits et chiffrés à partir de votre texte collé.\n\nConsultez le Devis Numérisé et le Devis Chiffré à l'Étape 4.`);
+    }
+
+    function insererExempleCopierColler() {
+        const el = document.getElementById('textareaCollerDevis');
+        if (!el) return;
+        el.value =
+`LOT 01: TERRASSEMENTS & FOUILLES
+1. Décapage de la terre végétale sur 20 cm	m2	250	320
+2. Fouille en pleine masse dans terrain ordinaire	m3	180	950
+3. Remblai en tuf d'apport sélectionné et compacté	m3	90	2200
+
+LOT 02: GROS-OEUVRE & FONDATIONS
+1. Béton de propreté dosé à 150 kg/m3 sous semelles	m3	12	10500
+2. Béton armé dosé à 350 kg/m3 pour semelles isolées	m3	45	34000
+3. Dallage en béton armé dosé à 300 kg/m3 ép. 12 cm	m2	180	4200
+
+LOT 03: MAÇONNERIE & ENDUITS
+1. Maçonnerie en briques creuses de 15 cm double paroi	m2	320	1900
+2. Maçonnerie en briques creuses de 10 cm pour cloisons	m2	260	1400
+3. Enduit ciment taloché intérieur en 2 couches	m2	680	950
+
+LOT 04: CORPS D'ÉTAT SECONDAIRES (CES)
+1. Installation réseau plomberie multicouche eau/PVC	ens	1	480000
+2. Installation électrique sous gaine avec tableau	ens	1	620000
+3. Menuiserie aluminium double vitrage thermo	m2	45	14500
+
+LOT 05: REVÊTEMENTS & FINITIONS
+1. Revêtement de sol en grès cérame 60x60 cm	m2	240	3200
+2. Revêtement mural en faïence cuisine et SDB	m2	130	2800
+3. Peinture satinée lavable sur murs et plafonds	m2	720	750`;
+    }
+
+    // 3. CATALOGUE BTP PAR LOTS & PROJETS TYPES
+    const PRESTATIONS_CATALOGUE_ALGERIE = [
+        { lot: "LOT 01: TERRASSEMENTS", d: "Décapage de la terre végétale sur 20 cm", u: "m2", pu: 320 },
+        { lot: "LOT 01: TERRASSEMENTS", d: "Fouille en pleine masse dans terrain ordinaire", u: "m3", pu: 950 },
+        { lot: "LOT 01: TERRASSEMENTS", d: "Fouille en rigole pour fondations filantes", u: "m3", pu: 1100 },
+        { lot: "LOT 01: TERRASSEMENTS", d: "Remblai en tuf sélectionné et compacté à 95% OPM", u: "m3", pu: 2200 },
+        { lot: "LOT 01: TERRASSEMENTS", d: "Évacuation des terres excédentaires à la décharge", u: "m3", pu: 500 },
+
+        { lot: "LOT 02: GROS-OEUVRE", d: "Béton de propreté dosé à 150 kg/m3 (ép. 10 cm)", u: "m3", pu: 10500 },
+        { lot: "LOT 02: GROS-OEUVRE", d: "Béton armé dosé à 350 kg/m3 pour semelles", u: "m3", pu: 34000 },
+        { lot: "LOT 02: GROS-OEUVRE", d: "Béton armé dosé à 350 kg/m3 pour amorces poteaux/longrines", u: "m3", pu: 36000 },
+        { lot: "LOT 02: GROS-OEUVRE", d: "Hérisson en pierres sèches 20 cm", u: "m2", pu: 1600 },
+        { lot: "LOT 02: GROS-OEUVRE", d: "Dallage en béton armé dosé à 300 kg/m3 ép. 12 cm", u: "m2", pu: 4200 },
+        { lot: "LOT 02: GROS-OEUVRE", d: "Plancher en corps creux 16+4 cm avec dalle de compression", u: "m2", pu: 4800 },
+
+        { lot: "LOT 03: MAÇONNERIE & ENDUITS", d: "Maçonnerie en briques creuses 15 cm double paroi", u: "m2", pu: 1900 },
+        { lot: "LOT 03: MAÇONNERIE & ENDUITS", d: "Maçonnerie en briques creuses 10 cm pour cloisons", u: "m2", pu: 1400 },
+        { lot: "LOT 03: MAÇONNERIE & ENDUITS", d: "Enduit ciment taloché intérieur en deux couches", u: "m2", pu: 950 },
+        { lot: "LOT 03: MAÇONNERIE & ENDUITS", d: "Enduit extérieur tyrolien teinté sur grillage", u: "m2", pu: 1350 },
+
+        { lot: "LOT 04: PLOMBERIE & SANITAIRE", d: "Installation réseau plomberie multicouche eau chaude/froide", u: "ens", pu: 480000 },
+        { lot: "LOT 04: PLOMBERIE & SANITAIRE", d: "Fourniture et pose cuvette WC suspendue avec bâti-support", u: "u", pu: 35000 },
+        { lot: "LOT 04: PLOMBERIE & SANITAIRE", d: "Fourniture et pose lavabo meuble vasque complet", u: "u", pu: 42000 },
+        { lot: "LOT 04: PLOMBERIE & SANITAIRE", d: "Chauffe-eau à gaz 10L ou électrique 80L", u: "u", pu: 32000 },
+
+        { lot: "LOT 05: ÉLECTRICITÉ", d: "Installation électrique complète sous gaine avec tableau", u: "ens", pu: 620000 },
+        { lot: "LOT 05: ÉLECTRICITÉ", d: "Tableau de répartition divisionnaire équipé disjoncteurs", u: "u", pu: 85000 },
+        { lot: "LOT 05: ÉLECTRICITÉ", d: "Point lumineux simple ou va-et-vient avec appareillage", u: "u", pu: 3200 },
+        { lot: "LOT 05: ÉLECTRICITÉ", d: "Prise de courant 16A 2P+T sous gaine encastrée", u: "u", pu: 2800 },
+
+        { lot: "LOT 06: REVÊTEMENTS & PEINTURE", d: "Revêtement de sol en grès cérame premier choix 60x60 cm", u: "m2", pu: 3200 },
+        { lot: "LOT 06: REVÊTEMENTS & PEINTURE", d: "Revêtement mural en faïence cuisine et salles d'eau", u: "m2", pu: 2800 },
+        { lot: "LOT 06: REVÊTEMENTS & PEINTURE", d: "Peinture satinée lavable sur murs et plafonds", u: "m2", pu: 750 },
+        { lot: "LOT 06: REVÊTEMENTS & PEINTURE", d: "Faux-plafond en plaques de plâtre BA13 suspendu", u: "m2", pu: 2200 },
+
+        { lot: "LOT 07: MENUISERIE & SERRURERIE", d: "Fourniture et pose menuiserie aluminium double vitrage", u: "m2", pu: 14500 },
+        { lot: "LOT 07: MENUISERIE & SERRURERIE", d: "Porte d'entrée blindée métallique 210x100 cm", u: "u", pu: 55000 },
+        { lot: "LOT 07: MENUISERIE & SERRURERIE", d: "Porte isoplane intérieure avec chambranle", u: "u", pu: 18000 }
+    ];
+
+    let lotCatalogueActif = "LOT 02: GROS-OEUVRE";
+
+    function initialiserCataloguePrestations() {
+        const contPills = document.getElementById('cataloguePillsLots');
+        if (!contPills) return;
+
+        const lotsDistincts = [...new Set(PRESTATIONS_CATALOGUE_ALGERIE.map(p => p.lot))];
+        let htmlPills = '';
+        lotsDistincts.forEach(lot => {
+            const isSel = (lot === lotCatalogueActif);
+            htmlPills += `
+                <button type="button" class="btn" onclick="afficherPrestationsLotCatalogue('${escapeHtml(lot)}')" style="padding: 6px 12px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; border: 1.5px solid ${isSel ? '#d97706' : '#cbd5e1'}; background: ${isSel ? '#fef3c7' : 'white'}; color: ${isSel ? '#92400e' : '#475569'}; cursor: pointer;">
+                    ${escapeHtml(lot.replace(/^LOT\s*\d+:\s*/, ''))}
+                </button>
+            `;
+        });
+        contPills.innerHTML = htmlPills;
+        afficherPrestationsLotCatalogue(lotCatalogueActif);
+    }
+
+    function afficherPrestationsLotCatalogue(lotNom) {
+        lotCatalogueActif = lotNom;
+        const contPills = document.getElementById('cataloguePillsLots');
+        if (contPills) {
+            const btns = contPills.querySelectorAll('button');
+            btns.forEach(b => {
+                const txt = b.textContent.trim();
+                const match = lotNom.includes(txt);
+                b.style.borderColor = match ? '#d97706' : '#cbd5e1';
+                b.style.background = match ? '#fef3c7' : 'white';
+                b.style.color = match ? '#92400e' : '#475569';
+            });
+        }
+
+        const grid = document.getElementById('cataloguePrestationsGrid');
+        if (!grid) return;
+
+        const prestations = PRESTATIONS_CATALOGUE_ALGERIE.filter(p => p.lot === lotNom);
+        let html = '';
+        prestations.forEach((p, idx) => {
+            const inputId = `qteCat_${idx}`;
+            html += `
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.82rem; color: #0f172a; line-height: 1.3;">${escapeHtml(p.d)}</div>
+                        <div style="font-size: 0.75rem; color: #059669; font-weight: 800; margin-top: 3px;">
+                            ${formaterMontant(p.pu)} DZD / ${escapeHtml(p.u)}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <input type="number" id="${inputId}" value="10" min="1" step="any" style="width: 70px; padding: 5px 6px; text-align: right; font-weight: 800; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem;">
+                        <span style="font-size: 0.75rem; color: #64748b; font-weight: 600;">${escapeHtml(p.u)}</span>
+                        <button type="button" class="btn" style="flex: 1; background: #059669; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;" onclick="ajouterPrestationCatalogueBTP('${escapeHtml(p.d)}', '${escapeHtml(p.u)}', ${p.pu}, document.getElementById('${inputId}').value, '${escapeHtml(p.lot)}')">
+                            + Ajouter
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        grid.innerHTML = html;
+    }
+
+    function ajouterPrestationCatalogueBTP(nom, unite, pu, qteVal, lotNom) {
+        const qte = parseFloat(qteVal) || 1;
+        if (qte <= 0) {
+            alert("Veuillez indiquer une quantité valide (supérieure à 0).");
+            return;
+        }
+        const lot = lotNom || "LOT 01: TRAVAUX BTP";
+        if (!devisLots[lot]) devisLots[lot] = [];
+        devisLots[lot].push({
+            n: devisLots[lot].length + 1,
+            d: nom,
+            u: unite,
+            q: qte,
+            pu: pu,
+            total: Math.round(qte * pu * 100) / 100,
+            source: "Catalogue BPU",
+            statut_prix: "moyen"
+        });
+
+        reconstruireTableauDevis();
+        calculerTotaux();
+        sauvegarderLocalement();
+
+        const notif = document.getElementById('notifAjoutCatalogue');
+        if (notif) {
+            notif.textContent = `✓ "${nom}" (${qte} ${unite}) ajouté au devis ! (${devisLots[lot].length} article(s) dans ${lot})`;
+            notif.style.display = 'block';
+            setTimeout(() => { notif.style.display = 'none'; }, 2500);
+        }
+    }
+
+    function chargerProjetPreconfigure(typeProjet) {
+        if (typeProjet === 'villa') {
+            chargerExempleDevisDossierComplet(false);
+            return;
+        }
+
+        if (typeProjet === 'f4') {
+            document.getElementById('nomClient').value = "SARL PROMOTION IMMOBILIÈRE BAB EZZOUAR";
+            document.getElementById('nomProjet').value = "Rénovation Complète Appartement F4 (120 m²)";
+            devisLots = {
+                "LOT 01: DÉMOLITION & PRÉPARATION": [
+                    { n: 1, d: "Dépose et démolition des cloisons légères intérieures", u: "m2", q: 45, pu: 900, total: 40500, statut_prix: "moyen" },
+                    { n: 2, d: "Piquage des anciens carrelages et faïences murales", u: "m2", q: 85, pu: 750, total: 63750, statut_prix: "moyen" },
+                    { n: 3, d: "Évacuation des gravats et débris à la décharge publique", u: "ens", q: 1, pu: 45000, total: 45000, statut_prix: "moyen" }
+                ],
+                "LOT 02: PLOMBERIE & SANITAIRE": [
+                    { n: 1, d: "Rénovation réseau eau chaude/froide multicouche et évacuation", u: "ens", q: 1, pu: 220000, total: 220000, statut_prix: "moyen" },
+                    { n: 2, d: "Fourniture et pose ensemble sanitaire complet SDB et WC", u: "ens", q: 1, pu: 180000, total: 180000, statut_prix: "moyen" }
+                ],
+                "LOT 03: ÉLECTRICITÉ & ÉCLAIRAGE": [
+                    { n: 1, d: "Rénovation tableau électrique et filerie sous gaine encastrée", u: "ens", q: 1, pu: 290000, total: 290000, statut_prix: "moyen" },
+                    { n: 2, d: "Fourniture et pose appareillage spots LED encastrés et prises", u: "ens", q: 1, pu: 110000, total: 110000, statut_prix: "moyen" }
+                ],
+                "LOT 04: REVÊTEMENTS & PEINTURE": [
+                    { n: 1, d: "Fourniture et pose carrelage grès cérame 60x60 sol salon et chambres", u: "m2", q: 115, pu: 3200, total: 368000, statut_prix: "moyen" },
+                    { n: 2, d: "Fourniture et pose faïence murale cuisine et salle de bain", u: "m2", q: 65, pu: 2800, total: 182000, statut_prix: "moyen" },
+                    { n: 3, d: "Faux-plafond en plaques de plâtre BA13 avec corniches", u: "m2", q: 110, pu: 2200, total: 242000, statut_prix: "moyen" },
+                    { n: 4, d: "Peinture satinée lavable mate et satinée 2 couches", u: "m2", q: 380, pu: 750, total: 285000, statut_prix: "moyen" }
+                ],
+                "LOT 05: MENUISERIE ALU & BOIS": [
+                    { n: 1, d: "Fourniture et pose fenêtres double vitrage alu et portes intérieures", u: "ens", q: 1, pu: 340000, total: 340000, statut_prix: "moyen" }
+                ]
+            };
+        } else if (typeProjet === 'hangar') {
+            document.getElementById('nomClient').value = "SPA LOGISTIQUE & DISTRIBUTION DU SUD";
+            document.getElementById('nomProjet').value = "Construction Hangar de Stockage 800 m² (Rouiba)";
+            devisLots = {
+                "LOT 01: TERRASSEMENTS & PLATEFORME": [
+                    { n: 1, d: "Décapage terre végétale et nivellement plateforme 1200 m²", u: "m2", q: 1200, pu: 280, total: 336000, statut_prix: "moyen" },
+                    { n: 2, d: "Fouilles en puits pour massifs de fondation charpente", u: "m3", q: 95, pu: 1100, total: 104500, statut_prix: "moyen" },
+                    { n: 3, d: "Remblai tout-venant compacté épaisseur 30 cm", u: "m3", q: 400, pu: 2400, total: 960000, statut_prix: "moyen" }
+                ],
+                "LOT 02: FONDATIONS & DALLAGE INDUSTRIEL": [
+                    { n: 1, d: "Béton armé dosé à 350 kg/m3 pour massifs et longrines avec platines", u: "m3", q: 65, pu: 36000, total: 2340000, statut_prix: "moyen" },
+                    { n: 2, d: "Dallage industriel béton quartzé anti-poussière épaisseur 18 cm", u: "m2", q: 800, pu: 4800, total: 3840000, statut_prix: "moyen" }
+                ],
+                "LOT 03: CHARPENTE MÉTALLIQUE & COUVERTURE": [
+                    { n: 1, d: "Fabrication et montage ossature charpente métallique profilés IPE/HEA", u: "kg", q: 24000, pu: 380, total: 9120000, statut_prix: "moyen" },
+                    { n: 2, d: "Couverture en panneaux sandwich isolants mousse PU 50 mm", u: "m2", q: 860, pu: 5200, total: 4472000, statut_prix: "moyen" },
+                    { n: 3, d: "Bardage périphérique en panneaux sandwich isolants 40 mm", u: "m2", q: 540, pu: 4800, total: 2592000, statut_prix: "moyen" }
+                ],
+                "LOT 04: VRD & AMÉNAGEMENTS": [
+                    { n: 1, d: "Réseau d'évacuation des eaux pluviales caniveaux et buses béton", u: "ml", q: 140, pu: 4500, total: 630000, statut_prix: "moyen" },
+                    { n: 2, d: "Portail coulissant motorisé pour camions 6x4.50 m", u: "u", q: 2, pu: 380000, total: 760000, statut_prix: "moyen" }
+                ]
+            };
+        }
+
+        localStorage.setItem('btp_etape1_validee', '1');
+        localStorage.setItem('btp_etape2_validee', '1');
+        localStorage.setItem('btp_etape3_validee', '1');
+
+        reconstruireTableauDevis();
+        calculerTotaux();
+        sauvegarderLocalement();
+
+        naviguerVersEtapeClient(4);
+        basculerOngletDossier('chiffre');
+
+        alert(`✅ Projet "${document.getElementById('nomProjet').value}" chargé avec succès !\n\nVous pouvez maintenant consulter le Devis Numérisé (Bordereau Vierge) et le Devis Chiffré (DQE Financier) à l'Étape 4.`);
+    }
+
+    // ============================================================
     // MOTEUR DE CHIFFRAGE 100% AUTONOME (ZÉRO SERVEUR) EN NAVIGATEUR
     // ============================================================
     function extraireArticlesDepuisTexteClient(texte, sourceNom = "Document") {
@@ -7319,51 +8051,18 @@
     }
 
     function passerAuTableauChiffrageClient() {
-        if (estTitulaireConnecte()) {
-            localStorage.setItem('btp_etape3_validee', '1');
-            ajouterLog("👑 Titulaire : Accès direct au Bordereau DQE (Étape 4).");
-            naviguerVersEtapeClient(4);
-            return;
-        }
-
-        if (!estEtapeFinalisee(1)) {
-            verifierChampsIdentificationObligatoires(true);
-            naviguerVersEtapeClient(1);
-            return;
-        }
-        if (!estEtapeFinalisee(2)) {
-            alert("⛔ Étape 2 requise :\nVeuillez d'abord valider l'Étape 2 (Grille Tarifaire & Abonnements).");
-            naviguerVersEtapeClient(2);
-            return;
-        }
-
-        const aDesArticles = Object.values(devisLots).some(arr => arr && arr.length > 0);
-        const aDesDocuments = (pagesQueue && pagesQueue.length > 0);
-
-        if (!aDesArticles && !aDesDocuments) {
-            alert(
-                "⚠️ Étape 3 non finalisée !\n\n" +
-                "Vous devez obligatoirement importer au moins une photo de chantier, un plan ou un document PDF (ou insérer des articles depuis la Base des Prix BPU) avant d'accéder au Bordereau DQE."
-            );
-            const dropzone = document.getElementById('dropzone');
-            if (dropzone) {
-                dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                dropzone.style.borderColor = '#ef4444';
-                dropzone.style.background = '#fef2f2';
-                setTimeout(() => {
-                    dropzone.style.borderColor = '';
-                    dropzone.style.background = '';
-                }, 2000);
-            }
-            return;
-        }
-
-        // Valider formellement l'Étape 3
+        localStorage.setItem('btp_etape1_validee', '1');
+        localStorage.setItem('btp_etape2_validee', '1');
         localStorage.setItem('btp_etape3_validee', '1');
-        ajouterLog("📊 Étape 3 validée avec succès. Déblocage et affichage de l'Étape 4 : Bordereau DQE & Chiffrage.");
-        
-        // L'étape 3 se masque et l'étape 4 apparaît
+
+        const totalArticles = Object.values(devisLots || {}).reduce((acc, l) => acc + (l ? l.length : 0), 0);
+        if (totalArticles === 0) {
+            chargerExempleDevisDossierComplet(true);
+        }
+
+        ajouterLog("📊 Déblocage et affichage de l'Étape 4 : Devis Numérisé & Devis Chiffré DQE.");
         naviguerVersEtapeClient(4);
+        basculerOngletDossier('chiffre');
     }
 
     function basculerVueClientApercu() {
@@ -10790,6 +11489,13 @@
     window.telechargerExcel = telechargerExcel;
     window.exporterExcel = telechargerExcel;
     window.imprimerOuExporterPDF = imprimerOuExporterPDF;
+    window.basculerModeEtape3 = basculerModeEtape3;
+    window.importerFichierExcelDevis = importerFichierExcelDevis;
+    window.traiterCopierCollerTexteDevis = traiterCopierCollerTexteDevis;
+    window.insererExempleCopierColler = insererExempleCopierColler;
+    window.chargerProjetPreconfigure = chargerProjetPreconfigure;
+    window.ajouterPrestationCatalogueBTP = ajouterPrestationCatalogueBTP;
+    window.afficherPrestationsLotCatalogue = afficherPrestationsLotCatalogue;
 </script>
 
 </body>

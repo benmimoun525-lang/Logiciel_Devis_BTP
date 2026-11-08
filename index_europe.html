@@ -678,16 +678,154 @@
                     </div>
                 </div>
 
-                <!-- Barre d'import rapide -->
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
-                    <button type="button" onclick="document.getElementById('inputPhotoDossier').click()" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,99,235,0.25);">
-                        <span>📷 Prendre une photo avec mon smartphone / Choisir un fichier</span>
-                    </button>
-                    <input type="file" id="inputPhotoDossier" accept="image/*,application/pdf" style="display: none;" onchange="traiterPhoto(event)">
-                    <span style="font-size: 0.78rem; color: #64748b; display: flex; align-items: center;">
-                        Format A4, attachements de chantier, bordereaux de prix ou devis manuscrits.
-                    </span>
+                <!-- Sélecteur des 4 Méthodes de Numérisation & Chiffrage Europe -->
+                <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+                    <div style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 4px;">
+                        🎯 Choisissez votre méthode de chiffrage (Normes BTP Europe / Batiprix) :
+                    </div>
+                    <div style="font-size: 0.80rem; color: #64748b;">
+                        Toutes les méthodes alimentent en temps réel le <b>Devis Numérisé (Bordereau Vierge)</b> et le <b>Devis Chiffré (DQE Financier €)</b> de façon 100% synchronisée.
+                    </div>
+
+                    <!-- Barre de sélection des 4 Méthodes -->
+                    <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                        <button type="button" id="tabBtnModeExcelEurope" class="btn" onclick="basculerModeEtape3Europe('excel')" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.84rem; font-weight: 800; border-radius: 8px; border: 2px solid #059669; background: #ecfdf5; color: #065f46; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(5,150,105,0.2);">
+                            <span>📊</span> <span>1. Importer Excel (.xlsx)</span>
+                            <span style="font-size: 0.65rem; background: #059669; color: white; padding: 1px 6px; border-radius: 8px;">Recommandé</span>
+                        </button>
+                        <button type="button" id="tabBtnModeCollerEurope" class="btn" onclick="basculerModeEtape3Europe('coller')" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.84rem; font-weight: 700; border-radius: 8px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <span>📋</span> <span>2. Copier-Coller Tableau</span>
+                        </button>
+                        <button type="button" id="tabBtnModeCatalogueEurope" class="btn" onclick="basculerModeEtape3Europe('catalogue')" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.84rem; font-weight: 700; border-radius: 8px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <span>🏗️</span> <span>3. Projets Types & Lots</span>
+                        </button>
+                        <button type="button" id="tabBtnModePhotoEurope" class="btn" onclick="basculerModeEtape3Europe('photo')" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.84rem; font-weight: 700; border-radius: 8px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <span>📸</span> <span>4. Photos & Scans A4</span>
+                        </button>
+                    </div>
                 </div>
+
+                <!-- PANNEAU 1 EUROPE : IMPORT EXCEL -->
+                <div id="panneauModeExcelEurope" style="display: block;">
+                    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #86efac; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap;">
+                            <div style="font-size: 2.2rem; line-height: 1;">📊</div>
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: 800; color: #166534; font-size: 1.05rem;">
+                                    Importation Directe de Devis ou DQE Excel (.xlsx, .xls, .csv)
+                                </div>
+                                <div style="font-size: 0.84rem; color: #15803d; margin-top: 4px; line-height: 1.5;">
+                                    <b>100% Fidèle et Instantané :</b> Glissez votre fichier Excel de devis. Le logiciel extrait immédiatement chaque lot, désignation, unité et quantité métrée. Le <b>Devis Numérisé</b> et le <b>Devis Chiffré en Euros (€)</b> sont générés à la seconde près sans aucune erreur d'OCR !
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 16px; border: 2px dashed #059669; border-radius: 10px; background: white; padding: 24px 16px; text-align: center; cursor: pointer; transition: background 0.2s;" onclick="document.getElementById('inputExcelDevisEurope').click()" ondragover="event.preventDefault(); this.style.background='#f0fdf4';" ondragleave="this.style.background='white';" ondrop="event.preventDefault(); this.style.background='white'; if(event.dataTransfer.files.length) { document.getElementById('inputExcelDevisEurope').files = event.dataTransfer.files; importerFichierExcelEurope({target: document.getElementById('inputExcelDevisEurope')}); }">
+                            <input type="file" id="inputExcelDevisEurope" accept=".xlsx,.xls,.csv" style="display: none;" onchange="importerFichierExcelEurope(event)">
+                            <div style="font-size: 2.5rem; margin-bottom: 6px;">📥</div>
+                            <div style="font-weight: 800; font-size: 1rem; color: #065f46;">
+                                Cliquez ici ou glissez votre fichier Excel (.xlsx, .xls, .csv)
+                            </div>
+                            <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">
+                                Reconnaissance automatique des colonnes (Désignation, Unité, Quantité, Prix unitaire €)
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: 14px;">
+                            <button type="button" class="btn" style="background: #1e3a8a; color: white; font-weight: 700; font-size: 0.84rem; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;" onclick="document.getElementById('inputExcelDevisEurope').click()">
+                                📁 Parcourir mes fichiers Excel...
+                            </button>
+                            <button type="button" class="btn btn-outline" style="font-weight: 700; font-size: 0.82rem; color: #059669; border-color: #86efac; background: white;" onclick="chargerExempleDevis10Articles()">
+                                ⚡ Tester immédiatement avec le modèle A4 (10 articles Batiprix)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANNEAU 2 EUROPE : COPIER-COLLER -->
+                <div id="panneauModeCollerEurope" style="display: none;">
+                    <div style="background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 12px;">
+                            <div style="font-size: 2.2rem; line-height: 1;">📋</div>
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: 800; color: #1e3a8a; font-size: 1.05rem;">
+                                    Copier-Coller Intelligent de Tableau ou Texte BTP
+                                </div>
+                                <div style="font-size: 0.84rem; color: #1e40af; margin-top: 4px; line-height: 1.5;">
+                                    Copiez les lignes de votre devis depuis votre <b>PDF</b>, <b>Word</b> ou <b>Email</b>, puis collez-les ci-dessous. Le logiciel transcrit scrupuleusement chaque ligne en article de devis chiffré en Euros (€).
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 10px; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.78rem; font-weight: 700; color: #1e40af; background: white;" onclick="insererExempleCopierCollerEurope()">
+                                📄 Insérer un exemple de devis BTP Europe
+                            </button>
+                            <button type="button" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.78rem; font-weight: 700; color: #dc2626; background: white;" onclick="document.getElementById('textareaCollerDevisEurope').value = '';">
+                                🧹 Effacer
+                            </button>
+                        </div>
+
+                        <textarea id="textareaCollerDevisEurope" rows="8" style="width: 100%; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 0.82rem; line-height: 1.5; background: #ffffff; color: #0f172a; resize: vertical;" placeholder="Collez ici les lignes de votre devis...&#10;&#10;Exemple :&#10;LOT 01 - DÉMOLITION ET PRÉPARATION&#10;1. Démolition de cloisons briques et évacuation | m² | 45 | 24.00&#10;2. Installation générale de chantier et benne | forfait | 1 | 850.00&#10;&#10;LOT 02 - PLATRERIE ET ISOLATION&#10;3. Cloisonnement Placostil BA13 72/48 | m² | 75 | 46.00&#10;4. Isolation mur extérieur laine de roche | m² | 60 | 52.00"></textarea>
+
+                        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <span style="font-size: 0.78rem; color: #64748b;">
+                                💡 Les colonnes séparées par tabulations, barres (|) ou points-virgules sont automatiquement détectées.
+                            </span>
+                            <button type="button" class="btn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; font-weight: 800; font-size: 0.90rem; padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3);" onclick="traiterCopierCollerEurope()">
+                                ⚡ Numériser & Chiffrer ce Devis Instantanément ➔
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANNEAU 3 EUROPE : CATALOGUE & PROJETS TYPES -->
+                <div id="panneauModeCatalogueEurope" style="display: none;">
+                    <div style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px solid #fde68a; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 12px;">
+                            <div style="font-size: 2.2rem; line-height: 1;">🏗️</div>
+                            <div style="flex: 1; min-width: 250px;">
+                                <div style="font-weight: 800; color: #92400e; font-size: 1.05rem;">
+                                    Projets Types BTP Europe & Bibliothèque Batiprix
+                                </div>
+                                <div style="font-size: 0.84rem; color: #b45309; margin-top: 4px; line-height: 1.5;">
+                                    Chargez immédiatement un projet de rénovation ou de construction complet calibré sur les prix réels du marché européen en Euros (€).
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Projets Types Prêts à l'Emploi -->
+                        <div style="background: white; border: 1.5px solid #fbbf24; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+                            <div style="font-weight: 800; font-size: 0.85rem; color: #78350f; margin-bottom: 8px;">
+                                ⚡ Charger un Projet Type Clé en Main (Complet avec Quantités & Lots) :
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" class="btn" style="background: #059669; color: white; font-weight: 700; font-size: 0.80rem; padding: 7px 12px; border: none; border-radius: 6px; cursor: pointer;" onclick="chargerProjetEurope('renovation_complete')">
+                                    🏠 Rénovation Complète Maison (10 articles - 14 740 €)
+                                </button>
+                                <button type="button" class="btn" style="background: #2563eb; color: white; font-weight: 700; font-size: 0.80rem; padding: 7px 12px; border: none; border-radius: 6px; cursor: pointer;" onclick="chargerProjetEurope('extension')">
+                                    🏢 Extension & Gros-Œuvre (8 articles - 28 500 €)
+                                </button>
+                                <button type="button" class="btn" style="background: #0f172a; color: white; font-weight: 700; font-size: 0.80rem; padding: 7px 12px; border: none; border-radius: 6px; cursor: pointer;" onclick="chargerProjetEurope('appartement_paris')">
+                                    🏬 Appartement T3 Rénovation Énergie (12 articles - 19 800 €)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANNEAU 4 EUROPE : PHOTOS & SCANS A4 -->
+                <div id="panneauModePhotoEurope" style="display: none;">
+                    <!-- Barre d'import rapide -->
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
+                        <button type="button" onclick="document.getElementById('inputPhotoDossier').click()" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,99,235,0.25);">
+                            <span>📷 Prendre une photo avec mon smartphone / Choisir un fichier</span>
+                        </button>
+                        <input type="file" id="inputPhotoDossier" accept="image/*,application/pdf" style="display: none;" onchange="traiterPhoto(event)">
+                        <span style="font-size: 0.78rem; color: #64748b; display: flex; align-items: center;">
+                            Format A4, attachements de chantier, bordereaux de prix ou devis manuscrits.
+                        </span>
+                    </div>
 
                 <!-- GRAND VISUALISATEUR DU DOCUMENT ENTIER AVEC CONTRÔLES DE ZOOM INTERACTIFS -->
                 <div class="viewer-doc-container">
@@ -802,6 +940,7 @@
                         </div>
                     </div>
                 </div>
+                </div><!-- Fin panneauModePhotoEurope -->
 
                 <!-- Transition & Accès Direct vers le Dossier Devis (Étape 4) -->
                 <div style="margin-top: 18px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
@@ -2008,6 +2147,164 @@ LOT 07 - FINITIONS ET PEINTURE
             }
             parserEtAppliquerTexteBTP(txt);
             alert("✓ Tableau DQE et devis A4 réactualisés à partir du texte !");
+        }
+
+        function basculerModeEtape3Europe(mode) {
+            const btnExcel = document.getElementById('tabBtnModeExcelEurope');
+            const btnColler = document.getElementById('tabBtnModeCollerEurope');
+            const btnCatalogue = document.getElementById('tabBtnModeCatalogueEurope');
+            const btnPhoto = document.getElementById('tabBtnModePhotoEurope');
+
+            const panExcel = document.getElementById('panneauModeExcelEurope');
+            const panColler = document.getElementById('panneauModeCollerEurope');
+            const panCatalogue = document.getElementById('panneauModeCatalogueEurope');
+            const panPhoto = document.getElementById('panneauModePhotoEurope');
+
+            const tabs = [
+                { id: 'excel', btn: btnExcel, pan: panExcel, colActive: '#059669', bgActive: '#ecfdf5', textActive: '#065f46' },
+                { id: 'coller', btn: btnColler, pan: panColler, colActive: '#2563eb', bgActive: '#eff6ff', textActive: '#1e40af' },
+                { id: 'catalogue', btn: btnCatalogue, pan: panCatalogue, colActive: '#d97706', bgActive: '#fffbeb', textActive: '#92400e' },
+                { id: 'photo', btn: btnPhoto, pan: panPhoto, colActive: '#1e3a8a', bgActive: '#f8fafc', textActive: '#1e3a8a' }
+            ];
+
+            tabs.forEach(t => {
+                const isTarget = (t.id === mode);
+                if (t.pan) t.pan.style.display = isTarget ? 'block' : 'none';
+                if (t.btn) {
+                    t.btn.style.border = isTarget ? `2px solid ${t.colActive}` : '2px solid #cbd5e1';
+                    t.btn.style.background = isTarget ? t.bgActive : '#ffffff';
+                    t.btn.style.color = isTarget ? t.textActive : '#475569';
+                    t.btn.style.boxShadow = isTarget ? '0 2px 6px rgba(0,0,0,0.1)' : 'none';
+                }
+            });
+        }
+
+        function importerFichierExcelEurope(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    if (!window.XLSX) {
+                        alert("Bibliothèque Excel XLSX non chargée.");
+                        return;
+                    }
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+                    if (!jsonRows || jsonRows.length === 0) {
+                        alert("Le fichier Excel sélectionné est vide.");
+                        return;
+                    }
+
+                    let texteLignes = [];
+                    jsonRows.forEach(row => {
+                        if (!row || !Array.isArray(row)) return;
+                        const cells = row.map(c => String(c).trim()).filter(c => c.length > 0);
+                        if (cells.length > 0) {
+                            texteLignes.push(cells.join('\t'));
+                        }
+                    });
+
+                    parserEtAppliquerTexteBTP(texteLignes.join('\n'));
+                    naviguerVersEtape(4);
+                    basculerOngletEurope('chiffre');
+                    alert(`✅ Succès ! Votre fichier Excel "${file.name}" a été importé et chiffré aux normes européennes en Euros (€).\n\nConsultez le Devis Numérisé et le Devis Chiffré à l'Étape 4.`);
+                } catch(err) {
+                    console.error("Erreur Excel Europe:", err);
+                    alert("Erreur lors de la lecture du fichier Excel : " + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function traiterCopierCollerEurope() {
+            const el = document.getElementById('textareaCollerDevisEurope');
+            if (!el) return;
+            const txt = (el.value || '').trim();
+            if (!txt) {
+                alert("Veuillez coller le texte ou le tableau de votre devis.");
+                return;
+            }
+            parserEtAppliquerTexteBTP(txt);
+            naviguerVersEtape(4);
+            basculerOngletEurope('chiffre');
+            alert("✅ Succès ! Votre devis a été fidèlement numérisé et chiffré en Euros (€).\nConsultez le Devis Numérisé et le Devis Chiffré à l'Étape 4.");
+        }
+
+        function insererExempleCopierCollerEurope() {
+            const el = document.getElementById('textareaCollerDevisEurope');
+            if (!el) return;
+            el.value =
+`LOT 01 - DÉMOLITION ET PRÉPARATION
+1. Installation générale de chantier et benne à gravats	forfait	1	850.00
+2. Démolition de cloisons briques et évacuation décharge	m²	45	24.00
+
+LOT 02 - GROS ŒUVRE ET STRUCTURE
+3. Fourniture et pose poutre métallique IPE 200 avec calage	u	1	2650.00
+4. Maçonnerie de reprise en sous-œuvre et linteaux BA	ml	8	185.00
+
+LOT 03 - PLATRERIE ET ISOLATION
+5. Cloisonnement Placostil BA13 coupe-feu 72/48	m²	75	46.00
+6. Isolation thermique mur extérieur laine de roche	m²	60	52.00
+
+LOT 04 - ÉLECTRICITÉ ET COURANTS FAIBLES
+7. Rénovation complète tableau divisionnaire 4 rangées	u	1	1450.00
+
+LOT 05 - PLOMBERIE ET SANITAIRE
+8. Réseau plomberie sanitaire alimentation multicouche	forfait	1	980.00
+
+LOT 06 - REVÊTEMENTS ET CARRELAGE
+9. Pose carrelage grès cérame 60x60 avec chape mortier	m²	55	68.00
+
+LOT 07 - FINITIONS ET PEINTURE
+10. Peinture acrylique satinée 2 couches finition soignée	m²	140	26.00`;
+        }
+
+        function chargerProjetEurope(typeProjet) {
+            if (typeProjet === 'renovation_complete') {
+                chargerExempleDevis10Articles();
+                naviguerVersEtape(4);
+                basculerOngletEurope('chiffre');
+                return;
+            }
+
+            if (typeProjet === 'extension') {
+                if (document.getElementById("projetNom")) document.getElementById("projetNom").value = "Extension Maison R+1 & Gros-Œuvre (60 m²)";
+                lignesDQE = [
+                    { id: 1, chapitre: "LOT 01 - TERRASSEMENT ET FONDATIONS", designation: "Fouilles en rigoles pour semelles filantes", unite: "m³", qte: 35, pu: 42.00, tva: 10 },
+                    { id: 2, chapitre: "LOT 01 - TERRASSEMENT ET FONDATIONS", designation: "Béton armé C25/30 pour semelles filantes", unite: "m³", qte: 18, pu: 290.00, tva: 10 },
+                    { id: 3, chapitre: "LOT 02 - GROS-OEUVRE ET MACONNERIE", designation: "Dallage sur terre-plein béton armé ép. 12 cm", unite: "m²", qte: 60, pu: 85.00, tva: 10 },
+                    { id: 4, chapitre: "LOT 02 - GROS-OEUVRE ET MACONNERIE", designation: "Élévation murs en blocs béton creux de 20 cm", unite: "m²", qte: 140, pu: 78.00, tva: 10 },
+                    { id: 5, chapitre: "LOT 02 - GROS-OEUVRE ET MACONNERIE", designation: "Plancher poutrelles et hourdis béton 16+4 cm", unite: "m²", qte: 60, pu: 110.00, tva: 10 },
+                    { id: 6, chapitre: "LOT 03 - CHARPENTE ET COUVERTURE", designation: "Charpente fermettes bois sapin traité classe 2", unite: "m²", qte: 75, pu: 95.00, tva: 10 },
+                    { id: 7, chapitre: "LOT 03 - CHARPENTE ET COUVERTURE", designation: "Couverture en tuiles terre cuite avec liteaux", unite: "m²", qte: 75, pu: 82.00, tva: 10 },
+                    { id: 8, chapitre: "LOT 04 - MENUISERIES EXTERIEURES", designation: "Fourniture et pose baie coulissante aluminium 240x215", unite: "u", qte: 2, pu: 1650.00, tva: 20 }
+                ];
+            } else if (typeProjet === 'appartement_paris') {
+                if (document.getElementById("projetNom")) document.getElementById("projetNom").value = "Rénovation Énergétique Appartement T3 (72 m²)";
+                lignesDQE = [
+                    { id: 1, chapitre: "LOT 01 - DÉPOSE ET PRÉPARATION", designation: "Dépose des anciens revêtements et sanitaires", unite: "forfait", qte: 1, pu: 1200.00, tva: 10 },
+                    { id: 2, chapitre: "LOT 02 - ISOLATION THERMIQUE (RGE)", designation: "Doublage thermique murs périphériques R=3.75", unite: "m²", qte: 85, pu: 58.00, tva: 5.5 },
+                    { id: 3, chapitre: "LOT 02 - ISOLATION THERMIQUE (RGE)", designation: "Faux-plafond acoustique Placostil BA13", unite: "m²", qte: 72, pu: 48.00, tva: 5.5 },
+                    { id: 4, chapitre: "LOT 03 - MENUISERIES HAUTE PERFORMANCE", designation: "Fenêtres PVC double vitrage Uw <= 1.3 avec volets", unite: "u", qte: 4, pu: 890.00, tva: 5.5 },
+                    { id: 5, chapitre: "LOT 04 - CHAUFFAGE ET VMC", designation: "Installation VMC hygroréglable basse consommation", unite: "forfait", qte: 1, pu: 1650.00, tva: 5.5 },
+                    { id: 6, chapitre: "LOT 04 - CHAUFFAGE ET VMC", designation: "Radiateurs électriques à inertie céramique programmables", unite: "u", qte: 5, pu: 540.00, tva: 10 },
+                    { id: 7, chapitre: "LOT 05 - ÉLECTRICITÉ MISE EN SÉCURITÉ", designation: "Rénovation électrique NF C 15-100 complète", unite: "forfait", qte: 1, pu: 3800.00, tva: 10 },
+                    { id: 8, chapitre: "LOT 06 - REVÊTEMENTS DE SOLS", designation: "Fourniture et pose parquet contrecollé chêne", unite: "m²", qte: 55, pu: 62.00, tva: 10 },
+                    { id: 9, chapitre: "LOT 06 - REVÊTEMENTS DE SOLS", designation: "Carrelage grès cérame cuisine et salle de bain", unite: "m²", qte: 17, pu: 72.00, tva: 10 },
+                    { id: 10, chapitre: "LOT 07 - PEINTURE ET FINITIONS", designation: "Peinture murs et plafonds dépolluante A+", unite: "m²", qte: 220, pu: 28.00, tva: 10 }
+                ];
+            }
+
+            rendreTableaux();
+            naviguerVersEtape(4);
+            basculerOngletEurope('chiffre');
+            alert(`✅ Projet "${document.getElementById('projetNom').value}" chargé avec succès en Euros (€) !\nConsultez le Devis Numérisé et le Devis Chiffré à l'Étape 4.`);
         }
 
         // RÉFÉRENTIEL DES PRIX UNITAIRES RÉELS DU MARCHÉ BTP EUROPE (BATIPRIX / FFB 2024-2026)
