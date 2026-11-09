@@ -1970,11 +1970,15 @@
         async function extraireAvecGeminiVision(cleApiKey) {
             const prompt = `Tu es un métreur vérificateur hautement qualifié en BTP (expert en métrés, CCTP, DQE et bordereaux de prix unitaires).
 
+RÈGLE ABSOLUE DE VÉRIFICATION ET DE CONFORMITÉ :
+0. Si le document soumis n'est PAS un devis, métré, CCTP, DQE ou bordereau de travaux de bâtiment (par exemple s'il s'agit d'une fiche de paie, bulletin de salaire, relevé bancaire, contrat, facture commerciale d'achat hors travaux ou pièce d'identité) :
+   Tu DOIS STRICTEMENT renvoyer un tableau JSON VIDE : [] ! Il est STRICTEMENT INTERDIT de transformer un bulletin de salaire ou un document administratif en devis BTP !
+
 INTERDICTION ABSOLUE ET RÈGLE D'EXCLUSION MAJEURE :
 1. NE JAMAIS PRENDRE LES EN-TÊTES ADMINISTRATIFS OU DE PROJET COMME DES ARTICLES !
    Sont STRICTEMENT INTERDITS et NE DOIVENT JAMAIS figurer comme des articles ou des postes :
-   - Les mentions républicaines et administratives : "RÉPUBLIQUE...", "WILAYA...", "DAIRA...", "COMMUNE...", "MINISTÈRE...", "DIRECTION...", "DIRECTION DE L'URBANISME...", etc.
-   - Les informations d'en-tête de marché : "AVIS D'APPEL D'OFFRES", "SOUMISSION", "BORDEREAU DES PRIX UNITAIRES", "DQE", "PROJET DE RÉALISATION...", "MAÎTRE D'OUVRAGE...", "ENTREPRISE...", "DATE...", "SIGNATURE", etc.
+   - Les mentions administratives ou d'entreprise : "BULLETIN DE PAIE", "SALAIRE", "COTISATIONS", "DIRECTION...", "MINISTÈRE...", etc.
+   - Les informations d'en-tête de marché : "AVIS D'APPEL D'OFFRES", "SOUMISSION", "BORDEREAU DES PRIX UNITAIRES", "DQE", "MAÎTRE D'OUVRAGE...", "ENTREPRISE...", "DATE...", "SIGNATURE", etc.
    - Les titres de chapitres ou de lots isolés : "LOT 01 - TERRASSEMENT", "CHAPITRE 1", etc. Ces titres doivent UNIQUEMENT remplir le champ "chapitre" de l'article, jamais être un article par eux-mêmes !
 
 2. RÈGLE STRICTE DE REPRODUCTION DU TABLEAU DU DOCUMENT :
@@ -2144,30 +2148,13 @@ RENVOIE UNIQUEMENT UN TABLEAU JSON VALIDE D'OBJETS :
             }
 
             if (!texteBrut.trim()) {
-                // Fallback structuré en Chapitres, Lignes et Colonnes conformes au BTP
-                texteBrut = `LOT 01 - DÉMOLITION ET PRÉPARATION
-1 Installation générale de chantier et benne à gravats ens 1 850.00
-2 Démolition de cloisons briques et évacuation décharge m² 45 24.00
-
-LOT 02 - GROS ŒUVRE ET STRUCTURE
-3 Fourniture et pose poutre métallique IPE 200 avec calage u 1 2650.00
-4 Maçonnerie de reprise en sous-œuvre et linteaux BA ml 8 185.00
-
-LOT 03 - PLATRERIE ET ISOLATION
-5 Cloisonnement Placostil BA13 coupe-feu 72/48 m² 75 46.00
-6 Isolation thermique mur extérieur laine de roche R=3.15 m² 60 52.00
-
-LOT 04 - ÉLECTRICITÉ ET COURANTS FAIBLES
-7 Rénovation complète tableau divisionnaire 4 rangées u 1 1450.00
-
-LOT 05 - PLOMBERIE ET SANITAIRE
-8 Réseau plomberie sanitaire alimentation multicouche forfait 1 980.00
-
-LOT 06 - REVÊTEMENTS ET CARRELAGE
-9 Pose carrelage grès cérame 60x60 avec chape mortier m² 55 68.00
-
-LOT 07 - FINITIONS ET PEINTURE
-10 Peinture acrylique satinée 2 couches finition soignée m² 140 26.00`;
+                alert("⚠️ Aucun texte n'a pu être lu sur ce document.\n\nS'il s'agit d'un scan ou d'une photo, vérifiez que le document est net et lisible, ou privilégiez l'import Excel (.xlsx) ou le Copier-Coller de tableau.");
+                const status = document.getElementById("statusArticlesDetectes");
+                if (status) {
+                    status.style.color = "#ef4444";
+                    status.textContent = "❌ Échec de lecture OCR : Document illisible ou vide.";
+                }
+                return;
             }
 
             document.getElementById("voletVerificationOCR").style.display = "block";
@@ -2411,13 +2398,42 @@ LOT 07 - FINITIONS ET PEINTURE
 
         // PARSEUR FIDÈLE DU TABLEAU BTP NUMÉRISÉ (Reproduction exacte Lignes & Colonnes, P.U., HT, TVA, TTC)
         function parserEtAppliquerTexteBTP(texte) {
+            if (!texte || !texte.trim()) {
+                alert("⚠️ Aucun texte à analyser.");
+                return;
+            }
+
+            // 1. REJET IMMÉDIAT DES BULLETINS DE SALAIRE ET DOCUMENTS ADMINISTRATIFS NON-BTP
+            const regexNonBTPEurope = /(?:bulletin\s*de\s*(?:paie|salaire)|fiche\s*de\s*paie|salaire\s*(?:brut|net|de\s*base)|cotisations\s*sociales|urssaf|net\s*imposable|net\s*à\s*payer|net\s*a\s*payer|matricule\s*:\s*\d+|heures\s*suppl|congés\s*payés|relevé\s*d'identité\s*bancaire|\brib\b|facture\s*(?:edf|engie|orange|free|eau)|quittance\s*de\s*loyer)/i;
+            if (regexNonBTPEurope.test(texte)) {
+                alert("⛔ Document Rejeté :\n\nCe document est un bulletin de salaire / document administratif et NON un devis ou bordereau de travaux BTP.\n\nLe logiciel refuse catégoriquement de chiffrer des fiches de paie ou documents hors BTP.");
+                const status = document.getElementById("statusArticlesDetectes");
+                if (status) {
+                    status.style.color = "#ef4444";
+                    status.textContent = "❌ Document rejeté : Bulletin de salaire ou document administratif non-BTP.";
+                }
+                return;
+            }
+
+            // 2. VÉRIFICATION DE LA PRÉSENCE MINIMALE DE TERMES BTP
+            const regexPresenceBTPEurope = /(?:démolition|demolition|terrassement|fouille|gros\s*oeuvre|gros\s*œuvre|maçonnerie|maconnerie|béton|beton|chape|plâtrerie|platrerie|isolation|placostil|peinture|revêtement|revetement|carrelage|faïence|faience|électricité|electricite|plomberie|sanitaire|menuiserie|charpente|couverture|étanchéité|etancheite|bordereau|devis|métré|metre|dqe|cctp)/i;
+            if (!regexPresenceBTPEurope.test(texte)) {
+                alert("⚠️ Aucun poste ou ouvrage de bâtiment détecté dans ce document.\n\nVeuillez charger un devis de travaux, un bordereau de prix (DQE) ou importer un fichier Excel.");
+                const status = document.getElementById("statusArticlesDetectes");
+                if (status) {
+                    status.style.color = "#f59e0b";
+                    status.textContent = "⚠️ Aucun ouvrage BTP détecté sur ce document.";
+                }
+                return;
+            }
+
             const lignesBrutes = texte.split("\n").map(l => l.trim()).filter(l => l.length > 0);
             const nouveauxArticles = [];
 
             const regexChapitre = /^(lot\s*\d+|chapitre\s*\d+|section\s*[a-z0-9]+|partie\s*\d+)/i;
             const regexPiedDevisTotaux = /^(sous-total|total\s*ht|total\s*ttc|tva|montant\s*total)/i;
             const regexDebutPoste = /^(\d+[\.\)\-]\d*|[a-z][\.\)]|\barticle\s*\d+|\bposte\s*\d+|[•\-*])\s+/i;
-            const regexUniteBTP = /\b(m²|m2|ml|m|u|ens|forfait|ft|kg|m³|m3|h|heure)\b/i;
+            const regexUniteBTP = /\b(m²|m2|ml|u|ens|forfait|ft|kg|m³|m3|pce)\b/i;
 
             // FILTRE STRICT D'EXCLUSION : EN-TÊTES ADMINISTRATIFS, MINISTÈRES, WILAYAS, DAÏRAS, TITRES DE MARCHÉ
             const regexExclusionAdministrative = /^(république|republique|wilaya|daira|daïra|commune|baladiya|ministère|ministere|direction|dlep|dduc|apc|avis|soumission|cahier\s*des\s*charges|cctp|dqe|bordereau\s*des|sommaire|intitulé|intitule|projet\s*de|maître\s*d|maitre\s*d|entreprise\s*:|chantier\s*:|client\s*:|date\s*:|siret|rcs|page\s*\d+)/i;
@@ -2427,7 +2443,7 @@ LOT 07 - FINITIONS ET PEINTURE
             for (let i = 0; i < lignesBrutes.length; i++) {
                 const ligne = lignesBrutes[i];
 
-                if (regexExclusionAdministrative.test(ligne) || regexPiedDevisTotaux.test(ligne)) {
+                if (regexExclusionAdministrative.test(ligne) || regexPiedDevisTotaux.test(ligne) || /(?:salaire|prime|panier|transport|cotisation|retenue|impôt|avance|allocation|indemnité|matricule|bulletin)/i.test(ligne)) {
                     continue;
                 }
 

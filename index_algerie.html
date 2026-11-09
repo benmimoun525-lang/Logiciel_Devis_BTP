@@ -4900,14 +4900,7 @@
                 if (resGlob && Array.isArray(resGlob.articles)) artsGlobaux = resGlob.articles;
             }
 
-            // 3. Repli BPU référentiel Algérie
-            if (artsGlobaux.length === 0) {
-                ajouterLog(`💰 Chiffrage automatique à partir du référentiel BPU Algérie...`);
-                pagesQueue.forEach((p, idx) => {
-                    const r = genererArticlesBpuParDefaut(p.name, idx);
-                    if (r && Array.isArray(r.articles)) artsGlobaux.push(...r.articles);
-                });
-            }
+            // 3. Pas de génération d'articles bidons si non détectés
 
             if (resGlob) {
                 if (resGlob.client && !document.getElementById('nomClient').value) document.getElementById('nomClient').value = resGlob.client;
@@ -4921,14 +4914,16 @@
                 ajouterLog(`🎉 Succès total ! ${artsGlobaux.length} article(s) chiffré(s) sur l'ensemble du document.`);
                 statusBadge.className = 'status-pill status-done';
                 statusBadge.textContent = `Document complet traité (Autonome) ! (${artsGlobaux.length} articles)`;
+                consommerCreditApresSucces(nbPages);
             } else {
-                pagesQueue.forEach(p => { p.status = 'traite'; });
+                pagesQueue.forEach(p => { p.status = 'erreur'; });
                 rafraichirGrilleVignettes();
-                statusBadge.className = 'status-pill status-done';
-                statusBadge.textContent = `Analyse terminée.`;
+                const motifErr = (resGlob && resGlob.message) ? resGlob.message : "Aucun article de devis BTP détecté sur ce document. Seuls les devis et bordereaux de travaux BTP peuvent être traités.";
+                statusBadge.className = 'status-pill status-err';
+                statusBadge.innerHTML = `<span>❌ ${escapeHtml(motifErr)}</span>`;
+                ajouterLog(`⚠️ ${motifErr}`);
+                alert(`⚠️ Document non reconnu :\n\n${motifErr}`);
             }
-
-            consommerCreditApresSucces(nbPages);
             if (btnDirect) btnDirect.disabled = false;
             if (btnTout) btnTout.disabled = false;
             pBar.style.width = '100%';
@@ -5073,7 +5068,15 @@
             r.readAsDataURL(fichierImg);
         });
 
-        const promptText = `Tu es un expert métreur-vérificateur senior BTP Algérie. Analyse scrupuleusement ce document (devis, bordereau des prix unitaires BPU, DQE). Transcris fidèlement chaque article sans fusionner. Détecte les lots BTP. Format JSON strict: {"client":"","projet":"","articles":[{"lot":"LOT ...","n":1,"d":"...","u":"m2","q":1,"pu":1500,"total":1500}]}`;
+        const promptText = `Tu es un métreur vérificateur senior expert en BTP.
+RÈGLE ABSOLUE DE VÉRIFICATION DU DOCUMENT :
+1. Si le document soumis n'est PAS un devis, bordereau de prix unitaires (BPU), DQE, attachement ou métré de travaux BTP (par exemple s'il s'agit d'une fiche de paie, d'un bulletin de salaire, d'un relevé bancaire, d'une quittance de loyer, d'une facture de commerce générale ou d'une pièce d'identité) :
+   Tu DOIS STRICTEMENT renvoyer ce JSON de rejet :
+   {"est_devis_btp": false, "motif": "Document rejeté : Ce document est un document administratif ou financier hors BTP (bulletin de paie, etc.), et NON un devis de travaux de construction.", "articles": []}
+2. Si et seulement si c'est un vrai devis ou bordereau de travaux BTP :
+   Transcris scrupuleusement chaque article sans fusionner. Détecte les lots BTP.
+   Format JSON strict :
+   {"est_devis_btp": true, "client":"","projet":"","articles":[{"lot":"LOT ...","n":1,"d":"...","u":"m2","q":1,"pu":1500,"total":1500}]}`;
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cleApi}`;
         const payload = {
@@ -5112,7 +5115,17 @@
         const start = textResp.indexOf('{');
         const end = textResp.lastIndexOf('}');
         if (start !== -1 && end !== -1 && end > start) {
-            try { return JSON.parse(textResp.substring(start, end + 1)); } catch(e) {}
+            try {
+                const parsed = JSON.parse(textResp.substring(start, end + 1));
+                if (parsed.est_devis_btp === false) {
+                    return {
+                        articles: [],
+                        erreur: "DOCUMENT_NON_BTP",
+                        message: parsed.motif || "Document rejeté : Ce n'est pas un devis ou bordereau BTP."
+                    };
+                }
+                return parsed;
+            } catch(e) {}
         }
         return { articles: [] };
     }
@@ -5221,10 +5234,16 @@
     }
 
     function extraireArticlesDepuisLignesExcel(jsonRows, nomFichier) {
+        const texteComplet = jsonRows.map(r => Array.isArray(r) ? r.join(' ') : '').join('\n');
+        if (/(?:bulletin\s*de\s*(?:paie|salaire)|fiche\s*de\s*paie|salaire\s*(?:brut|net|de\s*base)|cotisation\s*cnas|retenue\s*irg|net\s*a\s*payer|matricule\s*:\s*\d+|heures\s*suppl)/i.test(texteComplet)) {
+            alert("⛔ Fichier Rejeté :\n\nCe fichier Excel semble être un état de paie ou un document de gestion du personnel et NON un devis ou bordereau BTP.\n\nLe logiciel est réservé aux devis et métrés de travaux BTP.");
+            return [];
+        }
+
         const articles = [];
         let lotActuel = "LOT 01: TRAVAUX PRINCIPAUX";
         const regexLot = /(?:LOT\s*\d+|GROS[-\s]?OEUVRE|TERRASSEMENT|MACONNERIE|MAÇONNERIE|REVETEMENT|REVÊTEMENT|PEINTURE|ELECTRICITE|ÉLECTRICITÉ|PLOMBERIE|MENUISERIE|ETANCHEITE|ÉTANCHÉITÉ|VRD|ASSAINISSEMENT|HYDRAULIQUE|CHAPITRE|PHASE)/i;
-        const regexUniteStrict = /^(m2|m²|m3|m³|ml|u|kg|tonne|t|ens|forfait|f|j|h|fft|pce|ml\.)$/i;
+        const regexUniteStrict = /^(m2|m²|m3|m³|ml|u|kg|tonne|t|ens|forfait|fft|pce|ml\.)$/i;
 
         for (let r = 0; r < jsonRows.length; r++) {
             const row = jsonRows[r];
@@ -5689,6 +5708,28 @@ LOT 05: REVÊTEMENTS & FINITIONS
     function extraireArticlesDepuisTexteClient(texte, sourceNom = "Document") {
         if (!texte || !texte.trim()) return { articles: [] };
 
+        // 1. DÉTECTION STRICTE & REJET IMMÉDIAT DES DOCUMENTS ADMINISTRATIFS NON-BTP
+        const regexNonBTP = /(?:bulletin\s*de\s*(?:paie|salaire)|fiche\s*de\s*paie|salaire\s*(?:brut|net|de\s*base)|cotisation\s*cnas|retenue\s*irg|net\s*a\s*payer|matricule\s*:\s*\d+|émargement|acompte\s*sur\s*salaire|heures\s*suppl|congés\s*payés|relevé\s*d'identité\s*bancaire|\brib\b|facture\s*(?:sonelgaz|algérie\s*télécom|eau)|quittance\s*de\s*loyer)/i;
+        if (regexNonBTP.test(texte)) {
+            return {
+                est_devis_btp: false,
+                erreur: "DOCUMENT_NON_BTP",
+                message: "⛔ Document Rejeté : Ce document est un bulletin de salaire / document administratif et NON un devis ou bordereau de travaux BTP.",
+                articles: []
+            };
+        }
+
+        // 2. VÉRIFICATION DE LA PRÉSENCE MINIMALE DE VOCABULAIRE OU STRUCTURE BTP
+        const regexPresenceBTP = /(?:terrassement|fouille|déblai|remblai|béton|beton|armature|ferraillage|coffrage|maçonnerie|maconnerie|parpaing|brique|enduit|chape|dallage|peinture|carrelage|faïence|faience|étanchéité|etancheite|plomberie|sanitaire|électricité|electricite|menuiserie|charpente|revêtement|revetement|bordereau|devis|métré|metre|dqe|cctp|gros[-\s]?oeuvre|bpu)/i;
+        if (!regexPresenceBTP.test(texte)) {
+            return {
+                est_devis_btp: false,
+                erreur: "AUCUN_OUVRAGE_BTP",
+                message: "⚠️ Aucun ouvrage ou poste de travaux BTP détecté dans ce document. Seuls les devis et bordereaux de bâtiment peuvent être chiffrés.",
+                articles: []
+            };
+        }
+
         const lignes = texte.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
         const articles = [];
         let lotActuel = "LOT 01: GROS-OEUVRE & MAÇONNERIE";
@@ -5697,10 +5738,15 @@ LOT 05: REVÊTEMENTS & FINITIONS
         let numArt = 1;
 
         const regexLot = /(?:LOT\s*\d+|GROS[-\s]?OEUVRE|TERRASSEMENT|MACONNERIE|MAÇONNERIE|REVETEMENT|REVÊTEMENT|PEINTURE|ELECTRICITE|ÉLECTRICITÉ|PLOMBERIE|MENUISERIE|ETANCHEITE|ÉTANCHÉITÉ|VRD|ASSAINISSEMENT|HYDRAULIQUE)/i;
-        const regexUnite = /\b(m2|m3|ml|kg|tonne|u|ens|forfait|f|j)\b/i;
+        const regexUnite = /\b(m2|m²|m3|m³|ml|kg|tonne|t|u|ens|forfait|fft|pce)\b/i;
         const regexQte = /(\d+(?:[.,]\d+)?)/;
 
         lignes.forEach(ligne => {
+            // Exclusion des lignes de paie ou administratives résiduelles
+            if (/(?:salaire|prime|panier|transport|cnas|cotisation|retenue|impôt|avance|allocation|indemnité|matricule)/i.test(ligne)) {
+                return;
+            }
+
             // Détection Client / Projet
             if (/client\s*:\s*(.+)/i.test(ligne)) {
                 const m = ligne.match(/client\s*:\s*(.+)/i);
@@ -5767,25 +5813,8 @@ LOT 05: REVÊTEMENTS & FINITIONS
     }
 
     function genererArticlesBpuParDefaut(nomPage = "Page", index = 0) {
-        if (!bpuCatalogue || bpuCatalogue.length === 0) return { articles: [] };
-        const startIdx = (index * 4) % Math.max(1, bpuCatalogue.length - 4);
-        const selection = bpuCatalogue.slice(startIdx, startIdx + 4);
-        const articles = selection.map((item, idx) => {
-            const pu = (strategiePrixActive === 'moins_disant') ? item.prix_min : item.prix_moyen;
-            const q = (item.unite === 'm3') ? 12 : (item.unite === 'm2' ? 45 : (item.unite === 'ml' ? 25 : 2));
-            return {
-                lot: item.lot || "TRAVAUX GÉNÉRAUX",
-                n: idx + 1,
-                d: item.designation,
-                u: item.unite,
-                q: q,
-                pu: pu,
-                total: Math.round(q * pu * 100) / 100,
-                source: nomPage,
-                statut_prix: (strategiePrixActive === 'moins_disant') ? 'moins_disant' : 'moyen'
-            };
-        });
-        return { articles };
+        // ZÉRO FABRICATION DE FAUX ARTICLES : Si un document est vide, on renvoie une liste vide
+        return { articles: [] };
     }
 
     async function executerTraitementPage(idx) {
@@ -5849,12 +5878,7 @@ LOT 05: REVÊTEMENTS & FINITIONS
                 if (resAutonome && Array.isArray(resAutonome.articles)) artsExtraits = resAutonome.articles;
             }
 
-            // 3. Repli BPU référentiel Algérie
-            if (artsExtraits.length === 0) {
-                ajouterLog(`💰 Chiffrage automatique à partir du référentiel BPU Algérie...`);
-                resAutonome = genererArticlesBpuParDefaut(page.name, idx);
-                if (resAutonome && Array.isArray(resAutonome.articles)) artsExtraits = resAutonome.articles;
-            }
+            // 3. Pas de fabrication de faux articles par défaut si aucun article réel n'est trouvé
 
             if (resAutonome) {
                 if (resAutonome.client && !document.getElementById('nomClient').value) document.getElementById('nomClient').value = resAutonome.client;
@@ -5867,15 +5891,19 @@ LOT 05: REVÊTEMENTS & FINITIONS
                 page.articles = artsExtraits;
                 ajouterLog(`✅ Succès immédiat ! ${artsExtraits.length} article(s) chiffré(s) sur "${page.name}".`);
                 statusBadge.className = 'status-pill status-done';
-                statusBadge.textContent = `Page traitée (Autonome) ! ${artsExtraits.length} articles ajoutés.`;
+                statusBadge.textContent = `Page traitée ! ${artsExtraits.length} articles ajoutés.`;
+                consommerCreditApresSucces(1);
             } else {
-                page.status = 'traite';
-                ajouterLog(`⚠️ Aucun article BTP détecté sur "${page.name}".`);
-                statusBadge.className = 'status-pill status-done';
-                statusBadge.textContent = `Analyse terminée.`;
+                page.status = 'erreur';
+                const motifErr = (resAutonome && resAutonome.message) ? resAutonome.message : `Aucun article BTP détecté sur "${page.name}". Ce document n'est pas un devis de travaux.`;
+                ajouterLog(`⚠️ ${motifErr}`);
+                statusBadge.className = 'status-pill status-err';
+                statusBadge.innerHTML = `<span>❌ ${escapeHtml(motifErr)}</span>`;
+                alert(`⚠️ Document non reconnu :\n\n${motifErr}\n\nVérifiez votre document ou utilisez l'import Excel / Copier-Coller Tableau.`);
+                rafraichirGrilleVignettes();
+                sauvegarderLocalement();
+                return false;
             }
-
-            consommerCreditApresSucces(1);
             rafraichirGrilleVignettes();
             sauvegarderLocalement();
             return true;
@@ -8093,7 +8121,8 @@ LOT 05: REVÊTEMENTS & FINITIONS
 
         const totalArticles = Object.values(devisLots || {}).reduce((acc, l) => acc + (l ? l.length : 0), 0);
         if (totalArticles === 0) {
-            chargerExempleDevisDossierComplet(true);
+            alert("⚠️ Votre devis est actuellement vide.\n\nVeuillez d'abord importer vos postes de travaux :\n- Soit via « 📊 1. Importer Excel (.xlsx) »\n- Soit via « 📋 2. Copier-Coller Tableau »\n- Soit en choisissant un projet dans « 🏗️ 3. Catalogue par Lots ».");
+            return;
         }
 
         ajouterLog("📊 Déblocage et affichage de l'Étape 4 : Devis Numérisé & Devis Chiffré DQE.");
