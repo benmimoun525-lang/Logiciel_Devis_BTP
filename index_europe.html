@@ -816,6 +816,27 @@
 
                 <!-- PANNEAU 4 EUROPE : PHOTOS & SCANS A4 -->
                 <div id="panneauModePhotoEurope" style="display: none;">
+                    <!-- Guide Recommandation CamScanner / DocScanner -->
+                    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #86efac; border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(22,101,52,0.06);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                            <div style="font-weight: 800; color: #166534; font-size: 0.96rem; display: flex; align-items: center; gap: 8px;">
+                                <span>📱</span> <span>Recommandation Pro : Utilisez CamScanner ou DocScanner !</span>
+                            </div>
+                            <span style="background: #22c55e; color: white; font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; font-weight: 800; letter-spacing: 0.5px;">100% RECOMMANDÉ BTP</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #14532d; line-height: 1.55;">
+                            Les photos ordinaires de smartphone comportent souvent des ombres et des déformations. En scannant avec <b>CamScanner (CS)</b> ou <b>DocScanner</b> (applications gratuites sur Android & iPhone) :
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin-top: 8px;">
+                                <div style="background: white; border-radius: 8px; padding: 8px 12px; border: 1px solid #bbf7d0;">
+                                    <b>1. Clarté & Redressement :</b> Votre feuille est redressée à plat, sans ombres, avec un contraste noir & blanc d'imprimerie.
+                                </div>
+                                <div style="background: white; border-radius: 8px; padding: 8px 12px; border: 1px solid #bbf7d0;">
+                                    <b>2. Option Magique CamScanner :</b> Utilisez la fonction <i>« Exporter vers Excel »</i> de l'application, puis glissez le fichier dans l'onglet <b>📊 1. Importer Excel</b> pour un chiffrage instantané à 100% sans aucune erreur !
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Barre d'import rapide -->
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
                         <button type="button" onclick="document.getElementById('inputPhotoDossier').click()" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,99,235,0.25);">
@@ -850,6 +871,9 @@
                             </span>
                             <button type="button" class="zoom-btn" onclick="basculerPleinEcranDoc()" style="background: #2563eb; border-color: #3b82f6;">
                                 <span>⛶ Plein Écran / Loupe HD</span>
+                            </button>
+                            <button type="button" id="btnFiltreCamScannerEurope" class="zoom-btn" onclick="basculerFiltreCamScannerEurope()" style="background: #059669; border-color: #10b981;" title="Augmente le contraste et blanchit le fond façon scan professionnel">
+                                <span>🪄 Filtre CamScanner</span>
                             </button>
                         </div>
                     </div>
@@ -1563,11 +1587,24 @@
             if (vp) { vp.scrollLeft = 0; vp.scrollTop = 0; }
         }
 
+        let filtreCamScannerEuropeActif = false;
+        function basculerFiltreCamScannerEurope() {
+            filtreCamScannerEuropeActif = !filtreCamScannerEuropeActif;
+            const btn = document.getElementById("btnFiltreCamScannerEurope");
+            if (btn) {
+                btn.style.background = filtreCamScannerEuropeActif ? '#166534' : '#059669';
+                btn.innerHTML = filtreCamScannerEuropeActif ? '<span>✓ Filtre Scan Actif</span>' : '<span>🪄 Filtre CamScanner</span>';
+            }
+            appliquerZoom();
+        }
+        window.basculerFiltreCamScannerEurope = basculerFiltreCamScannerEurope;
+
         function appliquerZoom() {
             const paper = document.getElementById("docPaperWrapper");
             const lbl = document.getElementById("labelZoomNiveau");
             if (paper) {
                 paper.style.transform = `scale(${zoomActuel})`;
+                paper.style.filter = filtreCamScannerEuropeActif ? 'grayscale(100%) contrast(190%) brightness(115%)' : 'none';
             }
             if (lbl) {
                 lbl.textContent = Math.round(zoomActuel * 100) + "%";
