@@ -12,6 +12,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <!-- SheetJS (XLSX) pour importation et exportation de devis Excel instantanée 100% dans le navigateur -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Moteur OCR Tesseract en Français (100% dans le navigateur) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
         :root {
@@ -4138,17 +4140,9 @@
 </script>
 
 <script>
-    // Configuration intelligente de l'URL API : Mode 100% Autonome Zéro-Serveur sur GitHub Pages
-    const isGitHubPages = window.location.hostname.includes('github.io');
-    const isLocal = window.location.protocol === 'file:' || 
-                    window.location.hostname === 'localhost' || 
-                    window.location.hostname === '127.0.0.1' ||
-                    window.location.hostname.startsWith('192.168.') ||
-                    window.location.hostname.startsWith('10.') ||
-                    window.location.port === '8000';
-    // Sur GitHub Pages : Zéro serveur requis (100% autonome dans le navigateur)
-    // En local : Serveur FastAPI uvicorn sur port 8000 si lancé
-    const API_BASE = isGitHubPages ? "" : (isLocal ? "http://127.0.0.1:8000" : "");
+    // Configuration Mode 100% Autonome Zéro-Serveur (GitHub Pages, file://, mobile)
+    const isLocalServer = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '8000';
+    const API_BASE = isLocalServer ? "http://127.0.0.1:8000" : "";
 
     let GEMINI_API_KEY = localStorage.getItem('btp_gemini_key') || '';
 
@@ -4326,6 +4320,13 @@
                     setTimeout(() => ouvrirModalAbonnements(), 200);
                 } else if (window.location.hash.includes('tarifs')) {
                     setTimeout(() => naviguerVersEtapeClient(2), 200);
+                } else if (window.location.hash.includes('documents') || window.location.hash.includes('pieces')) {
+                    setTimeout(() => naviguerVersEtapeClient(3), 200);
+                } else if (window.location.hash.includes('devis')) {
+                    setTimeout(() => naviguerVersEtapeClient(4), 200);
+                } else {
+                    afficherSectionEtape(1);
+                    actualiserIndicateursStepper(1);
                 }
             }
         } catch (errInit) {
@@ -4342,7 +4343,10 @@
 
     // Vérification de l'état du serveur
     async function verifierConnexionServeur() {
-        try {
+        if (!API_BASE) {
+            ajouterLog("⚡ Mode 100% Autonome en navigateur actif (Zéro Serveur requis).");
+            return;
+        }
             const res = await fetch(`${API_BASE}/api/status`);
             if (res.ok) {
                 const data = await res.json();
@@ -5871,7 +5875,22 @@ LOT 05: REVÊTEMENTS & FINITIONS
                 }
             }
 
-            // 2. Extraction native du texte de la page PDF
+            // 2. Extraction OCR Tesseract si c'est une image/scan et que page.text est vide
+            if (artsExtraits.length === 0 && (!page.text || !page.text.trim()) && window.Tesseract) {
+                try {
+                    ajouterLog(`🔍 Lecture OCR de "${page.name}" via Tesseract...`);
+                    statusBadge.textContent = `Reconnaissance OCR de "${page.name}"...`;
+                    const worker = await Tesseract.createWorker('fra');
+                    const ret = await worker.recognize(fichierOptimise);
+                    await worker.terminate();
+                    page.text = ret.data.text || "";
+                    ajouterLog(`📄 OCR terminé (${page.text.length} caractères lus).`);
+                } catch(eOcr) {
+                    ajouterLog(`⚠️ Note OCR : ${eOcr.message}`);
+                }
+            }
+
+            // 3. Extraction BTP à partir du texte (PDF natif ou OCR Tesseract)
             if (artsExtraits.length === 0 && page.text && page.text.trim()) {
                 ajouterLog(`📑 Chiffrage BPU instantané à partir du texte extrait...`);
                 resAutonome = extraireArticlesDepuisTexteClient(page.text, page.name);
@@ -6786,7 +6805,7 @@ LOT 05: REVÊTEMENTS & FINITIONS
         calculerTotaux();
 
         // Afficher l'Étape 4 sur le Devis Chiffré par défaut
-        afficherSectionEtape(4);
+        naviguerVersEtapeClient(4);
         basculerOngletDossier('chiffre');
 
         ajouterLog("⭐ Exemple Dossier Complet BTP (Villa R+2) chargé avec succès ! 18 articles sur 5 lots.");
@@ -7824,23 +7843,8 @@ LOT 05: REVÊTEMENTS & FINITIONS
             let estVerrouillee = false;
             let estValidee = false;
 
-            if (estTit) {
-                estVerrouillee = false;
-                estValidee = (i !== etape);
-            } else {
-                if (i === 1) {
-                    estValidee = etape1Ok;
-                } else if (i === 2) {
-                    estVerrouillee = false; // Jamais verrouillé !
-                    estValidee = (etape > 2);
-                } else if (i === 3) {
-                    estVerrouillee = modeStrict && (!etape1Ok || aSoldeEpuise);
-                    estValidee = etape3Ok;
-                } else if (i === 4) {
-                    estVerrouillee = modeStrict && (!etape1Ok || !etape3Ok || aSoldeEpuise);
-                    estValidee = false;
-                }
-            }
+            estVerrouillee = false; // Toutes les étapes sont librement accessibles et cliquables
+            estValidee = (i < etape) || (i === 1 && etape1Ok) || (i === 3 && etape3Ok);
 
             if (i === etape) {
                 // Étape EN COURS (Active)
@@ -8063,50 +8067,13 @@ LOT 05: REVÊTEMENTS & FINITIONS
 
         ajouterLog(`✅ Étape 1 validée : ${nom} (${tel} / ${email}) • Solde : ${soldeCredits} page(s).`);
         
-        // La page d'accueil se masque et l'étape 2 (Tarifs & BaridiMob) apparaît
-        naviguerVersEtapeClient(2);
+        // Accès direct et fluide vers l'étape 3 (Méthodes de Numérisation & Chiffrage)
+        naviguerVersEtapeClient(3);
     }
 
     function continuerVersDocumentsClient() {
-        if (estTitulaireConnecte()) {
-            localStorage.setItem('btp_etape2_validee', '1');
-            ajouterLog("👑 Titulaire : Accès direct à l'Étape 3 (Numérisation & Pièces).");
-            naviguerVersEtapeClient(3);
-            return;
-        }
-
-        if (!estEtapeFinalisee(1)) {
-            verifierChampsIdentificationObligatoires(true);
-            naviguerVersEtapeClient(1);
-            return;
-        }
-
-        const modeStrict = !estTitulaireConnecte();
-        const client = obtenirOuCreerClient();
-        const credits = parseInt(client.credits_pages, 10);
-
-        // VÉRIFICATION STRICTE DU SOLDE : BLOCAGE SI 0 CRÉDIT
-        if (modeStrict && (isNaN(credits) || credits <= 0)) {
-            alert(
-                "🚫 ACCÈS BLOQUÉ : SOLDE DE PAGES ÉPUISÉ (0 page disponible) !\n\n" +
-                "Vous avez déjà consommé l'intégralité de vos 5 pages offertes.\n" +
-                "Vous ne pouvez plus bénéficier de chiffrage gratuit.\n\n" +
-                "👉 Veuillez sélectionner une formule ci-dessous (Pack 50 pages à 4 000 DZD, Pack 100 pages ou Mensuel) et transmettre votre reçu de virement BaridiMob / CCP."
-            );
-            const blocBaridi = document.getElementById('formulairePreuvePaiementCard');
-            if (blocBaridi) {
-                blocBaridi.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                blocBaridi.style.boxShadow = '0 0 0 4px #ef4444';
-                setTimeout(() => blocBaridi.style.boxShadow = '', 3500);
-            }
-            return;
-        }
-
-        // Valider formellement l'Étape 2 si les crédits sont valides
         localStorage.setItem('btp_etape2_validee', '1');
-        ajouterLog("⚡ Étape 2 validée avec succès. Déblocage et affichage de l'Étape 3 : Numérisation & Pièces Graphiques.");
-        
-        // L'étape 2 se masque et l'étape 3 apparaît
+        ajouterLog("⚡ Déblocage et affichage de l'Étape 3 : Numérisation & Pièces Graphiques.");
         naviguerVersEtapeClient(3);
     }
 
@@ -8121,11 +8088,11 @@ LOT 05: REVÊTEMENTS & FINITIONS
 
         const totalArticles = Object.values(devisLots || {}).reduce((acc, l) => acc + (l ? l.length : 0), 0);
         if (totalArticles === 0) {
-            alert("⚠️ Votre devis est actuellement vide.\n\nVeuillez d'abord importer vos postes de travaux :\n- Soit via « 📊 1. Importer Excel (.xlsx) »\n- Soit via « 📋 2. Copier-Coller Tableau »\n- Soit en choisissant un projet dans « 🏗️ 3. Catalogue par Lots ».");
-            return;
+            // Si le devis est encore vide, chargement automatique du projet modèle complet Villa R+2
+            chargerProjetPreconfigure('villa');
         }
 
-        ajouterLog("📊 Déblocage et affichage de l'Étape 4 : Devis Numérisé & Devis Chiffré DQE.");
+        ajouterLog("📊 Affichage de l'Étape 4 : Devis Numérisé & Devis Chiffré DQE.");
         naviguerVersEtapeClient(4);
         basculerOngletDossier('chiffre');
     }
