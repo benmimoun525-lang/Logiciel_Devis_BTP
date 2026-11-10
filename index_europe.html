@@ -943,6 +943,51 @@
                         </div>
                     </div>
 
+                    <!-- Bloc Options IA & Consigne Personnalisée (Europe) -->
+                    <div style="background: white; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 14px 16px; margin-top: 12px; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                            <div style="font-weight: 800; color: #1e3a8a; font-size: 0.90rem; display: flex; align-items: center; gap: 8px;">
+                                <span>🤖</span> <span>Consigne IA & Corps d'État (Prompt Métier)</span>
+                            </div>
+                            <button type="button" class="btn btn-outline" style="padding: 3px 10px; font-size: 0.74rem; font-weight: 800; color: #1e40af; background: #eff6ff; border-color: #93c5fd;" onclick="copierPromptIAEurope()" title="Copier ce prompt pour l'utiliser dans l'application mobile Gemini ou ChatGPT">
+                                📋 Copier ce Prompt pour Mobile (Gemini / ChatGPT)
+                            </button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                            <div>
+                                <label for="selectSecteurBTPEurope" style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 3px;">
+                                    🏗️ Corps d'état prioritaire :
+                                </label>
+                                <select id="selectSecteurBTPEurope" onchange="actualiserPromptSecteurBTPEurope()" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 0.82rem; font-weight: 600; background: white; color: #0f172a;">
+                                    <option value="tous">Général / Tous Corps d'État (TCE)</option>
+                                    <option value="plomberie">Plomberie, Sanitaire & Chauffage</option>
+                                    <option value="electricite">Électricité & Domotique</option>
+                                    <option value="maconnerie">Maçonnerie, Béton & Gros Œuvre</option>
+                                    <option value="peinture">Peinture, Plâtrerie & Revêtements</option>
+                                    <option value="etancheite">Étanchéité, Couverture & Isolation</option>
+                                    <option value="menuiserie">Menuiserie & Agencement</option>
+                                    <option value="vrd">VRD & Terrassement</option>
+                                    <option value="cvc">CVC (Climatisation, Ventilation, PAC)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="tauxTvaPromptEurope" style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 3px;">
+                                    📈 Taux de TVA appliqué :
+                                </label>
+                                <select id="tauxTvaPromptEurope" onchange="actualiserPromptSecteurBTPEurope()" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 0.82rem; font-weight: 600; background: white; color: #0f172a;">
+                                    <option value="20" selected>TVA Normale (Neuf / Tertiaire) : 20%</option>
+                                    <option value="10">TVA Intermédiaire (Rénovation) : 10%</option>
+                                    <option value="5.5">TVA Réduite (Rénov. Énergétique) : 5.5%</option>
+                                    <option value="0">Autoliquidation / Exonéré (0%)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <textarea id="promptPersonnaliseIAEurope" rows="3" style="width: 100%; border: 1px solid #94a3b8; border-radius: 6px; padding: 8px; font-family: inherit; font-size: 0.80rem; line-height: 1.45; background: #f8fafc; color: #0f172a; resize: vertical;"></textarea>
+                        <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;">
+                            💡 Vous pouvez utiliser ce prompt directement dans l'application Gemini/ChatGPT sur smartphone, puis coller le résultat dans l'onglet <b>2. Copier-Coller Tableau</b>.
+                        </div>
+                    </div>
+
                     <!-- Volet de Contrôle et Vérification Visuelle du Texte Extrait de la Photo -->
                     <div id="voletVerificationOCR" style="display: none; background: white; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 16px; margin-top: 12px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -1533,6 +1578,7 @@
             if (!lignesDQE || lignesDQE.length === 0) {
                 lignesDQE = JSON.parse(JSON.stringify(DIX_ARTICLES_EXEMPLES));
             }
+            actualiserPromptSecteurBTPEurope();
             basculerOngletEurope('chiffre');
             rendreTableaux();
         });
@@ -1966,9 +2012,56 @@
             }
         }
 
+        function actualiserPromptSecteurBTPEurope() {
+            const selSecteur = document.getElementById('selectSecteurBTPEurope');
+            const selTva = document.getElementById('tauxTvaPromptEurope');
+            const promptArea = document.getElementById('promptPersonnaliseIAEurope');
+            if (!promptArea) return;
+
+            const secteurNom = (selSecteur && selSecteur.options[selSecteur.selectedIndex]) ? selSecteur.options[selSecteur.selectedIndex].text : "BTP Général";
+            const tvaVal = selTva ? selTva.value : "20";
+
+            promptArea.value = `Voici la photo d'un devis/bordereau vierge. Numérise ce tableau avec fidélité (désignation, unité, quantité).
+Remplis la colonne 'Prix Unitaire' en te basant sur les prix moyens actuels du marché BTP en France / Europe (en Euros €) pour le secteur : ${secteurNom}.
+Ensuite, calcule les montants HT par ligne (Quantité x Prix unitaire), le Total HT, applique une TVA de ${tvaVal}%, et donne-moi le Total TTC.
+Présente le résultat sous forme de tableau clair et structuré copiable dans Excel.`;
+        }
+        window.actualiserPromptSecteurBTPEurope = actualiserPromptSecteurBTPEurope;
+
+        function copierPromptIAEurope() {
+            const promptArea = document.getElementById('promptPersonnaliseIAEurope');
+            if (!promptArea) return;
+            const txt = promptArea.value || '';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(txt).then(() => {
+                    alert("📋 Prompt copié dans votre presse-papier !\n\nVous pouvez maintenant ouvrir l'application Gemini ou ChatGPT sur votre smartphone, ajouter votre photo et coller ce prompt.\nEnsuite, collez le tableau retourné dans l'onglet '2. Copier-Coller Tableau' !");
+                }).catch(() => {
+                    promptArea.select();
+                    document.execCommand('copy');
+                    alert("📋 Prompt copié !");
+                });
+            } else {
+                promptArea.select();
+                document.execCommand('copy');
+                alert("📋 Prompt copié !");
+            }
+        }
+        window.copierPromptIAEurope = copierPromptIAEurope;
+
         // Appel direct API Google Gemini 2.0 Flash Vision
         async function extraireAvecGeminiVision(cleApiKey) {
+            const promptEl = document.getElementById("promptPersonnaliseIAEurope");
+            const customPrompt = (promptEl && promptEl.value) ? promptEl.value.trim() : "";
+            const selSecteur = document.getElementById("selectSecteurBTPEurope");
+            const secteurNom = (selSecteur && selSecteur.options[selSecteur.selectedIndex]) ? selSecteur.options[selSecteur.selectedIndex].text : "BTP Général";
+            const selTva = document.getElementById("tauxTvaPromptEurope");
+            const tauxTvaDefaut = selTva ? parseFloat(selTva.value) : 20;
+
             const prompt = `Tu es un métreur vérificateur hautement qualifié en BTP (expert en métrés, CCTP, DQE et bordereaux de prix unitaires).
+CORPS D'ÉTAT DU CHANTIER : ${secteurNom}
+${customPrompt ? `CONSIGNE UTILISATEUR : ${customPrompt}` : ''}
+MONNAIE : Euros (€)
+TAUX DE TVA PAR DÉFAUT : ${tauxTvaDefaut}%
 
 RÈGLE ABSOLUE DE VÉRIFICATION ET DE CONFORMITÉ :
 0. Si le document soumis n'est PAS un devis, métré, CCTP, DQE ou bordereau de travaux de bâtiment (par exemple s'il s'agit d'une fiche de paie, bulletin de salaire, relevé bancaire, contrat, facture commerciale d'achat hors travaux ou pièce d'identité) :
@@ -2443,6 +2536,15 @@ LOT 07 - FINITIONS ET PEINTURE
             for (let i = 0; i < lignesBrutes.length; i++) {
                 const ligne = lignesBrutes[i];
 
+                // Ignorer les séparateurs Markdown (|---|---| ou +---+---+)
+                if (/^[|\s\-+:=]+$/.test(ligne)) continue;
+
+                // Ignorer les en-têtes de tableau Markdown ou colonnes
+                if (/(?:désignation|designation|description|intitulé|ouvrage).*(?:unité|unite|quantité|qte|quantite|prix|montant)/i.test(ligne)) continue;
+
+                // Ignorer les totaux Markdown
+                if (/^\s*\|?\s*(?:\*{1,2})?\s*(?:total\s*(?:ht|ttc|général|general)?|tva|sous[-\s]?total|montant\s*total)/i.test(ligne)) continue;
+
                 if (regexExclusionAdministrative.test(ligne) || regexPiedDevisTotaux.test(ligne) || /(?:salaire|prime|panier|transport|cotisation|retenue|impôt|avance|allocation|indemnité|matricule|bulletin)/i.test(ligne)) {
                     continue;
                 }
@@ -2455,6 +2557,52 @@ LOT 07 - FINITIONS ET PEINTURE
                 if (ligne.length < 35 && ligne === ligne.toUpperCase() && !/\d/.test(ligne) && !ligne.includes("€")) {
                     chapitreEnCours = ligne;
                     continue;
+                }
+
+                // Prise en charge des tableaux Markdown (| col1 | col2 | col3 ...)
+                if (ligne.includes('|') && (ligne.match(/\|/g) || []).length >= 2) {
+                    const colonnes = ligne.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c.length > 0);
+                    if (colonnes.length >= 2) {
+                        let desTab = "";
+                        let uniteTab = "u";
+                        let nbAvant = [];
+                        let nbApres = [];
+                        colonnes.forEach(col => {
+                            if (regexUniteBTP.test(col) && col.length <= 8) {
+                                uniteTab = col.toLowerCase().replace("m2", "m²").replace("m3", "m³");
+                            } else if (/^\d+([.,]\d+)?$/.test(col.replace(/\s/g, ''))) {
+                                const val = parseFloat(col.replace(/\s/g, '').replace(',', '.'));
+                                if (!desTab) nbAvant.push(val);
+                                else nbApres.push(val);
+                            } else if (col.length > desTab.length) {
+                                desTab = col.replace(regexDebutPoste, "").trim();
+                            }
+                        });
+                        if (desTab.length >= 3) {
+                            let qTab = 1;
+                            let puTab = 0;
+                            if (nbApres.length >= 2) { qTab = nbApres[0]; puTab = nbApres[1]; }
+                            else if (nbApres.length === 1) { qTab = nbApres[0]; }
+                            else if (nbAvant.length > 1) { qTab = nbAvant[nbAvant.length - 1]; }
+
+                            if (puTab === 0) {
+                                if (uniteTab === 'm³') puTab = 180.00;
+                                else if (uniteTab === 'm²') puTab = 45.00;
+                                else if (uniteTab === 'ml') puTab = 28.00;
+                                else puTab = 95.00;
+                            }
+                            nouveauxArticles.push({
+                                id: nouveauxArticles.length + 1,
+                                chapitre: chapitreEnCours,
+                                designation: desTab,
+                                unite: uniteTab,
+                                qte: qTab,
+                                pu: puTab,
+                                tva: 20
+                            });
+                            continue;
+                        }
+                    }
                 }
 
                 // Détection de l'unité avec position précise dans la ligne

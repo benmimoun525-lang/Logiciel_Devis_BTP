@@ -1924,6 +1924,61 @@
 
                 <div id="previewContent" class="preview-content"></div>
 
+                <!-- Bloc Options IA & Consigne Personnalisée (Prompt Métier) -->
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px 16px; margin-top: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                        <div style="font-weight: 800; color: #1e3a8a; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                            <span>🤖</span> <span>Consigne IA & Secteur BTP de Chiffrage</span>
+                        </div>
+                        <span style="font-size: 0.74rem; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; font-weight: 700;">Personnalisable en 1 clic</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label for="selectSecteurBTP" style="font-size: 0.80rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">
+                                🏗️ Secteur BTP / Corps d'état :
+                            </label>
+                            <select id="selectSecteurBTP" onchange="actualiserPromptSecteurBTP()" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 0.85rem; font-weight: 600; background: white; color: #0f172a;">
+                                <option value="tous">Général / Tous Corps d'État (TCE)</option>
+                                <option value="plomberie">Plomberie, Sanitaire & Chauffage</option>
+                                <option value="electricite">Électricité & Courants Faibles</option>
+                                <option value="maconnerie">Maçonnerie, Béton Armé & Gros Œuvre</option>
+                                <option value="peinture">Peinture, Ravalement & Revêtements</option>
+                                <option value="etancheite">Étanchéité, Toiture & Isolation</option>
+                                <option value="menuiserie">Menuiserie Bois, Aluminium & PVC</option>
+                                <option value="vrd">VRD, Terrassement & Assainissement</option>
+                                <option value="climatisation">Climatisation, Ventilation & Froid</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="tauxTvaPrompt" style="font-size: 0.80rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">
+                                📈 Taux de TVA appliqué :
+                            </label>
+                            <select id="tauxTvaPrompt" onchange="actualiserPromptSecteurBTP()" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 0.85rem; font-weight: 600; background: white; color: #0f172a;">
+                                <option value="19" selected>Taux BTP Algérie : 19%</option>
+                                <option value="9">Taux Réduit Algérie : 9%</option>
+                                <option value="0">Exonéré de TVA (0%)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+                            <label for="promptPersonnaliseIA" style="font-size: 0.80rem; font-weight: 700; color: #334155;">
+                                📝 Instruction envoyée à l'IA (Prompt) :
+                            </label>
+                            <button type="button" class="btn btn-outline" style="padding: 3px 10px; font-size: 0.74rem; font-weight: 800; color: #1e40af; background: white; border-color: #93c5fd;" onclick="copierPromptIA()" title="Copier ce prompt pour l'utiliser dans l'application mobile Gemini ou ChatGPT">
+                                📋 Copier ce Prompt pour Mobile (Gemini / ChatGPT)
+                            </button>
+                        </div>
+                        <textarea id="promptPersonnaliseIA" rows="3" style="width: 100%; border: 1px solid #94a3b8; border-radius: 6px; padding: 8px; font-family: inherit; font-size: 0.82rem; line-height: 1.45; background: white; color: #0f172a; resize: vertical;"></textarea>
+                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 4px;">
+                            💡 Cliquez sur <b>Copier ce Prompt</b> si vous préférez soumettre la photo dans l'application Gemini ou ChatGPT de votre smartphone, puis collez le tableau résultant dans l'onglet <b>📋 2. Copier-Coller Tableau</b>.
+                        </div>
+                    </div>
+                </div>
+
                 <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                     <button type="button" id="btnLancerPage" class="btn" onclick="traiterPageSelectionnee()">
                         ⚡ Traiter cette page sélectionnée
@@ -4233,6 +4288,7 @@
             chargerLogoLogiciel();
             chargerInfosBaridimobPubliques();
             chargerBPU();
+            actualiserPromptSecteurBTP();
             verifierConnexionServeur();
             actualiserAffichageProfilUtilisateur();
 
@@ -4729,6 +4785,42 @@
     }
     window.basculerFiltreCamScanner = basculerFiltreCamScanner;
 
+    function actualiserPromptSecteurBTP() {
+        const selSecteur = document.getElementById('selectSecteurBTP');
+        const selTva = document.getElementById('tauxTvaPrompt');
+        const promptArea = document.getElementById('promptPersonnaliseIA');
+        if (!promptArea) return;
+
+        const secteurNom = (selSecteur && selSecteur.options[selSecteur.selectedIndex]) ? selSecteur.options[selSecteur.selectedIndex].text : "BTP Général";
+        const tvaVal = selTva ? selTva.value : "19";
+
+        promptArea.value = `Voici la photo d'un devis/bordereau vierge. Numérise ce tableau avec fidélité (désignation, unité, quantité).
+Remplis la colonne 'Prix Unitaire' en te basant sur les prix moyens actuels du marché BTP en Algérie (en Dinars DZD) pour le secteur : ${secteurNom}.
+Ensuite, calcule les montants HT par ligne (Quantité x Prix unitaire), le Total HT, applique une TVA de ${tvaVal}%, et donne-moi le Total TTC.
+Présente le résultat sous forme de tableau clair et structuré copiable dans Excel.`;
+    }
+    window.actualiserPromptSecteurBTP = actualiserPromptSecteurBTP;
+
+    function copierPromptIA() {
+        const promptArea = document.getElementById('promptPersonnaliseIA');
+        if (!promptArea) return;
+        const txt = promptArea.value || '';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt).then(() => {
+                alert("📋 Prompt copié dans votre presse-papier !\n\nVous pouvez maintenant ouvrir l'application Gemini ou ChatGPT sur votre smartphone, ajouter votre photo et coller ce prompt.\nEnsuite, collez le tableau retourné dans l'onglet '2. Copier-Coller Tableau' !");
+            }).catch(() => {
+                promptArea.select();
+                document.execCommand('copy');
+                alert("📋 Prompt copié !");
+            });
+        } else {
+            promptArea.select();
+            document.execCommand('copy');
+            alert("📋 Prompt copié !");
+        }
+    }
+    window.copierPromptIA = copierPromptIA;
+
     function appliquerTransformations() {
         const img = document.getElementById('previewImg');
         if (img) {
@@ -5072,14 +5164,26 @@
             r.readAsDataURL(fichierImg);
         });
 
-        const promptText = `Tu es un métreur vérificateur senior expert en BTP.
+        const promptCustomEl = document.getElementById('promptPersonnaliseIA');
+        const customPromptVal = (promptCustomEl && promptCustomEl.value) ? promptCustomEl.value.trim() : "";
+        const secteurEl = document.getElementById('selectSecteurBTP');
+        const secteurNom = (secteurEl && secteurEl.options[secteurEl.selectedIndex]) ? secteurEl.options[secteurEl.selectedIndex].text : "BTP Général";
+        const tvaEl = document.getElementById('tauxTvaPrompt');
+        const tauxTva = tvaEl ? tvaEl.value : "19";
+
+        const promptText = `Tu es un métreur vérificateur senior expert en BTP et chiffrage de projets de construction.
 RÈGLE ABSOLUE DE VÉRIFICATION DU DOCUMENT :
-1. Si le document soumis n'est PAS un devis, bordereau de prix unitaires (BPU), DQE, attachement ou métré de travaux BTP (par exemple s'il s'agit d'une fiche de paie, d'un bulletin de salaire, d'un relevé bancaire, d'une quittance de loyer, d'une facture de commerce générale ou d'une pièce d'identité) :
+1. Si le document soumis n'est PAS un devis, bordereau de prix unitaires (BPU), DQE, attachement ou métré de travaux BTP (par exemple s'il s'agit d'une fiche de paie, d'un bulletin de salaire, d'un relevé bancaire, d'une quittance de loyer, d'une facture de commerce général ou d'une pièce d'identité) :
    Tu DOIS STRICTEMENT renvoyer ce JSON de rejet :
    {"est_devis_btp": false, "motif": "Document rejeté : Ce document est un document administratif ou financier hors BTP (bulletin de paie, etc.), et NON un devis de travaux de construction.", "articles": []}
 2. Si et seulement si c'est un vrai devis ou bordereau de travaux BTP :
-   Transcris scrupuleusement chaque article sans fusionner. Détecte les lots BTP.
-   Format JSON strict :
+   - Numérise fidèlement chaque ligne du tableau (désignation, unité, quantité) sans rien fusionner. Détecte les lots BTP.
+   - Secteur prioritaire de chiffrage : ${secteurNom}.
+   - Monnaie : Dinars Algériens (DZD).
+   ${customPromptVal ? `- Consigne utilisateur : ${customPromptVal}` : ''}
+   - Remplis la colonne 'Prix Unitaire' (pu) en te basant sur les prix moyens réels et actuels du marché BTP en Algérie pour le secteur ${secteurNom}.
+   - Calcule pour chaque ligne 'total' = q * pu (Montant HT).
+   - Format JSON strict sans markdown :
    {"est_devis_btp": true, "client":"","projet":"","articles":[{"lot":"LOT ...","n":1,"d":"...","u":"m2","q":1,"pu":1500,"total":1500}]}`;
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cleApi}`;
@@ -5376,36 +5480,55 @@ RÈGLE ABSOLUE DE VÉRIFICATION DU DOCUMENT :
         const regexUnite = /\b(m2|m²|m3|m³|ml|kg|tonne|t|u|ens|forfait|f|j|h)\b/i;
 
         lignes.forEach(ligne => {
-            if (regexLot.test(ligne) && !ligne.includes('\t') && ligne.length < 80 && !/\d+\s*(m2|m3|ml|u)/i.test(ligne)) {
-                lotActuel = ligne.toUpperCase();
+            // Ignorer les lignes de séparation Markdown (|---|---| ou +---+---+)
+            if (/^[|\s\-+:=]+$/.test(ligne)) return;
+
+            // Ignorer les lignes d'en-tête de tableau Markdown ou Excel
+            if (/(?:désignation|designation|description|intitulé|ouvrage).*(?:unité|unite|quantité|qte|quantite|prix|montant)/i.test(ligne)) return;
+
+            // Ignorer les lignes de totaux de fin de tableau Markdown (Total HT, TVA, Total TTC)
+            if (/^\s*\|?\s*(?:\*{1,2})?\s*(?:total\s*(?:ht|ttc|général|general)?|tva|sous[-\s]?total|montant\s*total)/i.test(ligne)) return;
+
+            if (regexLot.test(ligne) && !ligne.includes('\t') && !ligne.includes('|') && ligne.length < 80 && !/\d+\s*(m2|m3|ml|u)/i.test(ligne)) {
+                lotActuel = ligne.replace(/^[#*\s|:-]+/, '').trim().toUpperCase();
                 return;
             }
 
             let colonnes = [];
-            if (ligne.includes('\t')) colonnes = ligne.split('\t').map(c => c.trim()).filter(c => c.length > 0);
-            else if (ligne.includes('|')) colonnes = ligne.split('|').map(c => c.trim()).filter(c => c.length > 0);
-            else if (ligne.includes(';') && (ligne.match(/;/g) || []).length >= 2) colonnes = ligne.split(';').map(c => c.trim()).filter(c => c.length > 0);
+            if (ligne.includes('\t')) colonnes = ligne.split('\t').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c.length > 0);
+            else if (ligne.includes('|')) colonnes = ligne.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c.length > 0);
+            else if (ligne.includes(';') && (ligne.match(/;/g) || []).length >= 2) colonnes = ligne.split(';').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c.length > 0);
 
             if (colonnes.length >= 2) {
                 let des = "";
                 let unite = "u";
-                let qte = 1;
-                let pu = 0;
+                let nombresAvantDes = [];
+                let nombresApresDes = [];
 
                 colonnes.forEach(col => {
                     if (regexUnite.test(col) && col.length <= 8) {
                         unite = col.toLowerCase().replace('m²', 'm2').replace('m³', 'm3');
                     } else if (/^\d+([.,]\d+)?$/.test(col.replace(/\s/g, ''))) {
                         const val = parseFloat(col.replace(/\s/g, '').replace(',', '.'));
-                        if (qte === 1 && !des) { }
-                        else if (qte === 1) qte = val;
-                        else if (pu === 0) pu = val;
+                        if (!des) nombresAvantDes.push(val);
+                        else nombresApresDes.push(val);
                     } else if (col.length > des.length) {
-                        des = col;
+                        des = col.replace(/^[\d.)\s-]+/, '').trim();
                     }
                 });
 
                 if (des.length >= 3) {
+                    let qte = 1;
+                    let pu = 0;
+                    if (nombresApresDes.length >= 2) {
+                        qte = nombresApresDes[0];
+                        pu = nombresApresDes[1];
+                    } else if (nombresApresDes.length === 1) {
+                        qte = nombresApresDes[0];
+                    } else if (nombresAvantDes.length > 1) {
+                        qte = nombresAvantDes[nombresAvantDes.length - 1];
+                    }
+
                     if (pu === 0) {
                         if (unite === 'm3') pu = 12500;
                         else if (unite === 'm2') pu = 2400;
@@ -5421,7 +5544,7 @@ RÈGLE ABSOLUE DE VÉRIFICATION DU DOCUMENT :
             if (matchU) {
                 const unite = matchU[0].toLowerCase().replace('m²', 'm2').replace('m³', 'm3');
                 const parties = ligne.split(matchU[0]);
-                let des = parties[0].replace(/^[\d.)\s-]+/, '').trim();
+                let des = parties[0].replace(/^[|#*\s\d.)-]+/, '').replace(/\*\*/g, '').trim();
                 let reste = parties[1] || '';
                 const mNombres = reste.match(/\d+([.,]\d+)?/g) || parties[0].match(/\d+([.,]\d+)?/g) || [];
                 let qte = mNombres[0] ? parseFloat(mNombres[0].replace(',', '.')) : 1;
@@ -11528,6 +11651,8 @@ LOT 05: REVÊTEMENTS & FINITIONS
     window.chargerProjetPreconfigure = chargerProjetPreconfigure;
     window.ajouterPrestationCatalogueBTP = ajouterPrestationCatalogueBTP;
     window.afficherPrestationsLotCatalogue = afficherPrestationsLotCatalogue;
+    window.actualiserPromptSecteurBTP = actualiserPromptSecteurBTP;
+    window.copierPromptIA = copierPromptIA;
 </script>
 
 </body>
