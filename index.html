@@ -1746,6 +1746,38 @@
                     </div>
                 </div>
 
+                <!-- Carte Méthode Recommandée Pro : Microsoft Excel (PC & Mobile) + Notre Chiffreur BTP -->
+                <div style="background: white; border: 1.5px solid #86efac; border-radius: 10px; padding: 14px 16px; margin-top: 14px; box-shadow: 0 2px 6px rgba(22,101,52,0.06);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                        <div style="font-weight: 800; color: #166534; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                            <span>💻📱</span> <span>La Combinaison Gagnante BTP : Microsoft Excel (PC & Mobile) + Notre Logiciel Métier !</span>
+                        </div>
+                        <span style="background: #16a34a; color: white; font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; font-weight: 800; letter-spacing: 0.5px;">100% SANS ERREUR</span>
+                    </div>
+                    <div style="font-size: 0.83rem; color: #14532d; line-height: 1.5;">
+                        Comme dans les logiciels professionnels de référence (EBP Bâtiment, Batappli, Optima), vous pouvez numériser et chiffrer directement sur PC ou Smartphone :
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin-top: 8px;">
+                            <div style="background: #f8fafc; border-radius: 8px; padding: 10px 12px; border: 1px solid #cbd5e1;">
+                                <b style="color: #1e3a8a;">💻 Option 1 : Directement sur PC (Excel Windows, Mac ou Web)</b>
+                                <div style="font-size: 0.79rem; color: #334155; margin-top: 3px;">
+                                    1. Dans Excel sur PC, allez dans l'onglet <b>Données</b> ➔ cliquez sur <b>« À partir d'une image »</b> (ou collez une capture d'écran).<br>
+                                    2. Excel génère le tableau en 3 secondes.<br>
+                                    3. <b>Association instantanée :</b> Sélectionnez les cellules (<code>Ctrl + A</code>), copiez (<code>Ctrl + C</code>), puis venez dans l'onglet <b>📋 2. Copier-Coller</b> de ce logiciel et faites <code>Ctrl + V</code> (ou glissez le fichier .xlsx ci-dessous).
+                                </div>
+                            </div>
+                            <div style="background: #f0fdf4; border-radius: 8px; padding: 10px 12px; border: 1px solid #86efac;">
+                                <b style="color: #166534;">📱 Option 2 : Sur Smartphone (Appli Microsoft Excel Mobile)</b>
+                                <div style="font-size: 0.79rem; color: #14532d; margin-top: 3px;">
+                                    1. Ouvrez l'appli gratuite <b>Microsoft Excel</b> sur votre téléphone.<br>
+                                    2. Touchez l'icône appareil photo : <i>« Insérer des données à partir d'une image »</i>.<br>
+                                    3. Excel extrait la photo en classeur .xlsx.<br>
+                                    4. Partagez le fichier .xlsx sur votre PC ou glissez-le ci-dessous pour un chiffrage BPU instantané !
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div style="margin-top: 16px; border: 2px dashed #059669; border-radius: 10px; background: white; padding: 24px 16px; text-align: center; cursor: pointer; transition: background 0.2s;" onclick="document.getElementById('inputExcelDevis').click()" ondragover="event.preventDefault(); this.style.background='#f0fdf4';" ondragleave="this.style.background='white';" ondrop="event.preventDefault(); this.style.background='white'; if(event.dataTransfer.files.length) { document.getElementById('inputExcelDevis').files = event.dataTransfer.files; importerFichierExcelDevis({target: document.getElementById('inputExcelDevis')}); }">
                     <input type="file" id="inputExcelDevis" accept=".xlsx,.xls,.csv" style="display: none;" onchange="importerFichierExcelDevis(event)">
                     <div style="font-size: 2.5rem; margin-bottom: 6px;">📥</div>
@@ -1786,6 +1818,9 @@
                 </div>
 
                 <div style="margin-bottom: 10px; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.78rem; font-weight: 800; color: #166534; background: #f0fdf4; border-color: #86efac;" onclick="collerDepuisPressePapierExcel()" title="Coller directement le tableau copié depuis Microsoft Excel sur PC (Ctrl+C)">
+                        📋 Coller depuis Excel PC (Presse-papiers)
+                    </button>
                     <button type="button" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.78rem; font-weight: 700; color: #1e40af; background: white;" onclick="insererExempleCopierColler()">
                         📄 Insérer un exemple de devis BTP
                     </button>
@@ -5428,20 +5463,54 @@ RÈGLE ABSOLUE DE VÉRIFICATION DU DOCUMENT :
             let statut = "moyen";
             if (pu === 0) {
                 const desMin = designation.toLowerCase();
-                const bpuTrouve = bpuCatalogue.find(b =>
-                    b.designation.toLowerCase().includes(desMin.substring(0, 10)) ||
-                    desMin.includes(b.designation.toLowerCase().substring(0, 10))
-                );
-                if (bpuTrouve) {
-                    pu = (strategiePrixActive === 'moins_disant') ? bpuTrouve.prix_min : bpuTrouve.prix_moyen;
+                // 1. Recherche intelligente par mots-clés significatifs dans le catalogue BPU
+                const motsCles = desMin.split(/[\s,.'’\-–/]+/).filter(m => m.length >= 4 && !/^(fourniture|pose|pour|dans|avec|sans|sous|tous|type|selon)$/i.test(m));
+                let meilleurBpu = null;
+                let maxScore = 0;
+
+                if (Array.isArray(bpuCatalogue) && bpuCatalogue.length > 0) {
+                    for (let b of bpuCatalogue) {
+                        const bpuDes = (b.designation || '').toLowerCase();
+                        let score = 0;
+                        motsCles.forEach(mc => {
+                            if (bpuDes.includes(mc)) score++;
+                        });
+                        if (score > maxScore) {
+                            maxScore = score;
+                            meilleurBpu = b;
+                        }
+                    }
+                }
+
+                if (meilleurBpu && maxScore >= 1) {
+                    pu = (strategiePrixActive === 'moins_disant') ? meilleurBpu.prix_min : meilleurBpu.prix_moyen;
                     statut = (strategiePrixActive === 'moins_disant') ? 'moins_disant' : 'moyen';
                 } else {
-                    if (uniteDetectee === 'm3') pu = 12500;
-                    else if (uniteDetectee === 'm2') pu = 2400;
-                    else if (uniteDetectee === 'ml') pu = 1200;
-                    else if (uniteDetectee === 'kg') pu = 180;
-                    else if (uniteDetectee === 'tonne') pu = 125000;
-                    else pu = 3500;
+                    // 2. Estimation experte par corps d'état et unité pour les devis vierges
+                    if (/béton\s*armé|beton\s*arme|semelle|poteau|voile|poutre|dalle\s*pleine/i.test(desMin)) pu = 34000;
+                    else if (/béton\s*de\s*propreté|beton\s*proprete/i.test(desMin)) pu = 11000;
+                    else if (/fouille|terrassement|déblai|remblai/i.test(desMin)) pu = (uniteDetectee === 'm3') ? 950 : 2500;
+                    else if (/maçonnerie|maconnerie|parpaing|brique/i.test(desMin)) pu = (uniteDetectee === 'm2') ? 2200 : 12000;
+                    else if (/enduit|crépi|crepi|plâtre|platre/i.test(desMin)) pu = (uniteDetectee === 'm2') ? 1400 : 2400;
+                    else if (/carrelage|faïence|faience|revêtement|sol/i.test(desMin)) pu = (uniteDetectee === 'm2') ? 2900 : 3500;
+                    else if (/peinture|badigeon/i.test(desMin)) pu = (uniteDetectee === 'm2') ? 850 : 1200;
+                    else if (/étanchéité|etancheite|paxalu/i.test(desMin)) pu = (uniteDetectee === 'm2') ? 3200 : 4500;
+                    else if (/tuyauterie|tube|pvc|cuivre|multicouche/i.test(desMin)) pu = (uniteDetectee === 'ml') ? 1800 : 3500;
+                    else if (/lavabo|vasque/i.test(desMin)) pu = 16500;
+                    else if (/wc|cuvette|toilette/i.test(desMin)) pu = 19000;
+                    else if (/chauffe[-\s]?eau|cumulus/i.test(desMin)) pu = 32000;
+                    else if (/tableau\s*électrique|armoire\s*electrique/i.test(desMin)) pu = 28000;
+                    else if (/prise|interrupteur|point\s*lumineux/i.test(desMin)) pu = 2600;
+                    else if (/câble|cable|fil\s*électrique/i.test(desMin)) pu = (uniteDetectee === 'ml') ? 450 : 2500;
+                    else if (/porte|fenêtre|fenetre|baie/i.test(desMin)) pu = 28000;
+                    else {
+                        if (uniteDetectee === 'm3') pu = 12500;
+                        else if (uniteDetectee === 'm2') pu = 2400;
+                        else if (uniteDetectee === 'ml') pu = 1200;
+                        else if (uniteDetectee === 'kg') pu = 180;
+                        else if (uniteDetectee === 'tonne') pu = 125000;
+                        else pu = 3500;
+                    }
                 }
             }
 
@@ -5457,6 +5526,26 @@ RÈGLE ABSOLUE DE VÉRIFICATION DU DOCUMENT :
 
         return articles;
     }
+
+    async function collerDepuisPressePapierExcel() {
+        try {
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                const txt = await navigator.clipboard.readText();
+                if (txt && txt.trim()) {
+                    const el = document.getElementById('textareaCollerDevis');
+                    if (el) {
+                        el.value = txt;
+                        traiterCopierCollerTexteDevis();
+                    }
+                    return;
+                }
+            }
+            alert("Veuillez d'abord sélectionner votre tableau dans Excel avec Ctrl + A, le copier avec Ctrl + C, puis appuyer sur Ctrl + V dans la case ci-dessous.");
+        } catch(err) {
+            alert("Pour coller votre tableau Excel, cliquez dans la case ci-dessous et appuyez sur Ctrl + V.");
+        }
+    }
+    window.collerDepuisPressePapierExcel = collerDepuisPressePapierExcel;
 
     // 2. COPIER-COLLER INTELLIGENT DE TEXTE / TABLEAU
     function traiterCopierCollerTexteDevis() {
