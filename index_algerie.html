@@ -1291,15 +1291,15 @@
         </button>
         <span style="color: #94a3b8; font-weight: bold; font-size: 0.9rem;">➔</span>
         <button type="button" id="stepPill2" onclick="naviguerVersEtapeClient(2)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; border: 1.5px solid #93c5fd; background: #ffffff; color: #1e40af; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-            <span>2️⃣</span> <span>2. Grille Tarifaire & BaridiMob</span>
+            <span>💳</span> <span>2. Grille Tarifaire & BaridiMob</span>
         </button>
         <span style="color: #94a3b8; font-weight: bold; font-size: 0.9rem;">➔</span>
-        <button type="button" id="stepPill3" onclick="naviguerVersEtapeClient(3)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; border: 1px dashed #cbd5e1; background: #f8fafc; color: #94a3b8; cursor: not-allowed; opacity: 0.65; display: flex; align-items: center; gap: 6px;">
-            <span>🔒</span> <span>3. Numérisation (Verrouillé)</span>
+        <button type="button" id="stepPill3" onclick="naviguerVersEtapeClient(3)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; border: 1.5px solid #93c5fd; background: #ffffff; color: #1e40af; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+            <span>📸</span> <span>3. Numérisation (Excel & Photos)</span>
         </button>
         <span style="color: #94a3b8; font-weight: bold; font-size: 0.9rem;">➔</span>
-        <button type="button" id="stepPill4" onclick="naviguerVersEtapeClient(4)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; border: 1px dashed #cbd5e1; background: #f8fafc; color: #94a3b8; cursor: not-allowed; opacity: 0.65; display: flex; align-items: center; gap: 6px;">
-            <span>🔒</span> <span>4. Bordereau DQE (Verrouillé)</span>
+        <button type="button" id="stepPill4" onclick="naviguerVersEtapeClient(4)" style="padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; border: 1.5px solid #93c5fd; background: #ffffff; color: #1e40af; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+            <span>📊</span> <span>4. Bordereau DQE & Chiffrage DZD</span>
         </button>
     </div>
 
@@ -1418,12 +1418,12 @@
 
         <div class="form-grid-3">
             <div class="form-group">
-                <label>👤 Nom du Client ou Maître d'Ouvrage <span style="color: #ef4444; font-weight: 800;">* (obligatoire)</span> :</label>
-                <input type="text" id="nomClient" class="form-control" placeholder="Ex: Entreprise Générale de Construction EURL" oninput="reinitialiserErreurChamp(this); sauvegarderLocalement(); actualiserIndicateursStepper(etapeClientActive);" required>
+                <label>👤 Nom du Client ou Maître d'Ouvrage :</label>
+                <input type="text" id="nomClient" class="form-control" value="Entreprise Générale de BTP" placeholder="Ex: Entreprise Générale de Construction EURL" oninput="reinitialiserErreurChamp(this); sauvegarderLocalement(); actualiserIndicateursStepper(etapeClientActive);">
             </div>
             <div class="form-group">
                 <label>🏗️ Intitulé du Chantier / Projet :</label>
-                <input type="text" id="nomProjet" class="form-control" placeholder="Ex: Réalisation Siège Administratif R+4 Alger" oninput="sauvegarderLocalement()">
+                <input type="text" id="nomProjet" class="form-control" value="Construction Villa R+2 (Chantier Modèle)" placeholder="Ex: Réalisation Siège Administratif R+4 Alger" oninput="sauvegarderLocalement()">
             </div>
             <div class="form-group">
                 <label>🔢 N° de Devis & Date :</label>
@@ -1435,12 +1435,12 @@
         </div>
         <div class="form-grid-3" style="margin-bottom: 0;">
             <div class="form-group">
-                <label>📧 Email Professionnel de l'Entreprise <span style="color: #ef4444; font-weight: 800;">* (obligatoire)</span> :</label>
-                <input type="email" id="emailClient" class="form-control" placeholder="Ex: direction@entreprise-btp.dz" oninput="reinitialiserErreurChamp(this); sauvegarderLocalement(); actualiserIndicateursStepper(etapeClientActive);" required>
+                <label>📧 Email Professionnel de l'Entreprise :</label>
+                <input type="email" id="emailClient" class="form-control" value="direction@entreprise-btp.dz" placeholder="Ex: direction@entreprise-btp.dz" oninput="reinitialiserErreurChamp(this); sauvegarderLocalement(); actualiserIndicateursStepper(etapeClientActive);">
             </div>
             <div class="form-group">
-                <label>📱 Téléphone / WhatsApp Professionnel <span style="color: #ef4444; font-weight: 800;">* (obligatoire)</span> :</label>
-                <input type="tel" id="telClient" class="form-control" placeholder="Ex: 0550 12 34 56" oninput="reinitialiserErreurChamp(this); sauvegarderLocalement(); actualiserIndicateursStepper(etapeClientActive);" required>
+                <label>📱 Téléphone / WhatsApp Professionnel :</label>
+                <input type="tel" id="telClient" class="form-control" value="0550 12 34 56" placeholder="Ex: 0550 12 34 56" oninput="reinitialiserErreurChamp(this); sauvegarderLocalement(); actualiserIndicateursStepper(etapeClientActive);">
             </div>
             <div class="form-group" style="justify-content: flex-end;">
                 <span style="font-size: 0.8rem; color: #64748b; line-height: 1.4; padding-top: 8px;">
@@ -1449,15 +1449,16 @@
             </div>
         </div>
 
-        <!-- Bouton de validation pour passer aux Tarifs & Abonnements -->
-        <div style="margin-top: 24px; text-align: center;">
-            <button type="button" class="btn btn-primary" style="padding: 14px 34px; font-size: 1.05rem; font-weight: 800; background: linear-gradient(135deg, #0f172a, #1e3a8a); border: none; border-radius: 12px; box-shadow: 0 4px 18px rgba(15, 23, 42, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" onclick="validerAccueilClientEtContinuer()">
-                <span>🚀 Valider l'Identification et Accéder aux Formules Professionnelles</span>
-                <span style="font-size: 1.25rem;">➔</span>
+        <!-- Boutons d'accès direct et fluide au logiciel -->
+        <div style="margin-top: 24px; text-align: center; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" style="padding: 12px 28px; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #1e3a8a, #2563eb); border: none; border-radius: 10px; box-shadow: 0 4px 14px rgba(37,99,235,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 10px;" onclick="naviguerVersEtapeClient(3)">
+                <span>📸 Accéder aux Outils de Numérisation (Étape 3)</span>
+                <span>➔</span>
             </button>
-            <div style="font-size: 0.78rem; color: #64748b; margin-top: 8px;">
-                Vos données sont enregistrées en toute sécurité sous votre contrôle exclusif.
-            </div>
+            <button type="button" class="btn btn-success" style="padding: 12px 28px; font-size: 1rem; font-weight: 800; background: linear-gradient(135deg, #059669, #047857); color: white; border: none; border-radius: 10px; box-shadow: 0 4px 14px rgba(5,150,105,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 10px;" onclick="passerAuTableauChiffrageClient()">
+                <span>📊 Voir Directement le Bordereau DQE & Devis Chiffré (Étape 4)</span>
+                <span>➔</span>
+            </button>
         </div>
     </div>
 
@@ -1694,7 +1695,7 @@
     </div>
 
     <!-- Étape 3 : Chargement des Pièces Graphiques & Documents de Chantier -->
-    <div class="card no-print" id="sectionEtape3_Documents" style="display: none;">
+    <div class="card no-print" id="sectionEtape3_Documents" style="margin-top: 24px; border-top: 1.5px solid #e2e8f0; padding-top: 20px;">
         <div class="card-title">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span>📄 3. Méthodes de Numérisation & Chiffrage du Devis</span>
@@ -2056,7 +2057,7 @@
     </div>
 
     <!-- Étape 4 : Tableau Interactif de Révision & Chiffrage par Lots -->
-    <div class="card" id="sectionDevis" style="display: none;">
+    <div class="card" id="sectionDevis" style="margin-top: 24px; border-top: 1.5px solid #e2e8f0; padding-top: 20px;">
         <!-- Sélecteur d'Onglets Étape 4 : Devis Numérisé (Sans Prix) vs Devis Chiffré (Avec Prix) vs Dossier Complet -->
         <div class="no-print" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap; align-items: center;">
             <button type="button" id="tabBtnDevisNumerise" onclick="basculerOngletDossier('numerise')" style="padding: 10px 18px; font-weight: 800; font-size: 0.90rem; border-radius: 10px; border: 2px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" title="Consulter le devis métré avec les colonnes de prix vierges (sans prix)">
@@ -8037,86 +8038,54 @@ LOT 05: REVÊTEMENTS & FINITIONS
     }
 
     function actualiserIndicateursStepper(etape) {
-        const estTit = estTitulaireConnecte();
-        const modeStrict = !estTit;
-
-        const etape1Ok = estEtapeFinalisee(1);
-        const etape2Ok = estEtapeFinalisee(2);
-        const etape3Ok = estEtapeFinalisee(3);
-
-        const clientActif = (typeof obtenirOuCreerClient === 'function') ? obtenirOuCreerClient() : null;
-        const soldeCredits = estTit ? 9999 : (clientActif ? parseInt(clientActif.credits_pages, 10) : 5);
-        const aSoldeEpuise = modeStrict && (isNaN(soldeCredits) || soldeCredits <= 0);
-
         for (let i = 1; i <= 4; i++) {
             const pill = document.getElementById('stepPill' + i);
             if (!pill) continue;
 
-            let estVerrouillee = false;
-            let estValidee = false;
+            const estActif = (i === etape);
+            const estPasse = (i < etape);
 
-            estVerrouillee = false; // Toutes les étapes sont librement accessibles et cliquables
-            estValidee = (i < etape) || (i === 1 && etape1Ok) || (i === 3 && etape3Ok);
+            pill.style.cursor = 'pointer';
+            pill.style.opacity = '1';
 
-            if (i === etape) {
+            if (estActif) {
                 // Étape EN COURS (Active)
                 pill.style.border = '2px solid #2563eb';
                 pill.style.background = '#eff6ff';
                 pill.style.color = '#1d4ed8';
                 pill.style.fontWeight = '800';
                 pill.style.boxShadow = '0 2px 8px rgba(37,99,235,0.25)';
-                pill.style.opacity = '1';
-                pill.style.cursor = 'pointer';
-            } else if (estValidee) {
-                // Étape DÉJÀ VALIDÉE
+            } else if (estPasse) {
+                // Étape PRÉCÉDENTE (Validée / Consultée)
                 pill.style.border = '1.5px solid #10b981';
                 pill.style.background = '#f0fdf4';
                 pill.style.color = '#15803d';
                 pill.style.fontWeight = '700';
                 pill.style.boxShadow = 'none';
-                pill.style.opacity = '1';
-                pill.style.cursor = 'pointer';
-            } else if (estVerrouillee) {
-                // Étape VERROUILLÉE
-                pill.style.border = '1px dashed #cbd5e1';
-                pill.style.background = '#f8fafc';
-                pill.style.color = '#94a3b8';
-                pill.style.fontWeight = '600';
-                pill.style.boxShadow = 'none';
-                pill.style.opacity = '0.65';
-                pill.style.cursor = 'not-allowed';
             } else {
-                // Étape DÉVERROUILLÉE DISPONIBLE
+                // Étape DISPONIBLE ET DÉVERROUILLÉE
                 pill.style.border = '1.5px solid #93c5fd';
                 pill.style.background = '#ffffff';
                 pill.style.color = '#1e40af';
                 pill.style.fontWeight = '700';
                 pill.style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                pill.style.opacity = '1';
-                pill.style.cursor = 'pointer';
             }
 
-            // Labels et icônes explicites
+            // Labels clairs sans aucun verrouillage artificiel
             if (i === 1) {
-                pill.innerHTML = (i === etape)
-                    ? `<span>1️⃣</span> <span>1. Identification & Projet</span>`
-                    : (estValidee ? `<span>✅</span> <span>1. Identification ✓</span>` : `<span>1️⃣</span> <span>1. Identification</span>`);
+                pill.innerHTML = estPasse 
+                    ? `<span>✅</span> <span>1. Identification & Projet ✓</span>` 
+                    : `<span>1️⃣</span> <span>1. Identification & Projet</span>`;
             } else if (i === 2) {
-                pill.innerHTML = (i === etape)
-                    ? (aSoldeEpuise ? `<span>2️⃣</span> <span>2. Grille Tarifaire & Recharge (0 p.)</span>` : `<span>2️⃣</span> <span>2. Grille Tarifaire & BaridiMob</span>`)
-                    : (aSoldeEpuise ? `<span>💳</span> <span>2. Recharge Requise (0 p.)</span>` : `<span>2️⃣</span> <span>2. Grille Tarifaire & BaridiMob</span>`);
+                pill.innerHTML = `<span>💳</span> <span>2. Grille Tarifaire & BaridiMob</span>`;
             } else if (i === 3) {
-                pill.innerHTML = (i === etape)
-                    ? `<span>3️⃣</span> <span>3. Numérisation & Pièces Graphiques</span>`
-                    : (estValidee 
-                        ? `<span>✅</span> <span>3. Pièces Importées ✓</span>` 
-                        : (estVerrouillee ? `<span>🔒</span> <span>3. Numérisation (Verrouillé)</span>` : `<span>3️⃣</span> <span>3. Numérisation & Pièces</span>`));
+                pill.innerHTML = estPasse 
+                    ? `<span>✅</span> <span>3. Numérisation (Excel & Photos) ✓</span>` 
+                    : `<span>📸</span> <span>3. Numérisation (Excel & Photos)</span>`;
             } else if (i === 4) {
-                pill.innerHTML = (i === etape)
-                    ? `<span>4️⃣</span> <span>4. Bordereau DQE & Chiffrage</span>`
-                    : (estValidee
-                        ? `<span>✅</span> <span>4. Bordereau DQE ✓</span>`
-                        : (estVerrouillee ? `<span>🔒</span> <span>4. Bordereau DQE (Verrouillé)</span>` : `<span>4️⃣</span> <span>4. Bordereau DQE</span>`));
+                pill.innerHTML = (estActif || estPasse)
+                    ? `<span>📊</span> <span>4. Bordereau DQE & Chiffrage DZD ✓</span>`
+                    : `<span>📊</span> <span>4. Bordereau DQE & Chiffrage DZD</span>`;
             }
         }
     }
@@ -8127,37 +8096,36 @@ LOT 05: REVÊTEMENTS & FINITIONS
         const sec3 = document.getElementById('sectionEtape3_Documents');
         const sec4 = document.getElementById('sectionDevis');
 
-        if (modeToutDeplieTitulaire) {
-            if (sec1) sec1.style.display = 'block';
-            if (sec2) sec2.style.display = 'block';
-            if (sec3) sec3.style.display = 'block';
-            if (sec4) sec4.style.display = 'block';
+        // Les sections de travail restent toujours pleinement visibles et opérationnelles
+        if (sec1) sec1.style.display = 'block';
+        if (sec3) sec3.style.display = 'block';
+        if (sec4) sec4.style.display = 'block';
+
+        if (etape === 2) {
+            // Étape 2 : ouvrir directement la grille tarifaire & BaridiMob en modale
+            if (typeof ouvrirModalAbonnements === 'function') {
+                ouvrirModalAbonnements();
+            } else if (sec2) {
+                sec2.style.display = 'block';
+                sec2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
             return;
         }
 
-        // Affichage strict d'une seule étape à la fois (l'une après l'autre)
-        if (sec1) sec1.style.display = (etape === 1) ? 'block' : 'none';
-        if (sec2) sec2.style.display = (etape === 2) ? 'block' : 'none';
-        if (sec3) sec3.style.display = (etape === 3) ? 'block' : 'none';
-        if (sec4) sec4.style.display = (etape === 4) ? 'block' : 'none';
+        let targetEl = null;
+        if (etape === 1) targetEl = sec1;
+        else if (etape === 3) targetEl = sec3;
+        else if (etape === 4) targetEl = sec4;
+
+        if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     function naviguerVersEtapeClient(etape) {
         etapeClientActive = etape;
         afficherSectionEtape(etape);
         actualiserIndicateursStepper(etape);
-
-        let targetEl = null;
-        if (etape === 1) targetEl = document.getElementById('sectionEtape1_Accueil');
-        else if (etape === 2) targetEl = document.getElementById('sectionEtape2_Tarifs');
-        else if (etape === 3) targetEl = document.getElementById('sectionEtape3_Documents');
-        else if (etape === 4) targetEl = document.getElementById('sectionDevis');
-
-        if (targetEl) {
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-            window.scrollTo({ top: 120, behavior: 'smooth' });
-        }
     }
 
     function basculerModeToutDeplie() {
@@ -8172,20 +8140,30 @@ LOT 05: REVÊTEMENTS & FINITIONS
     }
 
     async function validerAccueilClientEtContinuer() {
-        // CONTRÔLE STRICT : Bloquer si Nom, Email ou Tel manquant
-        if (!verifierChampsIdentificationObligatoires(true)) {
-            return;
-        }
+        const elNom = document.getElementById('nomClient');
+        const elProjet = document.getElementById('nomProjet');
+        const elTel = document.getElementById('telClient');
+        const elEmail = document.getElementById('emailClient');
 
-        const nom = (document.getElementById('nomClient')?.value || '').trim();
-        const projet = (document.getElementById('nomProjet')?.value || '').trim();
-        const tel = (document.getElementById('telClient')?.value || '').trim();
-        const email = (document.getElementById('emailClient')?.value || '').trim();
+        if (elNom && (!elNom.value || elNom.value.trim() === '')) elNom.value = "Entreprise Générale de BTP";
+        if (elProjet && (!elProjet.value || elProjet.value.trim() === '')) elProjet.value = "Construction Villa R+2 (Chantier Modèle)";
+        if (elTel && (!elTel.value || elTel.value.trim() === '')) elTel.value = "0550 12 34 56";
+        if (elEmail && (!elEmail.value || elEmail.value.trim() === '')) elEmail.value = "direction@entreprise-btp.dz";
+
+        const nom = (elNom?.value || 'Entreprise Générale de BTP').trim();
+        const projet = (elProjet?.value || 'Construction Villa R+2').trim();
+        const tel = (elTel?.value || '0550 12 34 56').trim();
+        const email = (elEmail?.value || 'direction@entreprise-btp.dz').trim();
+
+        const errBox = document.getElementById('identificationErrorMessage');
+        if (errBox) errBox.style.display = 'none';
 
         sauvegarderLocalement();
 
-        // Enregistrer la validation formelle de l'Étape 1
+        // Enregistrer la validation formelle des étapes
         localStorage.setItem('btp_etape1_validee', '1');
+        localStorage.setItem('btp_etape2_validee', '1');
+        localStorage.setItem('btp_etape3_validee', '1');
         localStorage.setItem('btp_client_onboarding_done', '1');
 
         // Récupérer le solde réel et vérifier l'empreinte appareil
@@ -8435,23 +8413,19 @@ LOT 05: REVÊTEMENTS & FINITIONS
         }
         localStorage.removeItem('btp_mode_titulaire_permanent');
 
-        // 2. Si les champs de l'Étape 1 contiennent les coordonnées de test du Titulaire, les vider
+        // 2. Si les champs de l'Étape 1 sont vides, leur donner des valeurs par défaut élégantes
         const elNom = document.getElementById('nomClient');
         const elEmail = document.getElementById('emailClient');
         const elTel = document.getElementById('telClient');
-        if (elNom && (elNom.value === 'BENABDALLAH' || elNom.value.includes('Titulaire'))) elNom.value = '';
-        if (elEmail && elEmail.value === 'contact@devis-btp.dz') elEmail.value = '';
-        if (elTel && elTel.value === '0551422166' && !localStorage.getItem('btp_client_info')) elTel.value = '';
+        const elProjet = document.getElementById('nomProjet');
+        if (elNom && !elNom.value) elNom.value = 'Entreprise Générale de BTP';
+        if (elEmail && !elEmail.value) elEmail.value = 'direction@entreprise-btp.dz';
+        if (elTel && !elTel.value) elTel.value = '0550 12 34 56';
+        if (elProjet && !elProjet.value) elProjet.value = 'Construction Villa R+2 (Chantier Modèle)';
 
-        // 3. Si l'Étape 1 n'est pas remplie, reverrouiller strictement les étapes 2, 3 et 4
-        const nomVal = (elNom?.value || '').trim();
-        const emailVal = (elEmail?.value || '').trim();
-        const telVal = (elTel?.value || '').trim();
-        if (!nomVal || !emailVal || !telVal) {
-            localStorage.removeItem('btp_etape1_validee');
-            localStorage.removeItem('btp_etape2_validee');
-            localStorage.removeItem('btp_etape3_validee');
-        }
+        localStorage.setItem('btp_etape1_validee', '1');
+        localStorage.setItem('btp_etape2_validee', '1');
+        localStorage.setItem('btp_etape3_validee', '1');
 
         // Masquer la bannière Titulaire
         const banner = document.getElementById('titulaireModeBanner');
@@ -9870,7 +9844,8 @@ LOT 05: REVÊTEMENTS & FINITIONS
             if (sRes.ok) {
                 const sData = await sRes.json();
                 if (sData.stats) {
-                    document.getElementById('adminClientsCount').textContent = sData.stats.clients_total || 0;
+                    const elCount = document.getElementById('adminClientsCount');
+                    if (elCount) elCount.textContent = sData.stats.clients_total || 0;
                 }
             }
         } catch(e) {
