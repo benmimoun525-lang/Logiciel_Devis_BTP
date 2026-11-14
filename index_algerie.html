@@ -1277,7 +1277,9 @@ LOT 01 - TERRASSEMENTS
         window.addEventListener("DOMContentLoaded", () => {
             const p = new URLSearchParams(window.location.search);
             if (p.get("titulaire") === "1" || p.get("admin") === "true" || p.get("pin") === "7788") {
-                activerModeTitulaireSecret();
+                activerModeTitulaireSecret(true);
+            } else if (localStorage.getItem("btp_titulaire") === "1") {
+                activerModeTitulaireSecret(false);
             }
             if (!lignesDQE || lignesDQE.length === 0) {
                 lignesDQE = JSON.parse(JSON.stringify(DIX_HUIT_ARTICLES_ALGERIE));
@@ -1287,15 +1289,22 @@ LOT 01 - TERRASSEMENTS
             rendreTableauxAlgerie();
         });
 
-        function activerModeTitulaireSecret() {
+        function activerModeTitulaireSecret(notifier = true) {
             modeTitulaire = true;
             creditsRestants = 9999;
+            try { localStorage.setItem("btp_titulaire", "1"); } catch(e){}
             const badge = document.getElementById("badgeLicenceHeader");
             if (badge) {
                 badge.className = "btn-header-pill btn-header-titulaire";
                 badge.innerHTML = "<span>👑 M. BOUFELDJA BENABDALLAH (Titulaire • Accès Gratuit & Illimité)</span>";
             }
-            alert("👑 Mode Titulaire Activé : Accès illimité et gratuit pour M. BOUFELDJA BENABDALLAH.");
+            const lienBascule = document.querySelector('a[href^="index_europe.html"]');
+            if (lienBascule) {
+                lienBascule.href = "index_europe.html?titulaire=1";
+            }
+            if (notifier) {
+                alert("👑 Mode Titulaire Activé : Accès illimité et gratuit pour M. BOUFELDJA BENABDALLAH.");
+            }
         }
 
         function naviguerVersEtape(num) {
