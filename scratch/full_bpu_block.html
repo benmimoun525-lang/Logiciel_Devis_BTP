@@ -1,0 +1,969 @@
+﻿    <!-- MODAL BASE DES PRIX UNITAIRES (BPU) RÃ‰FÃ‰RENTIELS ALGÃ‰RIE -->
+    <div id="modalBPU" class="modal-overlay" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="modal" style="background: white; border-radius: 16px; padding: 24px; max-width: 960px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2px solid #bfdbfe;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 12px;">
+                <div style="font-weight: 900; font-size: 1.15rem; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
+                    <span>ðŸ’°</span> <span>Base des Prix Unitaires (BPU) BTP â€¢ Hydraulique â€¢ VRD AlgÃ©rie 2026</span>
+                </div>
+                <button type="button" onclick="fermerModalBPU()" style="background:none; border:none; font-size:1.6rem; color:#64748b; cursor:pointer; font-weight:800; line-height: 1;">&times;</button>
+            </div>
+            <p style="font-size: 0.86rem; color: #64748b; margin-top: -4px; margin-bottom: 14px;">
+                BarÃ¨me rÃ©fÃ©rentiel actualisÃ© du marchÃ© algÃ©rien en Dinars (DZD). Cliquez sur <b>Â« ðŸŸ¢ Min Â»</b> ou <b>Â« ðŸ”µ Moyen Â»</b> pour insÃ©rer immÃ©diatement un ouvrage dans votre devis.
+            </p>
+
+            <!-- Barre de recherche et destination -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center;">
+                <div style="flex: 1; min-width: 250px;">
+                    <input type="text" id="rechercheBPU" class="form-control" placeholder="ðŸ” Rechercher un ouvrage (ex: bÃ©ton, fouille, tuf, PEHD, enduit, brique, carrelage...)" oninput="filtrerTableauBPU()" style="width: 100%; padding: 8px 12px; font-size: 0.86rem; border: 1.5px solid #cbd5e1; border-radius: 8px;">
+                </div>
+                <div id="selectLotCibleContainer" style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.84rem; color: #475569; font-weight: 700;">Lot cible :</span>
+                    <select id="selectLotCibleBPU" class="form-control" style="width: auto; padding: 7px 10px; font-size: 0.84rem; border: 1.5px solid #cbd5e1; border-radius: 8px;">
+                        <option value="">(Lot d'origine de l'ouvrage)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Onglets des Secteurs -->
+            <div class="bpu-tabs">
+                <button type="button" class="bpu-tab-btn active" onclick="changerCategorieBPU('TOUS', this)">ðŸ—ï¸ Tous les secteurs (<span id="bpuCountTous">74</span>)</button>
+                <button type="button" class="bpu-tab-btn" onclick="changerCategorieBPU('BTP', this)">ðŸ¢ BTP / BÃ¢timent (<span id="bpuCountBTP">44</span>)</button>
+                <button type="button" class="bpu-tab-btn" onclick="changerCategorieBPU('HYDRAULIQUE', this)">ðŸ’§ Hydraulique & AEP (<span id="bpuCountHyd">16</span>)</button>
+                <button type="button" class="bpu-tab-btn" onclick="changerCategorieBPU('TRAVAUX PUBLICS', this)">ðŸ›£ï¸ Travaux Publics / VRD (<span id="bpuCountTP">14</span>)</button>
+            </div>
+
+            <!-- Tableau des rÃ©sultats BPU -->
+            <div style="max-height: 440px; overflow-y: auto; border: 1.5px solid #cbd5e1; border-radius: 10px;">
+                <table class="bpu-table" id="tableBPU">
+                    <thead>
+                        <tr>
+                            <th style="width: 65px;">Code</th>
+                            <th style="width: 110px;">Secteur</th>
+                            <th>DÃ©signation des Travaux & Norme</th>
+                            <th style="width: 60px; text-align: center;">UnitÃ©</th>
+                            <th style="width: 170px; text-align: right;">Prix RÃ©fÃ©rentiel DZD</th>
+                            <th style="width: 150px; text-align: center;">Action Chiffrage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyBPU">
+                        <!-- GÃ©nÃ©rÃ© par JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 10px;">
+                <div style="font-size: 0.80rem; color: #64748b;">
+                    ðŸ’¡ Les prix unitaires correspondent aux moyennes H.T. constatÃ©es sur les chantiers et marchÃ©s publics en AlgÃ©rie (DZD).
+                </div>
+                <button type="button" onclick="fermerModalBPU()" style="background: #f1f5f9; border: 1.5px solid #cbd5e1; color: #334155; padding: 7px 18px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- DONNÉES DU RÉFÉRENTIEL BPU ALGÉRIE 2026 (74 ARTICLES) -->
+    <script id="bpuDataJson" type="application/json">
+[
+  {
+    "id": "btp_001",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.01",
+    "designation": "Fouille en pleine masse en terrain ordinaire par engin m├⌐canique",
+    "unite": "m3",
+    "prix_min": 450,
+    "prix_moyen": 600,
+    "prix_max": 800,
+    "description": "Fouille m├⌐canique ├⌐vacu├⌐e ├á la d├⌐charge publique ou mise en d├⌐p├┤t"
+  },
+  {
+    "id": "btp_002",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.02",
+    "designation": "Fouille en tranch├⌐e ou en rigole pour fondations continues",
+    "unite": "m3",
+    "prix_min": 900,
+    "prix_moyen": 1200,
+    "prix_max": 1600,
+    "description": "Fouille m├⌐canique ou manuelle pour semelles filantes et longrines"
+  },
+  {
+    "id": "btp_003",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.03",
+    "designation": "Fouille en puits pour semelles isol├⌐es",
+    "unite": "m3",
+    "prix_min": 1200,
+    "prix_moyen": 1600,
+    "prix_max": 2200,
+    "description": "Ex├⌐cution de fouilles pour massifs et semelles isol├⌐es"
+  },
+  {
+    "id": "btp_004",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.04",
+    "designation": "Remblaiement des fouilles avec terres s├⌐lectionn├⌐es et compactage",
+    "unite": "m3",
+    "prix_min": 600,
+    "prix_moyen": 900,
+    "prix_max": 1300,
+    "description": "Compactage par couches successives de 20 cm avec arrosage"
+  },
+  {
+    "id": "btp_005",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.05",
+    "designation": "Remblai en tuf d'apport compact├⌐ sous dallage",
+    "unite": "m3",
+    "prix_min": 1600,
+    "prix_moyen": 2200,
+    "prix_max": 2800,
+    "description": "Fourniture, r├⌐galage et compactage de tuf ├á 95% OPM"
+  },
+  {
+    "id": "btp_006",
+    "categorie": "BTP",
+    "lot": "LOT 01: TERRASSEMENTS",
+    "code": "01.06",
+    "designation": "├ëvacuation des terres exc├⌐dentaires aux d├⌐charges publiques",
+    "unite": "m3",
+    "prix_min": 350,
+    "prix_moyen": 500,
+    "prix_max": 700,
+    "description": "Chargement et transport par camions bennes jusqu'├á la d├⌐charge"
+  },
+
+  {
+    "id": "btp_010",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.01",
+    "designation": "B├⌐ton de propret├⌐ dos├⌐ ├á 150 kg/m3 de ciment (├⌐p. 10 cm)",
+    "unite": "m3",
+    "prix_min": 8500,
+    "prix_moyen": 10500,
+    "prix_max": 12500,
+    "description": "Coul├⌐ en fond de fouille sous semelles et longrines"
+  },
+  {
+    "id": "btp_011",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.02",
+    "designation": "Gros b├⌐ton de calage dos├⌐ ├á 250 kg/m3",
+    "unite": "m3",
+    "prix_min": 11000,
+    "prix_moyen": 13500,
+    "prix_max": 16000,
+    "description": "Pour rattrapage de niveau de fondation et calage"
+  },
+  {
+    "id": "btp_012",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.03",
+    "designation": "B├⌐ton arm├⌐ pour semelles de fondation dos├⌐ ├á 350 kg/m3 (inclus coffrage & acier)",
+    "unite": "m3",
+    "prix_min": 28000,
+    "prix_moyen": 34000,
+    "prix_max": 42000,
+    "description": "Fourniture, coffrage soign├⌐, ferraillage HA et coulage"
+  },
+  {
+    "id": "btp_013",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.04",
+    "designation": "B├⌐ton arm├⌐ pour longrines et amorces poteaux dos├⌐ ├á 350 kg/m3",
+    "unite": "m3",
+    "prix_min": 30000,
+    "prix_moyen": 36000,
+    "prix_max": 44000,
+    "description": "Comprend coffrage m├⌐tallique ou bois, armatures et vibration"
+  },
+  {
+    "id": "btp_014",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.05",
+    "designation": "B├⌐ton arm├⌐ en ├⌐l├⌐vation pour poteaux dos├⌐ ├á 350 kg/m3",
+    "unite": "m3",
+    "prix_min": 32000,
+    "prix_moyen": 39000,
+    "prix_max": 48000,
+    "description": "Coulage poteaux rectangulaires ou circulaires avec ├⌐tayage"
+  },
+  {
+    "id": "btp_015",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.06",
+    "designation": "B├⌐ton arm├⌐ pour poutres et cha├«nages dos├⌐ ├á 350 kg/m3",
+    "unite": "m3",
+    "prix_min": 31000,
+    "prix_moyen": 38000,
+    "prix_max": 46000,
+    "description": "Coffrage suspendu, aciers ├á haute adh├⌐rence et coulage"
+  },
+  {
+    "id": "btp_016",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.07",
+    "designation": "Plancher en corps creux 16+4 cm (hourdis b├⌐ton ou terre cuite)",
+    "unite": "m2",
+    "prix_min": 3200,
+    "prix_moyen": 4200,
+    "prix_max": 5200,
+    "description": "Poutrelles pr├⌐fabriqu├⌐es ou coul├⌐es, hourdis, treillis soud├⌐ et dalle de compression 4cm"
+  },
+  {
+    "id": "btp_017",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.08",
+    "designation": "Plancher en corps creux 20+5 cm pour charges lourdes",
+    "unite": "m2",
+    "prix_min": 3800,
+    "prix_moyen": 4900,
+    "prix_max": 6000,
+    "description": "Hourdis 20cm avec dalle de compression 5cm dos├⌐e ├á 350 kg/m3"
+  },
+  {
+    "id": "btp_018",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.09",
+    "designation": "Dallage en b├⌐ton arm├⌐ au sol ├⌐p. 12 cm avec treillis soud├⌐",
+    "unite": "m2",
+    "prix_min": 1800,
+    "prix_moyen": 2400,
+    "prix_max": 3100,
+    "description": "Film polyane, treillis soud├⌐ anti-fissuration et lissage de surface"
+  },
+  {
+    "id": "btp_019",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.10",
+    "designation": "B├⌐ton arm├⌐ pour voile p├⌐riph├⌐rique dos├⌐ ├á 350 kg/m3",
+    "unite": "m3",
+    "prix_min": 34000,
+    "prix_moyen": 42000,
+    "prix_max": 50000,
+    "description": "Coffrage double face ├⌐tanche, armatures quadrill├⌐es et coulage"
+  },
+  {
+    "id": "btp_020",
+    "categorie": "BTP",
+    "lot": "LOT 02: GROS-OEUVRE & B├ëTON ARM├ë",
+    "code": "02.11",
+    "designation": "B├⌐ton arm├⌐ pour escaliers (paillasse et marches)",
+    "unite": "m3",
+    "prix_min": 36000,
+    "prix_moyen": 45000,
+    "prix_max": 55000,
+    "description": "Coffrage d├⌐coup├⌐ des marches et contremarches, armatures et coulage"
+  },
+
+  {
+    "id": "btp_025",
+    "categorie": "BTP",
+    "lot": "LOT 03: MA├çONNERIE & CLOISONS",
+    "code": "03.01",
+    "designation": "Ma├ºonnerie double paroi en briques creuses (12T + 8T avec lame d'air)",
+    "unite": "m2",
+    "prix_min": 2200,
+    "prix_moyen": 2900,
+    "prix_max": 3600,
+    "description": "Mur ext├⌐rieur 25 cm avec lame d'air de 5 cm au mortier de ciment"
+  },
+  {
+    "id": "btp_026",
+    "categorie": "BTP",
+    "lot": "LOT 03: MA├çONNERIE & CLOISONS",
+    "code": "03.02",
+    "designation": "Ma├ºonnerie simple paroi en briques 12 trous (├⌐p. 15 cm)",
+    "unite": "m2",
+    "prix_min": 1200,
+    "prix_moyen": 1600,
+    "prix_max": 2000,
+    "description": "Pour cloisons de distribution et s├⌐parations"
+  },
+  {
+    "id": "btp_027",
+    "categorie": "BTP",
+    "lot": "LOT 03: MA├çONNERIE & CLOISONS",
+    "code": "03.03",
+    "designation": "Ma├ºonnerie de cloisonnette en briques 8 trous (├⌐p. 10 cm)",
+    "unite": "m2",
+    "prix_min": 950,
+    "prix_moyen": 1300,
+    "prix_max": 1650,
+    "description": "Pour cloisons int├⌐rieures l├⌐g├¿res et gaines techniques"
+  },
+  {
+    "id": "btp_028",
+    "categorie": "BTP",
+    "lot": "LOT 03: MA├çONNERIE & CLOISONS",
+    "code": "03.04",
+    "designation": "Ma├ºonnerie en parpaings de ciment creux ├⌐p. 20 cm",
+    "unite": "m2",
+    "prix_min": 1400,
+    "prix_moyen": 1850,
+    "prix_max": 2400,
+    "description": "Murs de cl├┤ture et sous-sol en agglom├⌐r├⌐s de ciment"
+  },
+  {
+    "id": "btp_029",
+    "categorie": "BTP",
+    "lot": "LOT 03: MA├çONNERIE & CLOISONS",
+    "code": "03.05",
+    "designation": "Ma├ºonnerie en parpaings de ciment creux ├⌐p. 15 cm",
+    "unite": "m2",
+    "prix_min": 1150,
+    "prix_moyen": 1550,
+    "prix_max": 1950,
+    "description": "Pour s├⌐parations de locaux et cours anglaises"
+  },
+
+  {
+    "id": "btp_035",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.01",
+    "designation": "Enduit au mortier de ciment sous plafonds en 2 couches",
+    "unite": "m2",
+    "prix_min": 750,
+    "prix_moyen": 1050,
+    "prix_max": 1400,
+    "description": "Couche d'accrochage gobetis et couche de finition dress├⌐e"
+  },
+  {
+    "id": "btp_036",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.02",
+    "designation": "Enduit int├⌐rieur au mortier b├ótard sur murs verticaux",
+    "unite": "m2",
+    "prix_min": 650,
+    "prix_moyen": 900,
+    "prix_max": 1200,
+    "description": "Gobetis, corps d'enduit et couche de finition taloch├⌐e soign├⌐e"
+  },
+  {
+    "id": "btp_037",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.03",
+    "designation": "Enduit ext├⌐rieur ├⌐tanche au mortier de ciment dos├⌐ ├á 350 kg/m3",
+    "unite": "m2",
+    "prix_min": 850,
+    "prix_moyen": 1250,
+    "prix_max": 1700,
+    "description": "Trois couches avec hydrofuge de masse et finition gratt├⌐e ou taloch├⌐e"
+  },
+  {
+    "id": "btp_038",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.04",
+    "designation": "Enduit au pl├ótre liss├⌐ sur murs et plafonds",
+    "unite": "m2",
+    "prix_min": 550,
+    "prix_moyen": 780,
+    "prix_max": 1100,
+    "description": "Pl├ótre de construction liss├⌐ pr├¬t ├á peindre"
+  },
+  {
+    "id": "btp_039",
+    "categorie": "BTP",
+    "lot": "LOT 04: ENDUITS & PLATRERIE",
+    "code": "04.05",
+    "designation": "Faux plafond en plaques de pl├ótre BA13 hydrofuge ou standard",
+    "unite": "m2",
+    "prix_min": 1800,
+    "prix_moyen": 2500,
+    "prix_max": 3300,
+    "description": "Ossature m├⌐tallique galvanis├⌐e, suspentes, bandes ├á joint et enduit"
+  },
+
+  {
+    "id": "btp_045",
+    "categorie": "BTP",
+    "lot": "LOT 05: ├ëTANCH├ëIT├ë & ISOLATION",
+    "code": "05.01",
+    "designation": "Forme de pente en b├⌐ton maigre ├⌐p. moyenne 7 cm",
+    "unite": "m2",
+    "prix_min": 900,
+    "prix_moyen": 1300,
+    "prix_max": 1700,
+    "description": "R├⌐alisation de pentes min 1.5% vers les gargouilles d'├⌐vacuation"
+  },
+  {
+    "id": "btp_046",
+    "categorie": "BTP",
+    "lot": "LOT 05: ├ëTANCH├ëIT├ë & ISOLATION",
+    "code": "05.02",
+    "designation": "├ëtanch├⌐it├⌐ multicouche type 36S avec feutre bitum├⌐ et asphalte coul├⌐",
+    "unite": "m2",
+    "prix_min": 1600,
+    "prix_moyen": 2200,
+    "prix_max": 2800,
+    "description": "Impr├⌐gnation ├á froid (EAC), 2 feutres 36S crois├⌐s et bitume d'application"
+  },
+  {
+    "id": "btp_047",
+    "categorie": "BTP",
+    "lot": "LOT 05: ├ëTANCH├ëIT├ë & ISOLATION",
+    "code": "05.03",
+    "designation": "├ëtanch├⌐it├⌐ monocouche autoprot├⌐g├⌐e par feuille d'aluminium (Paxalu)",
+    "unite": "m2",
+    "prix_min": 1800,
+    "prix_moyen": 2400,
+    "prix_max": 3100,
+    "description": "Membrane SBS ou APP 4mm soud├⌐e ├á la flamme sur primaire"
+  },
+  {
+    "id": "btp_048",
+    "categorie": "BTP",
+    "lot": "LOT 05: ├ëTANCH├ëIT├ë & ISOLATION",
+    "code": "05.04",
+    "designation": "Protection d'├⌐tanch├⌐it├⌐ par gravillon roul├⌐ lav├⌐ 15/25 ├⌐p. 5 cm",
+    "unite": "m2",
+    "prix_min": 500,
+    "prix_moyen": 750,
+    "prix_max": 1000,
+    "description": "Pour toiture terrasse inaccessible avec filtre g├⌐otextile"
+  },
+  {
+    "id": "btp_049",
+    "categorie": "BTP",
+    "lot": "LOT 05: ├ëTANCH├ëIT├ë & ISOLATION",
+    "code": "05.05",
+    "designation": "Isolation thermique en panneaux de polystyr├¿ne extrud├⌐ ├⌐p. 4 cm",
+    "unite": "m2",
+    "prix_min": 950,
+    "prix_moyen": 1400,
+    "prix_max": 1900,
+    "description": "Pose sous ├⌐tanch├⌐it├⌐ ou en toiture invers├⌐e"
+  },
+
+  {
+    "id": "btp_055",
+    "categorie": "BTP",
+    "lot": "LOT 06: REV├èTEMENTS SOLS & MURS",
+    "code": "06.01",
+    "designation": "Rev├¬tement de sol en dalle de sol c├⌐ramique 40x40 ou 50x50 cm",
+    "unite": "m2",
+    "prix_min": 2400,
+    "prix_moyen": 3200,
+    "prix_max": 4200,
+    "description": "Pose sur chape au mortier de ciment dos├⌐ ├á 250 kg/m3 et jointoiement coulis blanc"
+  },
+  {
+    "id": "btp_056",
+    "categorie": "BTP",
+    "lot": "LOT 06: REV├èTEMENTS SOLS & MURS",
+    "code": "06.02",
+    "designation": "Rev├¬tement de sol en gr├¿s c├⌐rame ├⌐maill├⌐ grand format 60x60 ou 60x120 cm",
+    "unite": "m2",
+    "prix_min": 3500,
+    "prix_moyen": 4800,
+    "prix_max": 6500,
+    "description": "Pose soign├⌐e au mortier colle avec croisillons nivelants et joints ├⌐tanches"
+  },
+  {
+    "id": "btp_057",
+    "categorie": "BTP",
+    "lot": "LOT 06: REV├èTEMENTS SOLS & MURS",
+    "code": "06.03",
+    "designation": "Rev├¬tement mural en fa├»ence pour cuisines et sanitaires",
+    "unite": "m2",
+    "prix_min": 2200,
+    "prix_moyen": 3000,
+    "prix_max": 4000,
+    "description": "Fourniture, pose au ciment colle et jointoiement hydrofuge"
+  },
+  {
+    "id": "btp_058",
+    "categorie": "BTP",
+    "lot": "LOT 06: REV├èTEMENTS SOLS & MURS",
+    "code": "06.04",
+    "designation": "Plinthes assorties en c├⌐ramique ou gr├¿s c├⌐rame",
+    "unite": "ml",
+    "prix_min": 450,
+    "prix_moyen": 650,
+    "prix_max": 900,
+    "description": "Fourniture et pose de plinthes h=8cm au mortier colle"
+  },
+  {
+    "id": "btp_059",
+    "categorie": "BTP",
+    "lot": "LOT 06: REV├èTEMENTS SOLS & MURS",
+    "code": "06.05",
+    "designation": "Habillage marches et contremarches d'escalier en marbre national (Filfila / Chemtou)",
+    "unite": "ml",
+    "prix_min": 3500,
+    "prix_moyen": 4800,
+    "prix_max": 6500,
+    "description": "Marche ├⌐p. 3 cm chanfrein├⌐e, contremarche ├⌐p. 2 cm pos├⌐e au ciment blanc"
+  },
+
+  {
+    "id": "btp_065",
+    "categorie": "BTP",
+    "lot": "LOT 07: MENUISERIE BOIS, ALU & PVC",
+    "code": "07.01",
+    "designation": "Porte isoplane en bois alv├⌐olaire avec chambranles et quincaillerie",
+    "unite": "U",
+    "prix_min": 14000,
+    "prix_moyen": 19000,
+    "prix_max": 25000,
+    "description": "Dimensions 84x217 ou 74x217 cm avec serrure et b├⌐quille inox"
+  },
+  {
+    "id": "btp_066",
+    "categorie": "BTP",
+    "lot": "LOT 07: MENUISERIE BOIS, ALU & PVC",
+    "code": "07.02",
+    "designation": "Fen├¬tre en aluminium blanc 2 vantaux coulissants (120x120 cm)",
+    "unite": "m2",
+    "prix_min": 16000,
+    "prix_moyen": 22000,
+    "prix_max": 29000,
+    "description": "Profil├⌐s aluminium thermolaqu├⌐, vitrage clair 6mm et joint n├⌐opr├¿ne"
+  },
+  {
+    "id": "btp_067",
+    "categorie": "BTP",
+    "lot": "LOT 07: MENUISERIE BOIS, ALU & PVC",
+    "code": "07.03",
+    "designation": "Porte-fen├¬tre en aluminium avec volet roulant int├⌐gr├⌐",
+    "unite": "m2",
+    "prix_min": 24000,
+    "prix_moyen": 32000,
+    "prix_max": 42000,
+    "description": "Coulissant 2 vantaux avec tablier volet alu isol├⌐ et manivelle/moteur"
+  },
+  {
+    "id": "btp_068",
+    "categorie": "BTP",
+    "lot": "LOT 07: MENUISERIE BOIS, ALU & PVC",
+    "code": "07.04",
+    "designation": "Porte d'entr├⌐e blind├⌐e m├⌐tallique avec serrure multipoints",
+    "unite": "U",
+    "prix_min": 35000,
+    "prix_moyen": 48000,
+    "prix_max": 65000,
+    "description": "Porte pali├¿re s├⌐curis├⌐e avec pr├⌐-cadre, microviseur et cylindre europ├⌐en"
+  },
+
+  {
+    "id": "btp_075",
+    "categorie": "BTP",
+    "lot": "LOT 08: PEINTURE & VITRERIE",
+    "code": "08.01",
+    "designation": "Peinture vinylique ├á l'eau en 2 couches sur murs et plafonds",
+    "unite": "m2",
+    "prix_min": 280,
+    "prix_moyen": 420,
+    "prix_max": 580,
+    "description": "Pon├ºage, couche d'impression fixatrice et 2 couches de peinture vinyle mate"
+  },
+  {
+    "id": "btp_076",
+    "categorie": "BTP",
+    "lot": "LOT 08: PEINTURE & VITRERIE",
+    "code": "08.02",
+    "designation": "Peinture laqu├⌐e satin├⌐e ou brillante pour pi├¿ces d'eau",
+    "unite": "m2",
+    "prix_min": 450,
+    "prix_moyen": 680,
+    "prix_max": 950,
+    "description": "Enduisage repass├⌐, pon├ºage fin et 2 couches de laque glyc├⌐rophtalique"
+  },
+  {
+    "id": "btp_077",
+    "categorie": "BTP",
+    "lot": "LOT 08: PEINTURE & VITRERIE",
+    "code": "08.03",
+    "designation": "Peinture ext├⌐rieure monocouche imperm├⌐abilisante (Pliolite ou siloxane)",
+    "unite": "m2",
+    "prix_min": 600,
+    "prix_moyen": 850,
+    "prix_max": 1200,
+    "description": "Rev├¬tement plastique ├⌐pais (RPE) r├⌐sistant aux intemp├⌐ries et UV"
+  },
+
+  {
+    "id": "hyd_001",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.01",
+    "designation": "Fouille en tranch├⌐e pour canalisation d'eau potable et assainissement",
+    "unite": "m3",
+    "prix_min": 700,
+    "prix_moyen": 1000,
+    "prix_max": 1400,
+    "description": "Fouille m├⌐canique en terrain meuble ├á mi-dur avec dressement du fond"
+  },
+  {
+    "id": "hyd_002",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.02",
+    "designation": "Lit de pose en sable propre ├⌐p. 10 cm sous conduite",
+    "unite": "m3",
+    "prix_min": 2200,
+    "prix_moyen": 3000,
+    "prix_max": 3800,
+    "description": "Fourniture, r├⌐galage et damage de sable pour assise de tuyaux"
+  },
+  {
+    "id": "hyd_003",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.03",
+    "designation": "Fourniture et pose de tuyau PEHD haute densit├⌐ DN 63 mm PN16",
+    "unite": "ml",
+    "prix_min": 750,
+    "prix_moyen": 1100,
+    "prix_max": 1500,
+    "description": "Pour r├⌐seau d'adduction et distribution AEP avec raccords ├⌐lectrosoudables"
+  },
+  {
+    "id": "hyd_004",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.04",
+    "designation": "Fourniture et pose de tuyau PEHD DN 90 mm PN16",
+    "unite": "ml",
+    "prix_min": 1200,
+    "prix_moyen": 1700,
+    "prix_max": 2300,
+    "description": "Soudure bout ├á bout ou manchons ├⌐lectrosoudables, essais inclus"
+  },
+  {
+    "id": "hyd_005",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.05",
+    "designation": "Fourniture et pose de tuyau PEHD DN 110 mm PN16",
+    "unite": "ml",
+    "prix_min": 1700,
+    "prix_moyen": 2400,
+    "prix_max": 3200,
+    "description": "Conduite principale d'eau potable avec bande avertisseuse bleue"
+  },
+  {
+    "id": "hyd_006",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.06",
+    "designation": "Fourniture et pose de tuyau PEHD DN 160 mm PN16",
+    "unite": "ml",
+    "prix_min": 2800,
+    "prix_moyen": 3900,
+    "prix_max": 5200,
+    "description": "Pour transport d'eau potable sous pression avec pi├¿ces sp├⌐ciales"
+  },
+  {
+    "id": "hyd_007",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.07",
+    "designation": "Fourniture et pose de tuyau PVC Assainissement assainissement s├⌐rie I DN 200 mm",
+    "unite": "ml",
+    "prix_min": 1900,
+    "prix_moyen": 2600,
+    "prix_max": 3400,
+    "description": "Tuyau lisse ├á joint ├⌐lastom├¿re ├⌐tanche pour r├⌐seau d'eaux us├⌐es"
+  },
+  {
+    "id": "hyd_008",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.08",
+    "designation": "Fourniture et pose de tuyau PVC Assainissement s├⌐rie I DN 250 mm",
+    "unite": "ml",
+    "prix_min": 2600,
+    "prix_moyen": 3600,
+    "prix_max": 4700,
+    "description": "Canalisation d'assainissement avec pente minimale 0.5%"
+  },
+  {
+    "id": "hyd_009",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.09",
+    "designation": "Fourniture et pose de tuyau PVC Assainissement s├⌐rie I DN 315 mm",
+    "unite": "ml",
+    "prix_min": 3800,
+    "prix_moyen": 5200,
+    "prix_max": 6800,
+    "description": "Collecteur d'assainissement gravitaire principal"
+  },
+  {
+    "id": "hyd_010",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.10",
+    "designation": "Fourniture et pose de tuyau PVC Assainissement s├⌐rie I DN 400 mm",
+    "unite": "ml",
+    "prix_min": 5800,
+    "prix_moyen": 7800,
+    "prix_max": 9900,
+    "description": "Collecteur gros diam├¿tre pour r├⌐seaux unitaires ou pluviaux"
+  },
+  {
+    "id": "hyd_011",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.11",
+    "designation": "Fourniture et pose de tuyau en b├⌐ton arm├⌐ centrifug├⌐ DN 500 mm",
+    "unite": "ml",
+    "prix_min": 7500,
+    "prix_moyen": 10500,
+    "prix_max": 14000,
+    "description": "Buse en b├⌐ton arm├⌐ classe 135A avec bague d'├⌐tanch├⌐it├⌐"
+  },
+  {
+    "id": "hyd_012",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.12",
+    "designation": "Regard de visite en b├⌐ton arm├⌐ coul├⌐ sur place 100x100 cm (h jusqu'├á 2.00m)",
+    "unite": "U",
+    "prix_min": 24000,
+    "prix_moyen": 32000,
+    "prix_max": 42000,
+    "description": "Radier, cunette semi-circulaire, parois ├⌐p. 15cm, enduit ├⌐tanche et ├⌐chelons"
+  },
+  {
+    "id": "hyd_013",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.13",
+    "designation": "Fourniture et pose de tampon en fonte ductile rond classe D400 (40 tonnes)",
+    "unite": "U",
+    "prix_min": 18000,
+    "prix_moyen": 25000,
+    "prix_max": 33000,
+    "description": "Cadre et tampon verrouillable pour voirie lourde avec joint anti-bruit"
+  },
+  {
+    "id": "hyd_014",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.14",
+    "designation": "Regard borgne ou bo├«te de branchement particulier 50x50 cm",
+    "unite": "U",
+    "prix_min": 8500,
+    "prix_moyen": 12000,
+    "prix_max": 16000,
+    "description": "Pour raccordement individuel au r├⌐seau public avec couvercle b├⌐ton"
+  },
+  {
+    "id": "hyd_015",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.15",
+    "designation": "Vanne ├á opercule ├á brides DN 100 PN16 avec volant de commande",
+    "unite": "U",
+    "prix_min": 22000,
+    "prix_moyen": 30000,
+    "prix_max": 40000,
+    "description": "Robinet vanne en fonte ductile pour sectionnement de r├⌐seau AEP"
+  },
+  {
+    "id": "hyd_016",
+    "categorie": "HYDRAULIQUE",
+    "lot": "LOT 09: HYDRAULIQUE & ASSAINISSEMENT",
+    "code": "09.16",
+    "designation": "├ëpreuve hydrostatique et d├⌐sinfection de r├⌐seau d'eau potable",
+    "unite": "ml",
+    "prix_min": 150,
+    "prix_moyen": 250,
+    "prix_max": 400,
+    "description": "Mise en pression d'├⌐preuve 1.5 fois la pression de service et rin├ºage javellis├⌐"
+  },
+
+  {
+    "id": "tp_001",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.01",
+    "designation": "D├⌐capage de terre v├⌐g├⌐tale sur emprise de chauss├⌐e (├⌐p. 20 ├á 30 cm)",
+    "unite": "m2",
+    "prix_min": 120,
+    "prix_moyen": 180,
+    "prix_max": 260,
+    "description": "Au bulldozer ou ├á la niveleuse avec mise en cordon ou mise en d├⌐p├┤t"
+  },
+  {
+    "id": "tp_002",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.02",
+    "designation": "Couche de fondation en tout-venant de tuf s├⌐lectionn├⌐ compact├⌐ (├⌐p. 20 cm)",
+    "unite": "m3",
+    "prix_min": 1800,
+    "prix_moyen": 2400,
+    "prix_max": 3100,
+    "description": "Fourniture, r├⌐galage ├á la niveleuse et compactage ├á 98% de l'OPM"
+  },
+  {
+    "id": "tp_003",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.03",
+    "designation": "Couche de fondation en grave non trait├⌐e GNT 0/40 concass├⌐e (├⌐p. 15 cm)",
+    "unite": "m3",
+    "prix_min": 2500,
+    "prix_moyen": 3300,
+    "prix_max": 4200,
+    "description": "Grave de concassage dur r├⌐galeuse et compact├⌐e"
+  },
+  {
+    "id": "tp_004",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.04",
+    "designation": "Couche de base en grave concass├⌐e 0/20 (GNT 0/20) ├⌐p. 12 cm",
+    "unite": "m3",
+    "prix_min": 2800,
+    "prix_moyen": 3700,
+    "prix_max": 4600,
+    "description": "Mat├⌐riaux nobles pour assise de chauss├⌐e avec contr├┤le de compacit├⌐"
+  },
+  {
+    "id": "tp_005",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.05",
+    "designation": "Couche d'impr├⌐gnation au bitume fluidifi├⌐ 0/1 ├á raison de 1.2 kg/m2",
+    "unite": "m2",
+    "prix_min": 180,
+    "prix_moyen": 260,
+    "prix_max": 360,
+    "description": "R├⌐pandage m├⌐canique sous pression avec sablage de protection"
+  },
+  {
+    "id": "tp_006",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.06",
+    "designation": "Couche d'accrochage ├á l'├⌐mulsion de bitume ├á 65% (0.5 kg/m2)",
+    "unite": "m2",
+    "prix_min": 120,
+    "prix_moyen": 170,
+    "prix_max": 240,
+    "description": "Application juste avant la pose de l'enrob├⌐ ├á chaud"
+  },
+  {
+    "id": "tp_007",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.07",
+    "designation": "Rev├¬tement de chauss├⌐e en B├⌐ton Bitumineux ├á chaud (BB 0/10 ou BB 0/14) ├⌐p. 6 cm",
+    "unite": "m2",
+    "prix_min": 1500,
+    "prix_moyen": 2100,
+    "prix_max": 2800,
+    "description": "Fourniture, transport par camions calorifug├⌐s, mise en ┼ôuvre au finisseur et compactage"
+  },
+  {
+    "id": "tp_008",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.08",
+    "designation": "Fourniture et pose de bordures de trottoir en b├⌐ton pr├⌐fabriqu├⌐ type T2",
+    "unite": "ml",
+    "prix_min": 1100,
+    "prix_moyen": 1500,
+    "prix_max": 1950,
+    "description": "Pose sur semelle b├⌐ton dos├⌐ ├á 250 kg/m3 avec solin arri├¿re et joints fins"
+  },
+  {
+    "id": "tp_009",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.09",
+    "designation": "Fourniture et pose de bordures d'├«lot ou trottoir type T3 ou A2",
+    "unite": "ml",
+    "prix_min": 1300,
+    "prix_moyen": 1750,
+    "prix_max": 2300,
+    "description": "Bordures hautes pour protection de trottoirs et terre-pleins centraux"
+  },
+  {
+    "id": "tp_010",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.10",
+    "designation": "Fourniture et pose de caniveaux pr├⌐fabriqu├⌐s type CS2 ou CC1",
+    "unite": "ml",
+    "prix_min": 1400,
+    "prix_moyen": 1900,
+    "prix_max": 2500,
+    "description": "Caniveau double pente pour fil d'eau le long des bordures"
+  },
+  {
+    "id": "tp_011",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.11",
+    "designation": "Rev├¬tement de trottoir en pav├⌐s autobloquants en b├⌐ton ├⌐p. 6 cm",
+    "unite": "m2",
+    "prix_min": 1600,
+    "prix_moyen": 2200,
+    "prix_max": 2900,
+    "description": "Pose sur lit de sable de concassage 3 cm et balayage de sable fin dans les joints"
+  },
+  {
+    "id": "tp_012",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.12",
+    "designation": "B├⌐ton pour trottoir balay├⌐ ou bouchard├⌐ ├⌐p. 10 cm avec treillis",
+    "unite": "m2",
+    "prix_min": 1400,
+    "prix_moyen": 1950,
+    "prix_max": 2600,
+    "description": "Coulage b├⌐ton dos├⌐ ├á 300 kg/m3 avec joints de dilatation tous les 2 m"
+  },
+  {
+    "id": "tp_013",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.13",
+    "designation": "Avaloir ├á grille pour eaux pluviales avec siphon raccord├⌐ au r├⌐seau",
+    "unite": "U",
+    "prix_min": 16000,
+    "prix_moyen": 22000,
+    "prix_max": 29000,
+    "description": "Regard sous caniveau avec panier d├⌐grilleur et grille fonte C250"
+  },
+  {
+    "id": "tp_014",
+    "categorie": "TRAVAUX PUBLICS",
+    "lot": "LOT 10: TRAVAUX PUBLICS & VOIRIE (VRD)",
+    "code": "10.14",
+    "designation": "Signalisation horizontale par bandes blanches r├⌐tro-r├⌐fl├⌐chissantes (largeur 15 cm)",
+    "unite": "ml",
+    "prix_min": 120,
+    "prix_moyen": 180,
+    "prix_max": 250,
+    "description": "Peinture routi├¿re sp├⌐ciale avec microbilles de verre pour visibilit├⌐ nocturne"
+  }
+]
+
+    </script>
+

@@ -1,0 +1,63 @@
+    <!-- MODAL BASE DES PRIX UNITAIRES (BPU) RÉFÉRENTIELS ALGÉRIE -->
+    <div id="modalBPU" class="modal-overlay" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="modal" style="background: white; border-radius: 16px; padding: 24px; max-width: 960px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2px solid #bfdbfe;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 12px;">
+                <div style="font-weight: 900; font-size: 1.15rem; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
+                    <span>💰</span> <span>Base des Prix Unitaires (BPU) BTP • Hydraulique • VRD Algérie 2026</span>
+                </div>
+                <button type="button" onclick="fermerModalBPU()" style="background:none; border:none; font-size:1.6rem; color:#64748b; cursor:pointer; font-weight:800; line-height: 1;">&times;</button>
+            </div>
+            <p style="font-size: 0.86rem; color: #64748b; margin-top: -4px; margin-bottom: 14px;">
+                Barème référentiel actualisé du marché algérien en Dinars (DZD). Cliquez sur <b>« 🟢 Min »</b> ou <b>« 🔵 Moyen »</b> pour insérer immédiatement un ouvrage dans votre devis.
+            </p>
+
+            <!-- Barre de recherche et destination -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center;">
+                <div style="flex: 1; min-width: 250px;">
+                    <input type="text" id="rechercheBPU" class="form-control" placeholder="🔍 Rechercher un ouvrage (ex: béton, fouille, tuf, PEHD, enduit, brique, carrelage...)" oninput="filtrerTableauBPU()" style="width: 100%; padding: 8px 12px; font-size: 0.86rem; border: 1.5px solid #cbd5e1; border-radius: 8px;">
+                </div>
+                <div id="selectLotCibleContainer" style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.84rem; color: #475569; font-weight: 700;">Lot cible :</span>
+                    <select id="selectLotCibleBPU" class="form-control" style="width: auto; padding: 7px 10px; font-size: 0.84rem; border: 1.5px solid #cbd5e1; border-radius: 8px;">
+                        <option value="">(Lot d'origine de l'ouvrage)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Onglets des Secteurs -->
+            <div class="bpu-tabs">
+                <button type="button" class="bpu-tab-btn active" onclick="changerCategorieBPU('TOUS', this)">🏗️ Tous les secteurs (<span id="bpuCountTous">74</span>)</button>
+                <button type="button" class="bpu-tab-btn" onclick="changerCategorieBPU('BTP', this)">🏢 BTP / Bâtiment (<span id="bpuCountBTP">44</span>)</button>
+                <button type="button" class="bpu-tab-btn" onclick="changerCategorieBPU('HYDRAULIQUE', this)">💧 Hydraulique & AEP (<span id="bpuCountHyd">16</span>)</button>
+                <button type="button" class="bpu-tab-btn" onclick="changerCategorieBPU('TRAVAUX PUBLICS', this)">🛣️ Travaux Publics / VRD (<span id="bpuCountTP">14</span>)</button>
+            </div>
+
+            <!-- Tableau des résultats BPU -->
+            <div style="max-height: 440px; overflow-y: auto; border: 1.5px solid #cbd5e1; border-radius: 10px;">
+                <table class="bpu-table" id="tableBPU">
+                    <thead>
+                        <tr>
+                            <th style="width: 65px;">Code</th>
+                            <th style="width: 110px;">Secteur</th>
+                            <th>Désignation des Travaux & Norme</th>
+                            <th style="width: 60px; text-align: center;">Unité</th>
+                            <th style="width: 170px; text-align: right;">Prix Référentiel DZD</th>
+                            <th style="width: 150px; text-align: center;">Action Chiffrage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyBPU">
+                        <!-- Généré par JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 10px;">
+                <div style="font-size: 0.80rem; color: #64748b;">
+                    💡 Les prix unitaires correspondent aux moyennes H.T. constatées sur les chantiers et marchés publics en Algérie (DZD).
+                </div>
+                <button type="button" onclick="fermerModalBPU()" style="background: #f1f5f9; border: 1.5px solid #cbd5e1; color: #334155; padding: 7px 18px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
