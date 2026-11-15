@@ -4,7 +4,7 @@
   RIP BARIDIMOB      : 00799999000191804708 
   COMPTE CCP         : 0001918047 (Cle 08) 
   WHATSAPP           : 0551 42 21 66 
-  Date et Heure      : Sun 11/15/2026 22:39:13.00 
+  Date et Heure      : Sun 11/15/2026 23:27:16.30 
 ====================================================================== 
  
 [*] Nettoyage et optimisation reseau Git... 
@@ -13,24 +13,3 @@ Identite configuree : BOUFELDJA BENABDALLAH
         1 file(s) copied.
 [OK] Fichiers prets et separes : index.html (Algerie), index_algerie.html (Algerie), index_europe.html (Europe). 
 [*] Indexation des fichiers... 
-warning: in the working copy of 'METTRE A JOUR EN LIGNE.bat', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'index_algerie.html', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'scratch/bpu_data.json', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'scratch/bpu_js_functions.js', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'scratch/full_bpu_block.html', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'scratch/modal_bpu.html', LF will be replaced by CRLF the next time Git touches it
-[*] Validation de la version (commit)... 
-[main e28ce03] Autonome : Deploiement GitHub Actions pour GitHub Pages et chiffrage BPU instantane 0-serveur
- 8 files changed, 6471 insertions(+), 1046 deletions(-)
- create mode 100644 scratch/bpu_data.json
- create mode 100644 scratch/bpu_js_functions.js
- create mode 100644 scratch/full_bpu_block.html
- create mode 100644 scratch/modal_bpu.html
-[*] Envoi vers GitHub et Render (git push)... 
-[SUCCES] Push reussi tentative 1  
- 
-====================================================================== 
-  SYNCHRONISATION TERMINEE AVEC SUCCES  
-  Render met a jour le site en ligne dans 1 a 2 minutes. 
-====================================================================== 
