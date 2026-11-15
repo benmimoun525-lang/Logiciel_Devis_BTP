@@ -81,7 +81,7 @@ git add -A >> "%~dp0deploy_log.txt" 2>&1
 echo.
 echo [*] 3/4 - Validation de la version (commit)...
 echo [*] Validation de la version (commit)... >> "%~dp0deploy_log.txt" 2>&1
-git commit -m "Autonome : Deploiement GitHub Actions pour GitHub Pages et chiffrage BPU instantane 0-serveur" >> "%~dp0deploy_log.txt" 2>&1
+git commit -m "Mise a jour : Import Excel universel multi-feuilles, resolution tableau vide, detection colonnes BTP et tableur in situ" >> "%~dp0deploy_log.txt" 2>&1
 
 :: S'assurer que la branche active s'appelle main
 git branch -M main >> "%~dp0deploy_log.txt" 2>&1

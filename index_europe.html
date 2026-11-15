@@ -1148,8 +1148,12 @@ LOT 01 - DÉMOLITION
                                     </div>
                                 </div>
                                 <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                                    <button type="button" class="btn" onclick="ouvrirModalRaccordementExcelWeb()" style="background: #ffffff; color: #107c41; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.76rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);" title="Ouvrir la passerelle avec Excel sur le Web (Compte Microsoft Gratuit)">
-                                        <span>🌐</span> <span>Raccordement Excel Web (Gratuit)</span>
+                                    <button type="button" class="btn" onclick="document.getElementById('inputExcelDirectInSituEurope').click()" style="background: #ffffff; color: #107c41; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.76rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);" title="Ouvrir directement un fichier Excel (.xlsx, .xls, .csv)">
+                                        <span>📂</span> <span>Ouvrir Fichier Excel (.xlsx)</span>
+                                    </button>
+                                    <input type="file" id="inputExcelDirectInSituEurope" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importerFichierExcelEurope(event)">
+                                    <button type="button" class="btn" onclick="ouvrirModalRaccordementExcelWeb()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Ouvrir la passerelle avec Excel sur le Web (Compte Microsoft Gratuit)">
+                                        <span>🌐</span> <span>Excel Web (Gratuit)</span>
                                     </button>
                                     <button type="button" class="btn" onclick="exporterExcelInSitu()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; cursor: pointer;" title="Télécharger le fichier .xlsx direct">
                                         📥 .XLSX
@@ -1635,16 +1639,32 @@ LOT 01 - DÉMOLITION
                 <!-- Volet 2 : Raccordement In Situ dans le Logiciel -->
                 <div style="border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 14px; background: white;">
                     <div style="font-weight: 800; color: #059669; font-size: 0.90rem; margin-bottom: 6px;">
-                        2. Raccordement In Situ dans le Logiciel
+                        2. Coller depuis le Presse-Papiers
                     </div>
                     <div style="font-size: 0.78rem; color: #64748b; line-height: 1.5; margin-bottom: 10px;">
-                        Copiez les cellules dans Excel (Ctrl + A puis Ctrl + C) et collez-les directement dans notre tableur in situ :
+                        Copiez les cellules dans Excel (Ctrl + A puis Ctrl + C) et collez-les ici :
                     </div>
                     <button type="button" onclick="collerDepuisPressePapierDansExcelInSitu()" style="width: 100%; background: #2563eb; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer;">
-                        📋 Coller depuis le Presse-Papiers ➔
+                        📋 Coller Presse-Papiers ➔
                     </button>
                     <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 6px;">
-                        Les phrases complètes et les colonnes sont instantanément rechargées.
+                        Les phrases complètes et colonnes sont immédiatement injectées.
+                    </div>
+                </div>
+
+                <!-- Volet 3 : Ouvrir fichier Excel direct -->
+                <div style="border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 14px; background: white;">
+                    <div style="font-weight: 800; color: #b45309; font-size: 0.90rem; margin-bottom: 6px;">
+                        3. Charger Fichier Excel (.xlsx)
+                    </div>
+                    <div style="font-size: 0.78rem; color: #64748b; line-height: 1.5; margin-bottom: 10px;">
+                        Si vous avez déjà enregistré votre fichier Excel sur votre téléphone ou PC :
+                    </div>
+                    <button type="button" onclick="document.getElementById('inputExcelDirectInSituEurope').click(); document.getElementById('modalRaccordementExcel').style.display='none';" style="width: 100%; background: #d97706; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer;">
+                        📂 Choisir mon fichier .xlsx ➔
+                    </button>
+                    <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 6px;">
+                        Extraction directe sans aucun risque de tableau vide.
                     </div>
                 </div>
             </div>
@@ -1797,67 +1817,267 @@ LOT 01 - DÉMOLITION
             return 85;
         }
 
+        // ============================================================
+        // ANALYSEUR UNIVERSEL DE MATRICE 2D EXCEL / TABLEUR / TSV / CSV
+        // ============================================================
+        function analyserMatriceExcelVersArticles(matrice2D, monnaie = 'EUR') {
+            if (!matrice2D || !Array.isArray(matrice2D) || matrice2D.length === 0) return [];
+
+            // 1. Nettoyer et normaliser les lignes et cellules
+            const lignesPropres = [];
+            matrice2D.forEach(row => {
+                if (!row || !Array.isArray(row)) return;
+                const rowClean = row.map(c => (c !== null && c !== undefined ? String(c).trim() : ''));
+                if (rowClean.some(c => c.length > 0)) {
+                    lignesPropres.push(rowClean);
+                }
+            });
+
+            if (lignesPropres.length === 0) return [];
+
+            const isAlgerie = (monnaie === 'DZD');
+            const tvaDefaut = isAlgerie ? 19 : 20;
+            const regexUnit = /^(m²|m2|m³|m3|ml|u|ut|unite|unité|ens|ensemble|kg|t|tonne|forfait|ft|ff|h|j)$/i;
+
+            // 2. Détecter l'en-tête de colonnes (s'il existe dans les 10 premières lignes)
+            let idxHeader = -1;
+            let colNum = -1;
+            let colLot = -1;
+            let colDes = -1;
+            let colUnite = -1;
+            let colQte = -1;
+            let colPU = -1;
+
+            for (let r = 0; r < Math.min(lignesPropres.length, 10); r++) {
+                const row = lignesPropres[r];
+                let scoreHeader = 0;
+                let cDesTemp = -1;
+                let cUniteTemp = -1;
+                let cQteTemp = -1;
+
+                row.forEach((cell, c) => {
+                    const h = cell.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    if (/\b(designation|ouvrage|description|travaux|prestation|libelle|nature)\b/i.test(h)) {
+                        scoreHeader += 3;
+                        cDesTemp = c;
+                    }
+                    if (/\b(unite|u|ut)\b/i.test(h) || h === 'u') {
+                        scoreHeader += 2;
+                        cUniteTemp = c;
+                    }
+                    if (/\b(qte|quantite|metre|nombre|nbr)\b/i.test(h)) {
+                        scoreHeader += 2;
+                        cQteTemp = c;
+                    }
+                    if (/\b(pu|p\.u|prix|tarif|unitaire)\b/i.test(h)) {
+                        scoreHeader += 2;
+                    }
+                    if (/\b(lot|chapitre|section)\b/i.test(h)) {
+                        scoreHeader += 2;
+                    }
+                });
+
+                if (scoreHeader >= 4 || (cDesTemp !== -1 && (cUniteTemp !== -1 || cQteTemp !== -1))) {
+                    idxHeader = r;
+                    break;
+                }
+            }
+
+            if (idxHeader !== -1) {
+                const hRow = lignesPropres[idxHeader];
+                hRow.forEach((cell, c) => {
+                    const h = cell.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    if (/^(n|num|no|code|article|pos|item|ref)\b/i.test(h)) colNum = c;
+                    else if (/^(lot|chapitre|section|rubrique|partie)\b/i.test(h)) colLot = c;
+                    else if (/^(designation|ouvrage|description|travaux|prestation|libelle|nature)\b/i.test(h)) colDes = c;
+                    else if (/^(unite|u|ut)\b/i.test(h) || h === 'u') colUnite = c;
+                    else if (/^(qte|quantite|metre|nombre|nbr)\b/i.test(h)) colQte = c;
+                    else if (/^(pu|p\.u|prix|tarif|unitaire)\b/i.test(h)) colPU = c;
+                });
+            }
+
+            // 3. Détection statistique robuste si en-tête manquante ou incomplète
+            if (colDes === -1 || colUnite === -1 || colQte === -1) {
+                const nbCols = Math.max(...lignesPropres.map(r => r.length));
+                const countsUnit = new Array(nbCols).fill(0);
+                const countsNum = new Array(nbCols).fill(0);
+                const totalTextLen = new Array(nbCols).fill(0);
+                const textCount = new Array(nbCols).fill(0);
+
+                const dataStart = (idxHeader !== -1 ? idxHeader + 1 : 0);
+                for (let r = dataStart; r < lignesPropres.length; r++) {
+                    const row = lignesPropres[r];
+                    row.forEach((cell, c) => {
+                        if (!cell) return;
+                        if (regexUnit.test(cell)) countsUnit[c]++;
+                        const parsedNum = parseFloat(cell.replace(/\s/g, '').replace(',', '.'));
+                        if (!isNaN(parsedNum)) countsNum[c]++;
+                        if (cell.length > 2 && isNaN(parsedNum)) {
+                            totalTextLen[c] += cell.length;
+                            textCount[c]++;
+                        }
+                    });
+                }
+
+                // Déterminer colUnite
+                if (colUnite === -1) {
+                    let maxU = 0;
+                    countsUnit.forEach((cnt, c) => {
+                        if (cnt > maxU) { maxU = cnt; colUnite = c; }
+                    });
+                }
+
+                // Déterminer colDes
+                if (colDes === -1) {
+                    let maxAvg = 0;
+                    for (let c = 0; c < nbCols; c++) {
+                        if (c === colUnite) continue;
+                        const avg = textCount[c] > 0 ? totalTextLen[c] / textCount[c] : 0;
+                        if (avg > maxAvg) { maxAvg = avg; colDes = c; }
+                    }
+                }
+
+                // Déterminer colQte
+                if (colQte === -1) {
+                    for (let c = 0; c < nbCols; c++) {
+                        if (c !== colDes && c !== colUnite && countsNum[c] > 0) {
+                            colQte = c;
+                            break;
+                        }
+                    }
+                }
+
+                // Déterminer colPU
+                if (colPU === -1 && colQte !== -1) {
+                    for (let c = colQte + 1; c < nbCols; c++) {
+                        if (c !== colDes && c !== colUnite && countsNum[c] > 0) {
+                            colPU = c;
+                            break;
+                        }
+                    }
+                }
+
+                // Déterminer colLot
+                if (colLot === -1 && colDes > 0) {
+                    for (let c = 0; c < colDes; c++) {
+                        if (c !== colNum && c !== colUnite && c !== colQte) {
+                            colLot = c;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (colDes === -1) colDes = 0;
+
+            // 4. Extraction et reconstitution des articles BTP
+            const articles = [];
+            let chapCourant = isAlgerie ? "LOT 01 - GROS-OEUVRE & INFRASTRUCTURE" : "LOT 01 - DÉMOLITION & PRÉPARATION";
+            const startRow = (idxHeader !== -1 ? idxHeader + 1 : 0);
+
+            for (let r = startRow; r < lignesPropres.length; r++) {
+                const row = lignesPropres[r];
+
+                // Ignorer lignes d'en-tête résiduelles
+                if (row.some(c => /^(désignation|designation|ouvrage|totaux|total general|montant total|total ttc)/i.test(c))) {
+                    continue;
+                }
+
+                // Détecter si la ligne est un titre de LOT
+                const texteBrutLigne = row.join(' ').trim();
+                const matchLot = texteBrutLigne.match(/^(?:lot|chapitre|section|partie)\s*[:0-9A-Z\s-]{2,}/i);
+                if (matchLot && !row.some(c => regexUnit.test(c))) {
+                    chapCourant = texteBrutLigne.replace(/^[#*•\s-]+/, "").trim();
+                    continue;
+                }
+
+                let lotLigne = (colLot !== -1 && row[colLot]) ? row[colLot].trim() : chapCourant;
+                if (/^(lot|chapitre)/i.test(lotLigne)) chapCourant = lotLigne;
+
+                let des = (colDes !== -1 && row[colDes]) ? row[colDes].trim() : '';
+                if (!des) {
+                    let maxLen = 0;
+                    row.forEach((cell, c) => {
+                        if (c !== colUnite && c !== colQte && isNaN(parseFloat(cell.replace(',', '.'))) && cell.length > maxLen) {
+                            maxLen = cell.length;
+                            des = cell;
+                        }
+                    });
+                }
+
+                let unite = (colUnite !== -1 && row[colUnite]) ? row[colUnite].trim() : '';
+                if (!unite || !regexUnit.test(unite)) {
+                    for (let c = 0; c < row.length; c++) {
+                        if (c !== colDes && regexUnit.test(row[c])) {
+                            unite = row[c].trim();
+                            break;
+                        }
+                    }
+                }
+                unite = normaliserUniteBTP(unite);
+
+                let qte = 1;
+                if (colQte !== -1 && row[colQte]) {
+                    const parsedQte = parseFloat(row[colQte].replace(/\s/g, '').replace(',', '.'));
+                    if (!isNaN(parsedQte) && parsedQte > 0) qte = parsedQte;
+                } else {
+                    for (let c = 0; c < row.length; c++) {
+                        if (c !== colDes && c !== colUnite && c !== colNum) {
+                            const parsed = parseFloat(row[c].replace(/\s/g, '').replace(',', '.'));
+                            if (!isNaN(parsed) && parsed > 0) {
+                                qte = parsed;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                let pu = 0;
+                if (colPU !== -1 && row[colPU]) {
+                    const parsedPU = parseFloat(row[colPU].replace(/\s/g, '').replace(',', '.'));
+                    if (!isNaN(parsedPU) && parsedPU > 0) pu = parsedPU;
+                }
+                if (pu <= 0) {
+                    pu = isAlgerie ? estimerPrixUnitaireAlgerie(des, lotLigne) : estimerPrixUnitaireEurope(des, lotLigne);
+                }
+
+                des = des.replace(/^(?:article\s+)?\d{1,4}[\s.)\-\/]+/, "").trim();
+
+                if (des.length >= 2) {
+                    const estContinuation = (unite === 'm²' && qte === 1 && (!row[colUnite] || !regexUnit.test(row[colUnite])) && (!row[colQte] || isNaN(parseFloat(row[colQte]))) && articles.length > 0 && des.length > 5);
+                    if (estContinuation && articles.length > 0) {
+                        articles[articles.length - 1].designation += " " + des;
+                    } else {
+                        articles.push({
+                            id: articles.length + 1,
+                            chapitre: lotLigne || chapCourant,
+                            designation: des,
+                            unite: unite,
+                            qte: Math.round(qte * 100) / 100,
+                            pu: pu,
+                            tva: tvaDefaut
+                        });
+                    }
+                }
+            }
+
+            return articles;
+        }
+
         // Reconstituer les phrases complètes à partir du texte brut OCR ou du presse-papiers Excel
         function reconstituerPhrasesDevisBTPEurope(texte) {
             if (!texte || typeof texte !== "string") return null;
             const lignesBrutes = texte.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
             if (lignesBrutes.length === 0) return null;
 
-            const articles = [];
-            let chapActuel = "LOT 01 - DÉMOLITION & PRÉPARATION";
-
-            // 1. Détection format tabulé (Excel Web ou Bureau)
-            const lignesTabulees = lignesBrutes.filter(l => l.includes("\t") || l.split(";").length >= 3);
-            if (lignesTabulees.length >= 2) {
-                let idCounter = 1;
-                lignesBrutes.forEach(ligne => {
-                    const cols = (ligne.includes("\t") ? ligne.split("\t") : ligne.split(";")).map(c => c.trim());
-                    if (/^(n°|num|code|lot|designation|d[ée]signation|article|ouvrage)/i.test(cols[0]) || /^(designation|d[ée]signation|ouvrage)/i.test(cols[1])) {
-                        return;
-                    }
-                    if (cols.length === 1 && /^(lot|chapitre|section|partie)/i.test(cols[0])) {
-                        chapActuel = cols[0];
-                        return;
-                    }
-
-                    let lot = chapActuel;
-                    let des = "";
-                    let unite = "m²";
-                    let qte = 1;
-
-                    if (cols.length >= 5) {
-                        if (cols[1]) lot = cols[1];
-                        des = cols[2];
-                        unite = normaliserUniteBTP(cols[3]);
-                        qte = parseFloat(cols[4].replace(",", ".").replace(/\s/g, "")) || 1;
-                    } else if (cols.length === 4) {
-                        des = cols[1];
-                        unite = normaliserUniteBTP(cols[2]);
-                        qte = parseFloat(cols[3].replace(",", ".").replace(/\s/g, "")) || 1;
-                    } else if (cols.length === 3) {
-                        des = cols[0];
-                        unite = normaliserUniteBTP(cols[1]);
-                        qte = parseFloat(cols[2].replace(",", ".").replace(/\s/g, "")) || 1;
-                    } else if (cols.length >= 2) {
-                        des = cols[0];
-                        qte = parseFloat(cols[1].replace(",", ".").replace(/\s/g, "")) || 1;
-                    }
-
-                    if (des && des.length > 1) {
-                        des = des.replace(/^[-*•\d\.\s)]+/, "").trim();
-                        let pu = estimerPrixUnitaireEurope(des, lot);
-                        articles.push({
-                            id: idCounter++,
-                            chapitre: lot,
-                            designation: des,
-                            unite: unite,
-                            qte: Math.round(qte * 100) / 100,
-                            pu: pu,
-                            tva: 20
-                        });
-                    }
-                });
-                if (articles.length > 0) return articles;
+            // 1. Détection format tabulé ou point-virgule (Excel Web, bureau, CSV)
+            const lignesTabulees = lignesBrutes.filter(l => l.includes("\t") || l.split(";").length >= 2);
+            if (lignesTabulees.length >= 1) {
+                const matrice = lignesBrutes.map(l => (l.includes("\t") ? l.split("\t") : l.split(";")));
+                const articlesMatrice = analyserMatriceExcelVersArticles(matrice, 'EUR');
+                if (articlesMatrice && articlesMatrice.length > 0) {
+                    return articlesMatrice;
+                }
             }
 
             // 2. Parseur OCR avec reconstitution des phrases multi-lignes
@@ -2914,55 +3134,11 @@ LOT 01 - DÉMOLITION
         // PARSER UNIVERSEL DE TEXTE / TABLEAU COPIÉ
         function parserEtAppliquerTexteEurope(texte) {
             if (!texte || !texte.trim()) return;
-            const lignes = texte.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-            if (lignes.length === 0) return;
-
-            const nouveaux = [];
-            let chapCourant = "LOT 01 - TRAVAUX DIVERS";
-
-            lignes.forEach((lig, i) => {
-                if (/^(lot|chapitre|section|partie)/i.test(lig) || (lig.length < 40 && !/\d+[\s,.]\d+/.test(lig) && !/\t/.test(lig))) {
-                    chapCourant = lig.replace(/^[#*\s-]+/, "").trim();
-                    return;
-                }
-
-                let cols = lig.split(/\t/);
-                if (cols.length < 2) cols = lig.split(/ {2,}/);
-                if (cols.length < 2) cols = lig.split(/;/);
-
-                if (cols.length >= 2) {
-                    const des = cols[0].replace(/^[0-9]+[\s.)-]+/, "").trim();
-                    let u = "m²";
-                    let qte = 1;
-                    let pu = 45;
-
-                    for (let c = 1; c < cols.length; c++) {
-                        const val = cols[c].trim();
-                        if (/^(m²|m2|m³|m3|ml|u|ens|forfait|kg|t|l)$/i.test(val)) {
-                            u = val;
-                        } else {
-                            const num = parseFloat(val.replace(/\s/g, '').replace(',', '.'));
-                            if (!isNaN(num)) {
-                                if (qte === 1 && num < 1000) qte = num;
-                                else pu = num;
-                            }
-                        }
-                    }
-
-                    nouveaux.push({
-                        id: Date.now() + i,
-                        chapitre: chapCourant,
-                        designation: des || "Prestation BTP",
-                        unite: u,
-                        qte: qte,
-                        pu: pu,
-                        tva: 20
-                    });
-                }
-            });
-
-            if (nouveaux.length > 0) {
-                lignesDQE = nouveaux;
+            const articles = reconstituerPhrasesDevisBTPEurope(texte);
+            if (articles && articles.length > 0) {
+                lignesExcelInSitu = JSON.parse(JSON.stringify(articles));
+                rendreTableurExcelInSitu();
+                lignesDQE = JSON.parse(JSON.stringify(articles));
                 rendreTableauxEurope();
             }
         }
@@ -2976,29 +3152,57 @@ LOT 01 - DÉMOLITION
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonRows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
 
-                    if (!jsonRows || jsonRows.length === 0) {
-                        alert("Le fichier Excel sélectionné est vide.");
-                        return;
-                    }
+                    // Scanner toutes les feuilles pour sélectionner celle qui contient le plus de lignes utiles
+                    let sheetChoisie = null;
+                    let maxLignes = 0;
+                    let jsonRows = [];
 
-                    let texteLignes = [];
-                    jsonRows.forEach(row => {
-                        if (!row || !Array.isArray(row)) return;
-                        const cells = row.map(c => String(c).trim()).filter(c => c.length > 0);
-                        if (cells.length > 0) {
-                            texteLignes.push(cells.join('\t'));
+                    workbook.SheetNames.forEach(nomFeuille => {
+                        const feuille = workbook.Sheets[nomFeuille];
+                        if (feuille) {
+                            const rows = XLSX.utils.sheet_to_json(feuille, { header: 1, defval: '' });
+                            const nonVides = rows.filter(r => Array.isArray(r) && r.some(c => String(c).trim().length > 0));
+                            if (nonVides.length > maxLignes) {
+                                maxLignes = nonVides.length;
+                                sheetChoisie = feuille;
+                                jsonRows = rows;
+                            }
                         }
                     });
 
-                    parserEtAppliquerTexteEurope(texteLignes.join('\n'));
-                    naviguerVersEtape(4);
-                    basculerOngletEurope('chiffre');
-                    alert(`✅ Succès ! Votre fichier Excel "${file.name}" a été importé et chiffré en Euros (€).\nConsultez le Devis Numérisé et le Devis Chiffré à l'Étape 4.`);
+                    if (!jsonRows || jsonRows.length === 0 || maxLignes === 0) {
+                        alert("Le fichier Excel sélectionné est vide ou ne contient aucune donnée de devis.");
+                        return;
+                    }
+
+                    const articles = analyserMatriceExcelVersArticles(jsonRows, 'EUR');
+                    if (!articles || articles.length === 0) {
+                        alert("Impossible d'extraire des lignes de devis BTP depuis ce fichier Excel. Vérifiez que votre tableau contient une colonne désignation et une colonne unité/quantité.");
+                        return;
+                    }
+
+                    // Alimenter immédiatement le Tableur In Situ avec toutes les phrases complètes et colonnes
+                    lignesExcelInSitu = JSON.parse(JSON.stringify(articles));
+                    rendreTableurExcelInSitu();
+
+                    // Alimenter aussi le DQE et les bordereaux de l'étape 4
+                    lignesDQE = JSON.parse(JSON.stringify(articles));
+                    rendreTableauxEurope();
+
+                    // Défiler vers le Tableur In Situ pour que l'utilisateur voie son tableau plein et prêt !
+                    const tableurEl = document.getElementById("tableurExcelInSituContainer");
+                    if (tableurEl) {
+                        tableurEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+
+                    alert(`✅ Succès ! ${articles.length} articles BTP ont été fidèlement extraits de votre fichier Excel "${file.name}".\n\nToutes les phrases complètes, unités et quantités sont affichées dans votre Tableur In Situ ci-dessous. Vous pouvez les vérifier et les modifier avant d'appliquer les prix !`);
+
                 } catch(err) {
+                    console.error("Erreur import Excel:", err);
                     alert("Erreur lors de la lecture du fichier Excel : " + err.message);
+                } finally {
+                    try { event.target.value = ""; } catch(e){}
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -3031,10 +3235,22 @@ LOT 01 - DÉMOLITION
                 alert("Veuillez coller le texte ou le tableau de votre devis.");
                 return;
             }
-            parserEtAppliquerTexteEurope(txt);
-            naviguerVersEtape(4);
-            basculerOngletEurope('chiffre');
-            alert("✅ Succès ! Votre devis a été fidèlement numérisé et chiffré en Euros (€).\nConsultez le Devis Numérisé et le Devis Chiffré à l'Étape 4.");
+            const articles = reconstituerPhrasesDevisBTPEurope(txt);
+            if (!articles || articles.length === 0) {
+                alert("Impossible de reconnaître les lignes du devis collé. Assurez-vous d'avoir copié le tableau depuis Excel.");
+                return;
+            }
+            lignesExcelInSitu = JSON.parse(JSON.stringify(articles));
+            rendreTableurExcelInSitu();
+            lignesDQE = JSON.parse(JSON.stringify(articles));
+            rendreTableauxEurope();
+
+            const tableurEl = document.getElementById("tableurExcelInSituContainer");
+            if (tableurEl) {
+                tableurEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            alert(`✅ Succès ! ${articles.length} articles BTP ont été fidèlement numérisés depuis votre presse-papiers Excel.\n\nConsultez et vérifiez vos articles dans le Tableur In Situ ci-dessous.`);
         }
 
         function insererExempleCopierCollerEurope() {
