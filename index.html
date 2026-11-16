@@ -462,6 +462,81 @@
             filter: contrast(140%) brightness(105%) grayscale(25%);
         }
 
+        /* ASSISTANCE VISUELLE DOUBLE ÉCRAN (PHOTO & TABLEUR CÔTE-À-CÔTE) */
+        .split-photo-tableur {
+            display: grid;
+            gap: 16px;
+            margin-top: 12px;
+            transition: all 0.25s ease;
+        }
+        .split-photo-tableur.mode-split {
+            grid-template-columns: minmax(360px, 1fr) minmax(420px, 1.15fr);
+            align-items: stretch;
+        }
+        @media (max-width: 1024px) {
+            .split-photo-tableur.mode-split {
+                grid-template-columns: 1fr;
+            }
+        }
+        .split-photo-tableur.mode-stack {
+            grid-template-columns: 1fr;
+        }
+        .split-photo-tableur.mode-photo .split-col-tableur {
+            display: none !important;
+        }
+        .split-photo-tableur.mode-photo .split-col-photo {
+            grid-column: 1 / -1;
+        }
+        .split-photo-tableur.mode-tableur .split-col-photo {
+            display: none !important;
+        }
+        .split-photo-tableur.mode-tableur .split-col-tableur {
+            grid-column: 1 / -1;
+        }
+        .split-photo-tableur.mode-split .viewer-doc-container,
+        .split-photo-tableur.mode-split #tableurExcelInSituContainer {
+            height: 650px;
+            display: flex;
+            flex-direction: column;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+        .split-photo-tableur.mode-split .doc-viewport {
+            flex: 1;
+            height: auto !important;
+            min-height: 480px;
+        }
+        .split-photo-tableur.mode-split #tableurExcelInSituContainer .table-responsive {
+            flex: 1;
+            max-height: none !important;
+            height: auto;
+        }
+        .btn-mode-vue {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .btn-mode-vue:hover {
+            background: #e2e8f0;
+            color: #1e3a8a;
+        }
+        .btn-mode-vue.active {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #3b82f6;
+            font-weight: 800;
+            box-shadow: 0 2px 5px rgba(59,130,246,0.2);
+        }
+
         /* MODALES */
         .modal-overlay {
             position: fixed;
@@ -1161,180 +1236,208 @@ LOT 01 - TERRASSEMENTS
                 <!-- PANNEAU 4 : PHOTOS & SCANS A4 AVEC VISUALISATEUR HD, FILTRE CAMSCANNER & CHIFFRAGE IA -->
                 <div id="panneauModePhotoAlgerie" style="display: none;">
                     <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
+                        <!-- En-tête du Mode Photo / Double Écran -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                             <div>
-                                <div style="font-weight: 800; color: #1e3a8a; font-size: 1.05rem;">
-                                    📸 Photos Smartphone, Scans A4 & Chiffrage Intelligent BTP Algérie
+                                <div style="font-weight: 800; color: #1e3a8a; font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">
+                                    <span>📸</span> <span>Mode Double Écran (Assistance Visuelle) : Photo & Tableur Côte-à-Côte</span>
                                 </div>
                                 <div style="font-size: 0.82rem; color: #475569; margin-top: 2px;">
-                                    Visualisez le document scanné, appliquez le filtre de netteté CamScanner et lancez l'extraction automatique des lignes et prix en Dinars (DZD).
+                                    Visualisez votre devis photo ou scan en haute définition à gauche, pendant que vous contrôlez et modifiez chaque article dans le tableur in situ à droite.
                                 </div>
                             </div>
                             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                <button type="button" onclick="document.getElementById('inputPhotoDevisAlgerie').click()" style="background: #2563eb; color: white; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 0.80rem; cursor: pointer;">
-                                    📷 Choisir une Photo / Scan
+                                <button type="button" onclick="document.getElementById('inputPhotoDevisAlgerie').click()" style="background: #2563eb; color: white; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 0.80rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                    <span>📷</span> <span>Choisir une Photo / Scan</span>
                                 </button>
-                                <button type="button" onclick="chargerExempleDevisScanneA4()" style="background: #059669; color: white; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 0.80rem; cursor: pointer;">
-                                    📄 Charger Devis Exemple Scanné A4 (Démo 1 Clic)
+                                <button type="button" onclick="chargerExempleDevisScanneA4()" style="background: #059669; color: white; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 800; font-size: 0.80rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                    <span>📄</span> <span>Charger Devis Démo A4 (1 Clic)</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Sélecteur Corps d'état & Générateur de Prompt IA -->
-                        <div style="background: white; border: 1px solid #93c5fd; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
-                                <label style="font-size: 0.80rem; font-weight: 800; color: #1e3a8a;">
-                                    🏷️ Sélectionnez le Corps d'état pour le Chiffrage IA :
-                                </label>
-                                <select id="selectSecteurBTPAlgerie" class="form-control" style="width: auto; padding: 4px 10px; font-size: 0.80rem; font-weight: 700;" onchange="actualiserPromptSecteurBTPAlgerie()">
+                        <!-- Barre de sélection des dispositions & actions rapides -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; background: white; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <span style="font-weight: 800; font-size: 0.82rem; color: #1e3a8a; margin-right: 4px;">🖥️ Disposition :</span>
+                                <button type="button" class="btn-mode-vue active" id="btnVueSplit" onclick="changerDispositionDoubleEcran('split')" title="Photo à gauche, Tableur à droite (Assistance Visuelle Recommandée)">
+                                    <span>🖥️ Côte-à-Côte (Double Écran)</span>
+                                </button>
+                                <button type="button" class="btn-mode-vue" id="btnVueStack" onclick="changerDispositionDoubleEcran('stack')" title="Photo en haut, Tableur en bas">
+                                    <span>↕️ Empilé (Haut / Bas)</span>
+                                </button>
+                                <button type="button" class="btn-mode-vue" id="btnVuePhoto" onclick="changerDispositionDoubleEcran('photo')" title="Plein écran sur la photo">
+                                    <span>🔍 Focus Photo</span>
+                                </button>
+                                <button type="button" class="btn-mode-vue" id="btnVueTableur" onclick="changerDispositionDoubleEcran('tableur')" title="Plein écran sur le tableur">
+                                    <span>📊 Focus Tableur</span>
+                                </button>
+                            </div>
+                            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                <button type="button" onclick="viderTableurExcelInSitu()" style="background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; padding: 5px 10px; border-radius: 6px; font-weight: 700; font-size: 0.76rem; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Vider le tableur pour saisir un nouveau devis vierge">
+                                    <span>🗑️</span> <span>Vider (Nouveau)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Assistant Optionnel Prompt IA & Secteurs BTP -->
+                        <details style="margin-bottom: 12px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                            <summary style="font-size: 0.80rem; font-weight: 800; color: #1e3a8a; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                                <span>✨ Assistant IA Prompt Mobile & Secteurs BTP (Optionnel)</span>
+                                <span style="font-size: 0.72rem; color: #64748b;">Cliquer pour ouvrir / fermer</span>
+                            </summary>
+                            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <label style="font-size: 0.78rem; font-weight: 700; color: #334155;">Corps d'état :</label>
+                                <select id="selectSecteurBTPAlgerie" class="form-control" style="width: auto; padding: 3px 8px; font-size: 0.78rem; font-weight: 700;" onchange="actualiserPromptSecteurBTPAlgerie()">
                                     <option value="gros_oeuvre">Gros Œuvre & Maçonnerie</option>
                                     <option value="plomberie">Plomberie & Chauffage</option>
                                     <option value="electricite">Électricité & Courants Faibles</option>
                                     <option value="finitions">Revêtements & Finitions (Carrelage, Peinture)</option>
                                     <option value="tous" selected>Tous Corps d'État (TCE)</option>
                                 </select>
-                            </div>
-                            <textarea id="textareaPromptIAAlgerie" rows="2" class="form-control" style="width: 100%; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace;" readonly></textarea>
-                            <div style="margin-top: 6px; text-align: right;">
-                                <button type="button" onclick="copierPromptIAAlgerie()" style="background: #2563eb; color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; cursor: pointer;">
-                                    📋 Copier le Prompt IA pour Mobile
+                                <button type="button" onclick="copierPromptIAAlgerie()" style="background: #2563eb; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">
+                                    📋 Copier Prompt IA
                                 </button>
                             </div>
-                        </div>
+                            <textarea id="textareaPromptIAAlgerie" rows="2" class="form-control" style="width: 100%; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; margin-top: 6px;" readonly></textarea>
+                        </details>
 
-                        <!-- VISUALISATEUR DU DOCUMENT NUMÉRISÉ HD AVEC ZOOM & FILTRE CAMSCANNER -->
-                        <div class="viewer-doc-container" id="visualisateurDocContainer">
-                            <div class="zoom-toolbar">
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <span style="font-size: 1.1rem;">📄</span>
-                                    <span id="nomFichierDocCharge" style="font-weight: 800; font-size: 0.82rem; color: #f8fafc;">Document : Aucun scan chargé</span>
-                                    <span id="badgeStatutDocScan" style="font-size: 0.70rem; background: #64748b; color: white; padding: 2px 8px; border-radius: 10px; font-weight: 800;">En attente</span>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                    <button type="button" class="zoom-btn" onclick="zoomerDoc(1.2)" title="Zoomer">🔍 +</button>
-                                    <button type="button" class="zoom-btn" onclick="zoomerDoc(0.8)" title="Dézoomer">🔍 -</button>
-                                    <button type="button" class="zoom-btn" onclick="reinitialiserZoomDoc()" title="Taille normale">100%</button>
-                                    <button type="button" class="zoom-btn" id="btnFiltreCamScanner" onclick="basculerFiltreCamScanner()" style="border-color: #059669; color: #6ee7b7;" title="Filtre CamScanner haute netteté">
-                                        ⚡ Filtre CamScanner
-                                    </button>
-                                    <button type="button" class="zoom-btn" onclick="lancerExtractionManuellePhoto()" style="background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; font-weight: 900; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
-                                        ⚡ Numériser & Chiffrer ce Devis ➔
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="doc-viewport">
-                                <div class="doc-paper-wrapper" id="docPaperWrapper">
-                                    <div class="laser-scanner" id="laserScannerAlgerie"></div>
-                                    <img id="docImageApercu" class="doc-full-img" alt="Aperçu du Devis Numérisé" style="display: none;">
-                                    <div id="placeholderDocVide" style="width: 550px; height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; color: #94a3b8; border: 2px dashed #334155; border-radius: 8px; text-align: center; padding: 20px;">
-                                        <div style="font-size: 2.8rem; margin-bottom: 8px;">📸</div>
-                                        <div style="font-weight: 800; color: #f8fafc; font-size: 0.95rem; margin-bottom: 4px;">Aucun document scanné chargé</div>
-                                        <div style="font-size: 0.78rem; max-width: 400px; line-height: 1.5; margin-bottom: 14px;">Prenez en photo votre devis papier ou cliquez sur le bouton vert ci-dessous pour tester avec un vrai devis scanné.</div>
-                                        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-                                            <button type="button" onclick="document.getElementById('inputPhotoDevisAlgerie').click()" style="background: #2563eb; color: white; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 800; font-size: 0.80rem; cursor: pointer;">
-                                                📷 Choisir une Photo / Scan
-                                            </button>
-                                            <button type="button" onclick="chargerExempleDevisScanneA4()" style="background: #059669; color: white; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 800; font-size: 0.80rem; cursor: pointer;">
-                                                📄 Charger Exemple Réel Scanné A4 (Démo 1 Clic)
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Barre de progression scan optique -->
-                            <div id="barreProgressionScan" style="display: none; background: #0f172a; padding: 8px 16px; border-top: 1px solid #334155;">
-                                <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#93c5fd; margin-bottom:4px; font-weight:700;">
-                                    <span id="texteProgressionScan">🔍 Détection des lignes, métrés et calcul BPU DZD...</span>
-                                    <span id="pourcentProgressionScan">40%</span>
-                                </div>
-                                <div style="background: #334155; border-radius: 6px; height: 6px; overflow: hidden;">
-                                    <div id="jaugeProgressionScan" style="background: linear-gradient(90deg, #3b82f6, #10b981); width: 40%; height: 100%; transition: width 0.3s ease;"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Input File Invisible -->
+                        <!-- Input File Invisible pour Photo et Excel -->
                         <input type="file" id="inputPhotoDevisAlgerie" accept="image/*, application/pdf" style="display: none;" onchange="traiterPhotoSelectionneeAlgerie(event)">
+                        <input type="file" id="inputExcelDirectInSituAlgerie" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importerFichierExcelAlgerie(event)">
 
                         <!-- ============================================================ -->
-                        <!-- TABLEUR EXCEL IN SITU : VÉRIFICATION & ÉDITION AVANT CHIFFRAGE -->
+                        <!-- CONTENEUR SPLIT-SCREEN DOUBLE ÉCRAN (PHOTO GAUCHE / TABLEUR DROITE) -->
                         <!-- ============================================================ -->
-                        <div id="tableurExcelInSituContainer" style="margin-top: 18px; border: 2px solid #107c41; border-radius: 12px; background: white; overflow: hidden; box-shadow: 0 4px 20px rgba(16,124,65,0.15);">
-                            <!-- Ruban / En-tête Excel Officiel Vert -->
-                            <div style="background: linear-gradient(135deg, #107c41 0%, #185abd 100%); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="width: 34px; height: 34px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 900; color: #107c41; box-shadow: 0 2px 6px rgba(0,0,0,0.25);">
-                                        X
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 900; font-size: 1.05rem; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px;">
-                                            <span>Tableur Devis Excel In Situ</span>
-                                            <span style="font-size: 0.68rem; background: #22c55e; color: #064e3b; padding: 2px 7px; border-radius: 10px; font-weight: 800;">100% Modifiable avant Chiffrage</span>
+                        <div id="splitPhotoTableurContainer" class="split-photo-tableur mode-split">
+                            <!-- 1. COLONNE GAUCHE : VISUALISATEUR DU DOCUMENT PHOTO HD -->
+                            <div class="split-col-photo">
+                                <div class="viewer-doc-container" id="visualisateurDocContainer">
+                                    <div class="zoom-toolbar">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <span style="font-size: 1.1rem;">📄</span>
+                                            <span id="nomFichierDocCharge" style="font-weight: 800; font-size: 0.78rem; color: #f8fafc; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Document : Aucun scan</span>
+                                            <span id="badgeStatutDocScan" style="font-size: 0.68rem; background: #64748b; color: white; padding: 2px 7px; border-radius: 10px; font-weight: 800;">En attente</span>
                                         </div>
-                                        <div style="font-size: 0.76rem; color: #dcfce7;">
-                                            Transcription de votre photo en phrases complètes. Vérifiez et modifiez chaque cellule librement ici avant d'appliquer les prix.
+                                        <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+                                            <button type="button" class="zoom-btn" onclick="zoomerDoc(1.2)" title="Zoomer">🔍 +</button>
+                                            <button type="button" class="zoom-btn" onclick="zoomerDoc(0.8)" title="Dézoomer">🔍 -</button>
+                                            <button type="button" class="zoom-btn" onclick="reinitialiserZoomDoc()" title="Taille normale">100%</button>
+                                            <button type="button" class="zoom-btn" onclick="pivoterDoc(90)" title="Faire pivoter la photo de 90° dans le sens horaire">🔄 Pivoter</button>
+                                            <button type="button" class="zoom-btn" id="btnFiltreCamScanner" onclick="basculerFiltreCamScanner()" style="border-color: #059669; color: #6ee7b7;" title="Filtre CamScanner haute netteté">⚡ CamScanner</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="doc-viewport">
+                                        <div class="doc-paper-wrapper" id="docPaperWrapper">
+                                            <div class="laser-scanner" id="laserScannerAlgerie"></div>
+                                            <img id="docImageApercu" class="doc-full-img" alt="Aperçu du Devis Numérisé" style="display: none;">
+                                            <div id="placeholderDocVide" style="width: 100%; min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; color: #94a3b8; border: 2px dashed #334155; border-radius: 8px; text-align: center; padding: 20px;">
+                                                <div style="font-size: 2.8rem; margin-bottom: 8px;">📸</div>
+                                                <div style="font-weight: 800; color: #f8fafc; font-size: 0.95rem; margin-bottom: 4px;">Assistance Visuelle : Chargez votre Photo</div>
+                                                <div style="font-size: 0.78rem; max-width: 320px; line-height: 1.5; margin-bottom: 14px;">Prenez en photo votre devis papier. Il s'affichera ici en haute définition pendant que vous vérifiez vos postes dans le tableur à droite.</div>
+                                                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                                                    <button type="button" onclick="document.getElementById('inputPhotoDevisAlgerie').click()" style="background: #2563eb; color: white; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 800; font-size: 0.80rem; cursor: pointer;">
+                                                        📷 Choisir une Photo / Scan
+                                                    </button>
+                                                    <button type="button" onclick="chargerExempleDevisScanneA4()" style="background: #059669; color: white; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 800; font-size: 0.80rem; cursor: pointer;">
+                                                        📄 Démo A4
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Barre de progression scan optique -->
+                                    <div id="barreProgressionScan" style="display: none; background: #0f172a; padding: 8px 16px; border-top: 1px solid #334155;">
+                                        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#93c5fd; margin-bottom:4px; font-weight:700;">
+                                            <span id="texteProgressionScan">🔍 Détection des lignes et calcul BPU DZD...</span>
+                                            <span id="pourcentProgressionScan">40%</span>
+                                        </div>
+                                        <div style="background: #334155; border-radius: 6px; height: 6px; overflow: hidden;">
+                                            <div id="jaugeProgressionScan" style="background: linear-gradient(90deg, #3b82f6, #10b981); width: 40%; height: 100%; transition: width 0.3s ease;"></div>
                                         </div>
                                     </div>
                                 </div>
-                                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                                    <button type="button" class="btn" onclick="document.getElementById('inputExcelDirectInSituAlgerie').click()" style="background: #ffffff; color: #107c41; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.76rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);" title="Ouvrir directement un fichier Excel (.xlsx, .xls, .csv)">
-                                        <span>📂</span> <span>Ouvrir Fichier Excel (.xlsx)</span>
-                                    </button>
-                                    <input type="file" id="inputExcelDirectInSituAlgerie" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importerFichierExcelAlgerie(event)">
-                                    <button type="button" class="btn" onclick="ouvrirModalRaccordementExcelWeb()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Ouvrir la passerelle avec Excel sur le Web (Compte Microsoft Gratuit)">
-                                        <span>🌐</span> <span>Excel Web (Gratuit)</span>
-                                    </button>
-                                    <button type="button" class="btn" onclick="exporterExcelInSitu()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; cursor: pointer;" title="Télécharger le fichier .xlsx direct">
-                                        📥 .XLSX
-                                    </button>
-                                    <button type="button" class="btn" onclick="copierTableauExcelInSitu()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; cursor: pointer;" title="Copier pour coller dans Excel Web (Ctrl+C / Ctrl+V)">
-                                        📋 Copier
-                                    </button>
-                                    <button type="button" class="btn" onclick="ajouterLigneExcelInSitu()" style="background: #22c55e; color: #064e3b; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-weight: 800; cursor: pointer;">
-                                        ➕ + Ligne
-                                    </button>
-                                </div>
                             </div>
 
-                            <!-- Barre de Formule Excel (fx) pour lire & éditer les phrases complètes sans les tronquer -->
-                            <div style="background: #f8fafc; border-bottom: 1.5px solid #cbd5e1; padding: 6px 14px; display: flex; align-items: center; gap: 8px;">
-                                <div id="excelActiveCellLabel" style="width: 55px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 6px; text-align: center; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #1e3a8a;">
-                                    C1
-                                </div>
-                                <span style="font-weight: 900; font-family: 'JetBrains Mono', monospace; color: #64748b; font-size: 0.95rem;">fx</span>
-                                <input type="text" id="excelFormulaBarInput" class="form-control" placeholder="Sélectionnez une cellule ou tapez votre phrase complète BTP ici..." style="flex: 1; font-size: 0.82rem; padding: 5px 8px; border: 1px solid #cbd5e1; background: white;" oninput="synchroFormulaBarVersCellule()">
-                            </div>
+                            <!-- 2. COLONNE DROITE : TABLEUR EXCEL IN SITU (ÉDITION & VÉRIFICATION) -->
+                            <div class="split-col-tableur">
+                                <div id="tableurExcelInSituContainer" style="border: 2px solid #107c41; border-radius: 12px; background: white; overflow: hidden; box-shadow: 0 4px 20px rgba(16,124,65,0.15);">
+                                    <!-- Ruban Vert Excel -->
+                                    <div style="background: linear-gradient(135deg, #107c41 0%, #185abd 100%); color: white; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 30px; height: 30px; background: white; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 900; color: #107c41; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                                                X
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 900; font-size: 0.98rem; letter-spacing: 0.2px; display: flex; align-items: center; gap: 6px;">
+                                                    <span>Tableur In Situ</span>
+                                                    <span style="font-size: 0.65rem; background: #22c55e; color: #064e3b; padding: 1px 6px; border-radius: 8px; font-weight: 800;">Édition Directe</span>
+                                                </div>
+                                                <div style="font-size: 0.72rem; color: #dcfce7;">
+                                                    Contrôlez vos articles en direct avec la photo à côté
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
+                                            <button type="button" class="btn" onclick="ajouterLigneExcelInSitu()" style="background: #22c55e; color: #064e3b; border: none; padding: 5px 9px; border-radius: 6px; font-size: 0.76rem; font-weight: 800; cursor: pointer;" title="Ajouter une ligne au tableau">
+                                                ➕ + Ligne
+                                            </button>
+                                            <button type="button" class="btn" onclick="viderTableurExcelInSitu()" style="background: #ef4444; color: white; border: none; padding: 5px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; cursor: pointer;" title="Vider le tableau pour saisir un nouveau devis">
+                                                🗑️ Vider
+                                            </button>
+                                            <button type="button" class="btn" onclick="document.getElementById('inputExcelDirectInSituAlgerie').click()" style="background: #ffffff; color: #107c41; border: none; padding: 5px 9px; border-radius: 6px; font-size: 0.76rem; font-weight: 800; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.15);" title="Ouvrir directement un fichier Excel (.xlsx, .xls, .csv)">
+                                                <span>📂</span> <span>.xlsx</span>
+                                            </button>
+                                            <button type="button" class="btn" onclick="collerDepuisPressePapierDansExcelInSitu()" style="background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 5px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; cursor: pointer;" title="Coller du texte ou tableau copié (Ctrl+V)">
+                                                📋 Coller
+                                            </button>
+                                            <button type="button" class="btn" onclick="ouvrirModalRaccordementExcelWeb()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 5px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; cursor: pointer;" title="Passerelle Excel Web Gratuit">
+                                                🌐 Web
+                                            </button>
+                                            <button type="button" class="btn" onclick="exporterExcelInSitu()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 5px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; cursor: pointer;" title="Télécharger le fichier .xlsx">
+                                                📥 Export
+                                            </button>
+                                        </div>
+                                    </div>
 
-                            <!-- Grille du Tableur Excel In Situ -->
-                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin: 0;">
-                                <table class="excel-insitu-table" style="margin: 0;">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 50px;" class="excel-col-letter">A (N°)</th>
-                                            <th style="width: 180px;">B (Lot / Chapitre)</th>
-                                            <th style="text-align: left;">C (Désignation des Ouvrages BTP — Phrase Complète)</th>
-                                            <th style="width: 80px; text-align: center;">D (Unité)</th>
-                                            <th style="width: 95px; text-align: right;">E (Quantité)</th>
-                                            <th style="width: 45px; text-align: center;" class="excel-col-letter">Act.</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbodyExcelInSitu"></tbody>
-                                </table>
-                            </div>
+                                    <!-- Barre de Formule Excel (fx) -->
+                                    <div style="background: #f8fafc; border-bottom: 1.5px solid #cbd5e1; padding: 5px 12px; display: flex; align-items: center; gap: 8px;">
+                                        <div id="excelActiveCellLabel" style="width: 50px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; text-align: center; font-weight: 800; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: #1e3a8a;">
+                                            C1
+                                        </div>
+                                        <span style="font-weight: 900; font-family: 'JetBrains Mono', monospace; color: #64748b; font-size: 0.90rem;">fx</span>
+                                        <input type="text" id="excelFormulaBarInput" class="form-control" placeholder="Sélectionnez une cellule ou tapez votre phrase complète BTP ici..." style="flex: 1; font-size: 0.80rem; padding: 4px 8px; border: 1px solid #cbd5e1; background: white;" oninput="synchroFormulaBarVersCellule()">
+                                    </div>
 
-                            <!-- Barre inférieure avec statut et bouton de validation / chiffrage -->
-                            <div style="background: #f8fafc; border-top: 1.5px solid #cbd5e1; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size: 0.76rem; background: #e2e8f0; color: #334155; padding: 3px 8px; border-radius: 4px; font-weight: 800; font-family: 'JetBrains Mono', monospace;">
-                                        Feuille 1 : Devis_InSitu
-                                    </span>
-                                    <span id="badgeLignesExcelInSitu" style="font-size: 0.78rem; color: #64748b; font-weight: 700;">18 lignes vérifiées</span>
+                                    <!-- Grille du Tableur Excel In Situ -->
+                                    <div class="table-responsive" style="margin: 0; overflow-y: auto;">
+                                        <table class="excel-insitu-table" style="margin: 0;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 45px;" class="excel-col-letter">A (N°)</th>
+                                                    <th style="width: 150px;">B (Lot)</th>
+                                                    <th style="text-align: left;">C (Désignation des Ouvrages BTP — Phrase Complète)</th>
+                                                    <th style="width: 70px; text-align: center;">D (Unité)</th>
+                                                    <th style="width: 85px; text-align: right;">E (Qté)</th>
+                                                    <th style="width: 40px; text-align: center;" class="excel-col-letter">Act.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyExcelInSitu"></tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Barre inférieure avec statut et bouton de validation / chiffrage -->
+                                    <div style="background: #f8fafc; border-top: 1.5px solid #cbd5e1; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span id="badgeLignesExcelInSitu" style="font-size: 0.76rem; color: #15803d; font-weight: 800; background: #dcfce7; padding: 2px 8px; border-radius: 10px;">18 lignes vérifiées</span>
+                                        </div>
+                                        <button type="button" class="btn" onclick="validerEtChiffrerDepuisExcelInSitu()" style="background: linear-gradient(135deg, #107c41 0%, #059669 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.90rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(16,124,65,0.35); display: flex; align-items: center; gap: 8px;">
+                                            <span>⚡</span> <span>Valider ce Devis & Lancer le Chiffrage BPU Automatique (Prix DZD) ➔</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <button type="button" class="btn" onclick="validerEtChiffrerDepuisExcelInSitu()" style="background: linear-gradient(135deg, #107c41 0%, #059669 100%); color: white; border: none; padding: 11px 24px; border-radius: 8px; font-size: 0.92rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 14px rgba(16,124,65,0.35); display: flex; align-items: center; gap: 8px;">
-                                    <span>⚡</span> <span>Valider ce Devis Excel & Lancer le Chiffrage BPU Automatique (Prix DZD) ➔</span>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -3313,6 +3416,8 @@ LOT 01 - TERRASSEMENTS
         let lignesDQE = JSON.parse(JSON.stringify(DIX_HUIT_ARTICLES_ALGERIE));
         let modeOngletAlgerie = 'numerise'; // Défaut sur 'numerise' pour voir le Devis Numérisé en premier
         let zoomActuelDoc = 1.0;
+        let rotationActuelleDoc = 0;
+        let dispositionDoubleEcran = 'split';
         let filtreCamScannerActif = false;
         let dernierFichierPhotoDataUrl = null;
 
@@ -3870,17 +3975,22 @@ LOT 01 - TERRASSEMENTS
 
         function ajouterLigneExcelInSitu() {
             const nouveauId = lignesExcelInSitu.length + 1;
+            const dernierChapitre = (lignesExcelInSitu.length > 0 && lignesExcelInSitu[lignesExcelInSitu.length - 1].chapitre) ? lignesExcelInSitu[lignesExcelInSitu.length - 1].chapitre : "LOT 01 - GROS-OEUVRE";
             lignesExcelInSitu.push({
                 id: nouveauId,
-                chapitre: "LOT 01 - GROS-OEUVRE",
-                designation: "Nouvelle prestation BTP (saisir désignation complète)",
+                chapitre: dernierChapitre,
+                designation: "",
                 unite: "m²",
                 qte: 1,
-                pu: 2500,
+                pu: 0,
                 tva: 19
             });
             rendreTableurExcelInSitu();
-            selectionnerCelluleExcel(`C${nouveauId}`, "Nouvelle prestation BTP (saisir désignation complète)", nouveauId - 1, "designation");
+            selectionnerCelluleExcel(`C${nouveauId}`, "", nouveauId - 1, "designation");
+            setTimeout(() => {
+                const formula = document.getElementById("excelFormulaBarInput");
+                if (formula) formula.focus();
+            }, 60);
         }
 
         function supprimerLigneExcelInSitu(idx) {
@@ -3950,6 +4060,7 @@ LOT 01 - TERRASSEMENTS
             });
 
             rendreTableauxAlgerie();
+            if (typeof actualiserCompteursArticles === "function") actualiserCompteursArticles();
             naviguerVersEtape(4);
             basculerOngletAlgerie('numerise');
 
@@ -4358,16 +4469,58 @@ LOT 01 - TERRASSEMENTS
             reinitialiserZoomDoc();
         }
 
-        function zoomerDoc(facteur) {
-            zoomActuelDoc = Math.min(3.0, Math.max(0.5, zoomActuelDoc * facteur));
+        function appliquerTransformationDoc() {
             const wrapper = document.getElementById("docPaperWrapper");
-            if (wrapper) wrapper.style.transform = `scale(${zoomActuelDoc})`;
+            if (wrapper) {
+                wrapper.style.transform = `scale(${zoomActuelDoc}) rotate(${rotationActuelleDoc}deg)`;
+            }
+        }
+
+        function zoomerDoc(facteur) {
+            zoomActuelDoc = Math.min(3.5, Math.max(0.3, zoomActuelDoc * facteur));
+            appliquerTransformationDoc();
         }
 
         function reinitialiserZoomDoc() {
             zoomActuelDoc = 1.0;
-            const wrapper = document.getElementById("docPaperWrapper");
-            if (wrapper) wrapper.style.transform = "scale(1.0)";
+            rotationActuelleDoc = 0;
+            appliquerTransformationDoc();
+        }
+
+        function pivoterDoc(angle = 90) {
+            rotationActuelleDoc = (rotationActuelleDoc + angle) % 360;
+            appliquerTransformationDoc();
+        }
+
+        function changerDispositionDoubleEcran(mode) {
+            dispositionDoubleEcran = mode;
+            const container = document.getElementById("splitPhotoTableurContainer");
+            if (!container) return;
+            container.className = `split-photo-tableur mode-${mode}`;
+
+            const boutons = [
+                { id: 'btnVueSplit', mode: 'split' },
+                { id: 'btnVueStack', mode: 'stack' },
+                { id: 'btnVuePhoto', mode: 'photo' },
+                { id: 'btnVueTableur', mode: 'tableur' }
+            ];
+            boutons.forEach(b => {
+                const el = document.getElementById(b.id);
+                if (el) {
+                    if (b.mode === mode) el.classList.add('active');
+                    else el.classList.remove('active');
+                }
+            });
+        }
+
+        function viderTableurExcelInSitu() {
+            if (!lignesExcelInSitu || lignesExcelInSitu.length === 0) return;
+            if (confirm("🗑️ Démarrer une saisie vierge ?\n\nCette action vide le tableur in situ pour vous permettre de reporter ou saisir vos propres articles avec votre photo sous les yeux.")) {
+                lignesExcelInSitu = [];
+                rendreTableurExcelInSitu();
+                lignesDQE = [];
+                rendreTableauxAlgerie();
+            }
         }
 
         function basculerFiltreCamScanner() {
@@ -4463,6 +4616,7 @@ LOT 01 - TERRASSEMENTS
             rendreTableurExcelInSitu();
             lignesDQE = JSON.parse(JSON.stringify(DIX_HUIT_ARTICLES_ALGERIE));
             rendreTableauxAlgerie();
+            changerDispositionDoubleEcran('split');
 
             // Animation laser HD
             const laser = document.getElementById("laserScannerAlgerie");
@@ -4559,35 +4713,42 @@ LOT 01 - TERRASSEMENTS
                     }
                 }
 
-                // NIVEAU 3 : Repli intelligent sur la base 18 articles BPU
-                if (!articlesExtraits || articlesExtraits.length === 0) {
-                    articlesExtraits = DIX_HUIT_ARTICLES_ALGERIE;
+                let extractionReussie = false;
+                if (articlesExtraits && articlesExtraits.length > 0) {
+                    extractionReussie = true;
+                    lignesExcelInSitu = JSON.parse(JSON.stringify(articlesExtraits));
+                } else {
+                    if (!lignesExcelInSitu || lignesExcelInSitu.length === 0) {
+                        lignesExcelInSitu = [
+                            { id: 1, chapitre: "LOT 01 - GROS-OEUVRE", designation: "", unite: "m²", qte: 1, pu: 0, tva: 19 }
+                        ];
+                    }
                 }
+
+                rendreTableurExcelInSitu();
+                if (extractionReussie) {
+                    lignesDQE = JSON.parse(JSON.stringify(lignesExcelInSitu));
+                    rendreTableauxAlgerie();
+                }
+
+                // Activer le mode Double Écran Côte-à-Côte
+                changerDispositionDoubleEcran('split');
 
                 if (jauge) jauge.style.width = "100%";
                 if (pourcent) pourcent.textContent = "100%";
-                if (txt) txt.textContent = "✅ Devis extrait et prêt dans le Tableur Excel In Situ !";
-
-                // Alimenter le tableur in situ avec phrases complètes
-                lignesExcelInSitu = JSON.parse(JSON.stringify(articlesExtraits));
-                rendreTableurExcelInSitu();
-                lignesDQE = JSON.parse(JSON.stringify(articlesExtraits));
-                rendreTableauxAlgerie();
+                if (txt) txt.textContent = extractionReussie ? "✅ Devis extrait et prêt dans le Tableur In Situ !" : "📸 Photo affichée à gauche • Saisie assistée active à droite !";
 
                 setTimeout(() => {
-                    const tableurEl = document.getElementById("tableurExcelInSituContainer");
-                    if (tableurEl) {
-                        tableurEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (extractionReussie) {
+                        alert(`✨ Photo convertie avec succès en Devis In Situ (${lignesExcelInSitu.length} articles BTP) !\n\n🖥️ Mode Double Écran actif : Vérifiez vos lignes dans le tableur à droite avec votre photo sous les yeux.\n\nCliquez sur « ⚡ Valider & Chiffrer ce Devis » quand vous avez terminé.`);
+                    } else {
+                        alert(`📸 Votre photo est prête et affichée en haute définition à gauche !\n\n🖥️ Le MODE DOUBLE ÉCRAN est activé :\n1. À gauche : Zoomez ou pivotez votre photo pour bien lire les ouvrages.\n2. À droite : Saisissez ou ajustez directement vos articles dans le tableur.\n3. Cliquez sur « ⚡ Valider & Chiffrer ce Devis BPU (DZD) » pour appliquer les prix officiels.`);
                     }
-                    alert(`✨ Photo convertie avec succès en Devis Excel In Situ (${lignesExcelInSitu.length} articles BTP) !\n\nChaque phrase complète et métré est modifiable dans le tableur ci-dessous.\n\nQuand vous êtes prêt, cliquez sur « Valider ce Devis Excel & Lancer le Chiffrage BPU Automatique » pour générer le devis officiel.`);
                 }, 400);
 
             } catch (err) {
-                console.warn("Repli sur le moteur BPU:", err);
-                lignesExcelInSitu = JSON.parse(JSON.stringify(DIX_HUIT_ARTICLES_ALGERIE));
-                rendreTableurExcelInSitu();
-                lignesDQE = JSON.parse(JSON.stringify(DIX_HUIT_ARTICLES_ALGERIE));
-                rendreTableauxAlgerie();
+                console.warn("Erreur analyse photo:", err);
+                changerDispositionDoubleEcran('split');
             } finally {
                 setTimeout(() => {
                     if (laser) laser.style.display = "none";

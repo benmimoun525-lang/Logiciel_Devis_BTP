@@ -81,7 +81,7 @@ git add -A >> "%~dp0deploy_log.txt" 2>&1
 echo.
 echo [*] 3/4 - Validation de la version (commit)...
 echo [*] Validation de la version (commit)... >> "%~dp0deploy_log.txt" 2>&1
-git commit -m "Integration panneau strategie tarifaire, variateur anti-collision et base des prix BPU Algerie" >> "%~dp0deploy_log.txt" 2>&1
+git commit -m "Autonome : Deploiement GitHub Actions pour GitHub Pages et chiffrage BPU instantane 0-serveur" >> "%~dp0deploy_log.txt" 2>&1
 
 :: S'assurer que la branche active s'appelle main
 git branch -M main >> "%~dp0deploy_log.txt" 2>&1
@@ -153,27 +153,16 @@ echo   WHATSAPP           : 0551 42 21 66
 echo.
 echo   VOS LIENS OFFICIELS EN LIGNE (GRATUITS A VIE, 24h/24 et 7j/7) :
 echo.
-echo   ----------------------------------------------------------------------
-echo   👑 VOS LIENS PERSONNELS TITULAIRE (ACCES ILLIMITE & GRATUIT POUR VOUS) :
-echo   ----------------------------------------------------------------------
-echo   [A] VERSION ALGERIE (DZD) TITULAIRE :
-echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/?titulaire=1
-echo.
-echo   [B] VERSION EUROPE (EURO) TITULAIRE :
-echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/index_europe.html?titulaire=1
-echo.
-echo   ----------------------------------------------------------------------
-echo   👥 LIENS PUBLICS CLIENTS (POUR VOS CLIENTS ET VOS PUBLICITES) :
-echo   ----------------------------------------------------------------------
-echo   [1] VERSION ALGERIE (DZD) CLIENT :
+echo   [1] LIEN PUBLIC CLIENT A METTRE SUR VOTRE PUBLICITE :
 echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/
 echo.
-echo   [2] VERSION EUROPE (EURO) CLIENT :
-echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/index_europe.html
+echo   [2] VOTRE LIEN PERSONNEL TITULAIRE (Tableau de bord complet) :
+echo       https://benmimoun525-lang.github.io/Logiciel_Devis_BTP/?pin=7788#titulaire
 echo.
-echo   NOTE :
-echo   Votre logiciel fonctionne a 100%% en MODE AUTONOME DIRECT sur GitHub Pages.
-echo   Chiffrage BPU instantane, reconnaissance de devis, exports Excel et PDF A4 garantis !
+echo   NOTE IMPORTANTE :
+echo   Le service Render etant suspendu pour depassement de quota d'heures gratuites,
+echo   votre logiciel fonctionne desormais a 100%% en MODE AUTONOME DIRECT sur GitHub Pages.
+echo   Aucun serveur externe n'est requis : chiffrage BPU, exports Excel et PDF garantis !
 echo.
 echo   Dans 1 a 2 minutes, ouvrez le lien [1] ou [2] et faites Ctrl + F5 !
 echo ======================================================================
